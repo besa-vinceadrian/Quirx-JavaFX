@@ -2,23 +2,3 @@
 /bin/
 /build/
 /out/
-
-# Ignore JavaFX build files
-*.fxbuild
-*.fxml
-
-# Ignore compiled class files
-*.class
-
-# Ignore Eclipse project files
-*.log
-.settings/
-.project
-.classpath
-
-# Ignore Java crash logs
-hs_err_pid*
-
-# Ignore OS files
-.DS_Store
-Thumbs.db
