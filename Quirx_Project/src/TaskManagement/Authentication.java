@@ -53,7 +53,7 @@ public class Authentication {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(from));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-            message.setSubject("Password Reset OTP");
+            message.setSubject("Email Verification OTP");
             message.setText("Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes.");
 
             Transport.send(message);
@@ -81,7 +81,7 @@ public class Authentication {
         return rs.next();
     }
 
-    // REGISTER USER
+    // REGISTER USER WITH EMAIL VERIFICATION
     public static void registerUser() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("First Name: ");
@@ -103,6 +103,44 @@ public class Authentication {
 
             System.out.print("Email: ");
             String email = scanner.nextLine();
+
+            // Send verification OTP
+            generateAndSendOTP(email);
+            hasResentOTP = false;
+
+            while (true) {
+                System.out.print("Enter the OTP sent to your email for verification (or type 'resend' to get a new one): ");
+                String enteredOTP = scanner.nextLine();
+
+                if (enteredOTP.equalsIgnoreCase("resend")) {
+                    if (hasResentOTP) {
+                        System.out.println("You can only resend OTP once.");
+                        continue;
+                    }
+                    generateAndSendOTP(email);
+                    hasResentOTP = true;
+                    continue;
+                }
+
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - otpGenerationTime > OTP_VALID_DURATION) {
+                    System.out.println("OTP expired. Please restart registration.");
+                    return;
+                }
+
+                if (enteredOTP.equals(generatedOTP)) {
+                    break; // Proceed with registration
+                } else {
+                    attemptsRemaining--;
+                    if (attemptsRemaining > 0) {
+                        System.out.println("Invalid OTP. Attempts remaining: " + attemptsRemaining);
+                    } else {
+                        System.out.println("Too many failed attempts. Registration cancelled.");
+                        return;
+                    }
+                }
+            }
+
             System.out.print("Password: ");
             String pass = scanner.nextLine();
 
@@ -116,7 +154,7 @@ public class Authentication {
             ps.setString(5, pass);
             ps.executeUpdate();
 
-            System.out.println("User registered successfully!");
+            System.out.println("Email verified! User registered successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -134,6 +172,7 @@ public class Authentication {
 
             if (rs.next()) {
                 generateAndSendOTP(email);
+                hasResentOTP = false;
 
                 while (true) {
                     System.out.print("Enter the OTP sent to your email (or type 'resend' to get a new one): ");
