@@ -14,8 +14,19 @@ public class Crud_updated {
         private String taskNote;
         private String assignedUser;
 
+        // Constructor WITH taskID (for reading from DB)
         public Task(int taskID, String taskTitle, String taskStatus, java.sql.Date dueDate, String taskPriority, String taskNote, String assignedUser) {
             this.taskID = taskID;
+            this.taskTitle = taskTitle;
+            this.taskStatus = taskStatus;
+            this.dueDate = dueDate;
+            this.taskPriority = taskPriority;
+            this.taskNote = taskNote;
+            this.assignedUser = assignedUser;
+        }
+
+        // Constructor WITHOUT taskID (for inserting into DB)
+        public Task(String taskTitle, String taskStatus, java.sql.Date dueDate, String taskPriority, String taskNote, String assignedUser) {
             this.taskTitle = taskTitle;
             this.taskStatus = taskStatus;
             this.dueDate = dueDate;
@@ -29,7 +40,7 @@ public class Crud_updated {
         public String getTaskStatus() { return taskStatus; }
         public java.sql.Date getDueDate() { return dueDate; }
         public String getTaskPriority() { return taskPriority; }
-        public String getTaskNote() { return taskNote; } 
+        public String getTaskNote() { return taskNote; }
         public String getAssignedUser() { return assignedUser; }
 
         public void setTaskTitle(String taskTitle) { this.taskTitle = taskTitle; }
@@ -55,9 +66,9 @@ public class Crud_updated {
     }
 
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=Quirx_TMS;encrypt=true;trustServerCertificate=true";
-        private static final String DB_USER = "LMS_Admin";
-        private static final String DB_PASS = "benchbrian";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18980;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_USER = "QuirxAdmin";
+        private static final String DB_PASS = "admin";
 
         public static Connection connect() throws SQLException {
             try {
@@ -69,20 +80,27 @@ public class Crud_updated {
         }
 
         public static void addTask(Task task) {
-            String sql = "INSERT INTO TaskTable (taskID, taskTitle, taskStatus, dueDate, taskPriority, taskNote, assignedUserID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO TaskTable (taskTitle, taskStatus, dueDate, taskPriority, taskNote, assignedUserID) VALUES (?, ?, ?, ?, ?, ?)";
 
-            try (Connection conn = connect(); 
-                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (Connection conn = connect();
+                 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-                stmt.setInt(1, task.getTaskID());
-                stmt.setString(2, task.getTaskTitle());
-                stmt.setString(3, task.getTaskStatus());
-                stmt.setDate(4, task.getDueDate());
-                stmt.setString(5, task.getTaskPriority());
-                stmt.setString(6, task.getTaskNote());
-                stmt.setString(7, task.getAssignedUser());
+                stmt.setString(1, task.getTaskTitle());
+                stmt.setString(2, task.getTaskStatus());
+                stmt.setDate(3, task.getDueDate());
+                stmt.setString(4, task.getTaskPriority());
+                stmt.setString(5, task.getTaskNote());
+                stmt.setString(6, task.getAssignedUser());
                 stmt.executeUpdate();
-                System.out.println("✅ Task added!");
+
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    int generatedID = rs.getInt(1);
+                    System.out.println("✅ Task added with ID: " + generatedID);
+                } else {
+                    System.out.println("⚠ Task added, but no ID returned.");
+                }
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -158,9 +176,6 @@ public class Crud_updated {
 
             switch (choice) {
                 case 1 -> {
-                    System.out.print("Task ID: ");
-                    int taskID = scanner.nextInt();
-                    scanner.nextLine();
                     System.out.print("Title: ");
                     String title = scanner.nextLine();
 
@@ -186,7 +201,7 @@ public class Crud_updated {
 
                     java.sql.Date sqlDate = java.sql.Date.valueOf(LocalDate.parse(date));
 
-                    Task newTask = new Task(taskID, title, status, sqlDate, priority, note, assignedUser);
+                    Task newTask = new Task(title, status, sqlDate, priority, note, assignedUser); // no taskID
                     DatabaseManager.addTask(newTask);
                 }
                 case 2 -> {
