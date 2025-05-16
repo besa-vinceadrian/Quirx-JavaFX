@@ -3,6 +3,7 @@ package TaskManagement;
 import java.sql.*;
 import java.util.*;
 import java.util.Properties;
+import java.io.Console;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
@@ -10,15 +11,17 @@ public class Authentication {
     static Scanner scanner = new Scanner(System.in);
     static String generatedOTP = "";
     static long otpGenerationTime = 0;
-    static final long OTP_VALID_DURATION = 5 * 60 * 1000; // 5 minutes
+    static long lastOTPSentTime = 0;
+    static final long OTP_VALID_DURATION = 5 * 60 * 1000; 
+    static final long OTP_RESEND_INTERVAL = 60 * 1000; 
     static int attemptsRemaining = 3;
     static boolean hasResentOTP = false;
 
     // DATABASE CONNECTION
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=Quirx_TMS;encrypt=true;trustServerCertificate=true";
-        private static final String DB_USER = "LMS_Admin";
-        private static final String DB_PASS = "benchbrian";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18980;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_USER = "QuirxAdmin";
+        private static final String DB_PASS = "admin";
 
         public static Connection connect() throws SQLException {
             try {
@@ -33,7 +36,7 @@ public class Authentication {
     // SEND EMAIL OTP
     public static void sendOTP(String to, String otp) {
         final String from = "quirxg8@gmail.com";
-        final String password = "vnks zpzg decz gyzx"; // App password
+        final String password = "vnks zpzg decz gyzx"; //
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -57,6 +60,7 @@ public class Authentication {
             message.setText("Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes.");
 
             Transport.send(message);
+            lastOTPSentTime = System.currentTimeMillis(); // Track last OTP time
             System.out.println("OTP sent to " + to);
         } catch (MessagingException e) {
             System.out.println("Failed to send OTP email.");
@@ -81,6 +85,27 @@ public class Authentication {
         return rs.next();
     }
 
+    // CHECK IF EMAIL EXISTS
+    public static boolean isEmailTaken(Connection con, String email) throws SQLException {
+        String query = "SELECT userEmail FROM UserTable WHERE userEmail = ?";
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setString(1, email);
+        ResultSet rs = ps.executeQuery();
+        return rs.next();
+    }
+
+    // HIDDEN PASSWORD INPUT
+    public static String readPassword(String prompt) {
+        Console console = System.console();
+        if (console != null) {
+            char[] passwordArray = console.readPassword(prompt);
+            return new String(passwordArray);
+        } else {
+            System.out.print(prompt + " (warning: input visible): ");
+            return scanner.nextLine();
+        }
+    }
+
     // REGISTER USER WITH EMAIL VERIFICATION
     public static void registerUser() {
         try (Connection con = DatabaseManager.connect()) {
@@ -101,8 +126,17 @@ public class Authentication {
                 }
             }
 
-            System.out.print("Email: ");
-            String email = scanner.nextLine();
+            String email;
+            while (true) {
+                System.out.print("Email: ");
+                email = scanner.nextLine();
+
+                if (isEmailTaken(con, email)) {
+                    System.out.println("Email already exists. Please use a different one.");
+                } else {
+                    break;
+                }
+            }
 
             // Send verification OTP
             generateAndSendOTP(email);
@@ -113,6 +147,11 @@ public class Authentication {
                 String enteredOTP = scanner.nextLine();
 
                 if (enteredOTP.equalsIgnoreCase("resend")) {
+                    long now = System.currentTimeMillis();
+                    if (now - lastOTPSentTime < OTP_RESEND_INTERVAL) {
+                        System.out.println("Please wait at least 1 minute before resending the OTP.");
+                        continue;
+                    }
                     if (hasResentOTP) {
                         System.out.println("You can only resend OTP once.");
                         continue;
@@ -141,8 +180,7 @@ public class Authentication {
                 }
             }
 
-            System.out.print("Password: ");
-            String pass = scanner.nextLine();
+            String pass = readPassword("Password: ");
 
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO UserTable (userFirstName, userLastName, userName, userEmail, userPassword) VALUES (?, ?, ?, ?, ?)"
@@ -179,6 +217,11 @@ public class Authentication {
                     String enteredOTP = scanner.nextLine();
 
                     if (enteredOTP.equalsIgnoreCase("resend")) {
+                        long now = System.currentTimeMillis();
+                        if (now - lastOTPSentTime < OTP_RESEND_INTERVAL) {
+                            System.out.println("Please wait at least 1 minute before resending the OTP.");
+                            continue;
+                        }
                         if (hasResentOTP) {
                             System.out.println("You can only resend OTP once.");
                             continue;
@@ -195,8 +238,7 @@ public class Authentication {
                     }
 
                     if (enteredOTP.equals(generatedOTP)) {
-                        System.out.print("Enter new password: ");
-                        String newPassword = scanner.nextLine();
+                        String newPassword = readPassword("Enter new password: ");
 
                         PreparedStatement updatePs = con.prepareStatement(
                             "UPDATE UserTable SET userPassword = ? WHERE userEmail = ?"
