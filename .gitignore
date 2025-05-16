@@ -1,1 +1,24 @@
-/bin/
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Build
+bin/
+build/
+out/
+target/
+*.class
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.idea/
+*.iml
+
+# ngrok
+*.ngrok.*
+ngrok.yml
