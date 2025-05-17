@@ -40,7 +40,7 @@ public class MenuController implements Initializable {
 	@FXML
 	private void dashboardButton(ActionEvent event) {
 	    try {
-	        Pane view = FXMLLoader.load(getClass().getResource("Dashboard.fxml"));
+	        Pane view = FXMLLoader.load(getClass().getResource("MyProfile.fxml"));
 	        windowPane.getChildren().clear();      
 	        windowPane.getChildren().add(view);    
 	    } catch (Exception e) {

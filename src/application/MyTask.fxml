@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #e7e9ed;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" />
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox layoutX="6.0" layoutY="8.0" prefHeight="651.0" prefWidth="691.0" spacing="10.0">
+         <children>
+            <Label prefHeight="30.0" prefWidth="691.0" text="ON GOING" textFill="#ffc107">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <font>
+                  <Font name="Arial Bold" size="24.0" />
+               </font>
+            </Label>
+            <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
+              <columns>
+                <TableColumn prefWidth="229.60003662109375" text="Task" />
+                <TableColumn minWidth="0.0" prefWidth="120.7999267578125" text="Due Date" />
+                  <TableColumn minWidth="0.0" prefWidth="94.40008544921875" text="Priority" />
+                  <TableColumn minWidth="0.0" prefWidth="112.800048828125" text="Team" />
+                  <TableColumn minWidth="0.0" prefWidth="151.199951171875" text="Assignee" />
+              </columns>
+            </TableView>
+            <Label prefHeight="30.0" prefWidth="691.0" text="NOT STARTED" textFill="#bababa">
+               <font>
+                  <Font name="Arial Bold" size="24.0" />
+               </font>
+            </Label>
+            <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
+               <columns>
+                  <TableColumn prefWidth="229.60003662109375" text="Task" />
+                  <TableColumn minWidth="0.0" prefWidth="120.7999267578125" text="Due Date" />
+                  <TableColumn minWidth="0.0" prefWidth="94.40008544921875" text="Priority" />
+                  <TableColumn minWidth="0.0" prefWidth="112.800048828125" text="Team" />
+                  <TableColumn minWidth="0.0" prefWidth="151.199951171875" text="Assignee" />
+               </columns>
+            </TableView>
+            <Label prefHeight="30.0" prefWidth="691.0" text="COMPLETED" textFill="#2dca7b">
+               <font>
+                  <Font name="Arial Bold" size="24.0" />
+               </font>
+            </Label>
+            <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
+               <columns>
+                  <TableColumn prefWidth="229.60003662109375" text="Task" />
+                  <TableColumn minWidth="0.0" prefWidth="120.7999267578125" text="Due Date" />
+                  <TableColumn minWidth="0.0" prefWidth="94.40008544921875" text="Priority" />
+                  <TableColumn minWidth="0.0" prefWidth="112.800048828125" text="Team" />
+                  <TableColumn minWidth="0.0" prefWidth="151.199951171875" text="Assignee" />
+               </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </children>
+</Pane>
