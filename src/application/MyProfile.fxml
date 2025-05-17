@@ -23,7 +23,7 @@
          <children>
             <ImageView fitHeight="96.0" fitWidth="100.0" layoutX="42.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../../QuirxImages/ImageBorder.png" />
+                  <Image url="@../../QuirxImages/MyProfile.png" />
                </image>
             </ImageView>
             <Label alignment="CENTER_RIGHT" layoutX="190.0" layoutY="120.0" prefHeight="27.0" prefWidth="45.0" style="-fx-font-weight: bold;" text="Name:" textAlignment="RIGHT">
