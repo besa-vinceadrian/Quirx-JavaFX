@@ -1,6 +1,5 @@
 /* === General Table Styling === */
 .table-view {
-    -fx-table-cell-border-color: #d3d3d3;
     -fx-border-color: #d3d3d3;
     -fx-background-color: #f5f5f0;
     -fx-padding: 0;
