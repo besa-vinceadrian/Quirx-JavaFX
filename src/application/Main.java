@@ -10,9 +10,9 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			BorderPane root = (BorderPane)FXMLLoader.load(getClass().getResource("Menu.fxml"));
+			BorderPane root = (BorderPane)FXMLLoader.load(getClass().getResource("SignUp.fxml"));
 			Scene scene = new Scene(root,1024,700);
-			scene.getStylesheets().add(getClass().getResource("Menu.css").toExternalForm());
+			scene.getStylesheets().add(getClass().getResource("SignUp.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.show();
 		} catch(Exception e) {
