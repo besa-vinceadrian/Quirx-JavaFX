@@ -26,7 +26,7 @@ public class Authentication {
      * Manages the database connection to the SQL Server.
      */
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:19875;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:14438;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
@@ -68,7 +68,7 @@ public class Authentication {
             }
         });
 
-        session.setDebug(true); // Enable SMTP logs
+        session.setDebug(false); // Enable SMTP logs
 
         try {
             Message message = new MimeMessage(session);
