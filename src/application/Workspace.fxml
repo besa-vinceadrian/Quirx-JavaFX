@@ -1,6 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
 
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #025fb6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" />
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.WorkspaceController">
+   <children>
+      <TableView fx:id="tableView" editable="true" layoutX="32.0" layoutY="164.0" prefHeight="207.0" prefWidth="640.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 5; -fx-border-color: #000000;" styleClass="todo-table" stylesheets="@Workspace.css">
+        <columns>
+            <TableColumn prefWidth="38.399959564208984" resizable="false" styleClass="task-header" />
+          <TableColumn fx:id="taskColumn" prefWidth="230.0" styleClass="task-header" text="Task" />
+          <TableColumn fx:id="ownerColumn" prefWidth="89.5999755859375" styleClass="task-header" text="Owner" />
+            <TableColumn fx:id="statusColumn" prefWidth="95.0" styleClass="task-header" text="Status" />
+            <TableColumn fx:id="dueDateColumn" prefWidth="87.0" styleClass="task-header" text="Due Date" />
+            <TableColumn fx:id="priorityColumn" prefWidth="100.0" styleClass="task-header" text="Priority" />
+        </columns>
+      </TableView>
+      <VBox layoutX="32.0" layoutY="14.0" prefHeight="101.0" prefWidth="640.0" />
+      <TableView editable="true" layoutX="32.0" layoutY="445.0" prefHeight="207.0" prefWidth="640.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 5; -fx-border-color: #000000;" styleClass="todo-table">
+         <columns>
+            <TableColumn prefWidth="38.399959564208984" resizable="false" styleClass="task-header" />
+            <TableColumn prefWidth="230.0" styleClass="task-header" text="Task" />
+            <TableColumn prefWidth="89.5999755859375" styleClass="task-header" text="Owner" />
+            <TableColumn prefWidth="95.0" styleClass="task-header" text="Status" />
+            <TableColumn prefWidth="87.0" styleClass="task-header" text="Due Date" />
+            <TableColumn prefWidth="100.0" styleClass="task-header" text="Priority" />
+         </columns>
+      </TableView>
+      <Label layoutX="33.0" layoutY="416.0" text="COMPLETED" textFill="#2dca7b">
+         <font>
+            <Font name="Arial Bold" size="15.0" />
+         </font>
+      </Label>
+      <Label layoutX="33.0" layoutY="135.0" text="TO-DO" textFill="#4c8bf0">
+         <font>
+            <Font name="Arial Bold" size="15.0" />
+         </font>
+      </Label>
+      <Line endX="33.80000305175781" layoutX="133.0" layoutY="438.0" startX="-100.0" stroke="#bababa" />
+      <Line endX="33.80000305175781" layoutX="133.0" layoutY="157.0" startX="-100.0" stroke="#bababa" />
+   </children>
+</Pane>
