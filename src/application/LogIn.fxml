@@ -50,7 +50,7 @@
                         <Cursor fx:constant="TEXT" />
                      </cursor>
                   </PasswordField>
-                  <Button layoutX="109.0" layoutY="471.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="196.0" styleClass="action-button" text="Log in">
+                  <Button fx:id="logInButton" layoutX="109.0" layoutY="471.0" mnemonicParsing="false" onAction="#handleLogInClick" prefHeight="32.0" prefWidth="196.0" styleClass="action-button" text="Log in">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
