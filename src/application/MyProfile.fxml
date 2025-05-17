@@ -95,11 +95,11 @@
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor></Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="520.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0"  styleClass="delete-button" text="Delete Account" textAlignment="CENTER">
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="520.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" styleClass="delete-button" text="Delete Account" textAlignment="CENTER">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor></Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="262.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0"  styleClass="cancel-button" text="Cancel" textAlignment="CENTER">
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="262.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" styleClass="cancel-button" text="Cancel" textAlignment="CENTER">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor></Button>
@@ -125,8 +125,20 @@
                   <Insets left="12.0" />
                </padding>
             </PasswordField>
-            <TextField fx:id="showConfirmNewPasswordField" layoutX="262.0" layoutY="431.0" prefHeight="38.0" prefWidth="367.0" visible="false" />
-            <TextField fx:id="showNewPasswordField" layoutX="262.0" layoutY="347.0" prefHeight="38.0" prefWidth="367.0" visible="false" />
+            <TextField fx:id="showConfirmNewPasswordField" layoutX="262.0" layoutY="431.0" prefHeight="38.0" prefWidth="367.0" visible="false">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="12.0" />
+               </padding></TextField>
+            <TextField fx:id="showNewPasswordField" layoutX="262.0" layoutY="347.0" prefHeight="38.0" prefWidth="367.0" visible="false">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="12.0" />
+               </padding></TextField>
             <Button fx:id="toggleConfirmPasswordButton" layoutX="579.0" layoutY="437.0" mnemonicParsing="false" onAction="#toggleConfirmPasswordButton" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show">
                <cursor>
                   <Cursor fx:constant="HAND" />
