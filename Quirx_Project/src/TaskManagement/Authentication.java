@@ -26,7 +26,7 @@ public class Authentication {
      * Manages the database connection to the SQL Server.
      */
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:19875;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:14438;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
@@ -68,7 +68,7 @@ public class Authentication {
             }
         });
 
-        session.setDebug(true); // Enable SMTP logs
+        session.setDebug(false); // Enable SMTP logs
 
         try {
             Message message = new MimeMessage(session);
@@ -364,21 +364,26 @@ public class Authentication {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-    	System.out.println("1. Login");
-        System.out.println("2. Register");
-        System.out.println("3. Reset Password");
-        System.out.print("Choose option: ");
-        int choice = Integer.parseInt(scanner.nextLine());
+        boolean running = true;
 
-        if (choice == 1) {
-            loginUser();
-        } else if (choice == 2) {
-            registerUser();
-        } else if (choice == 3) {
-        	resetPassword();
+        while (running) {
+            System.out.println("1. Login");
+            System.out.println("2. Register");
+            System.out.println("3. Reset Password");
+            System.out.println("4. Exit");
+            System.out.print("Choose option: ");
+
+            int choice = Integer.parseInt(scanner.nextLine());
+
+            switch (choice) {
+                case 1 -> loginUser();
+                case 2 -> registerUser();
+                case 3 -> resetPassword();
+                case 4 -> running = false;            // exit loop
+                default -> System.out.println("Invalid choice.");
+            }
         }
-        else {
-            System.out.println("Invalid choice.");
-        }
+
+        System.out.println("👋 Bye! Program exited.");
     }
 }
