@@ -4,8 +4,15 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * This class provides a simple command-line task management system with CRUD functionality,
+ * including interaction with a SQL Server database.
+ */
 public class Crud_updated {
-    public static class Task implements Comparable<Task> {
+	/**
+     * Represents a Task entity with comparable functionality based on task priority.
+     */
+	public static class Task implements Comparable<Task> {
         private int taskID;
         private String taskTitle;
         private String taskStatus;
@@ -14,7 +21,17 @@ public class Crud_updated {
         private String taskNote;
         private String assignedUser;
 
-        // Constructor WITH taskID (for reading from DB)
+        /**
+         * Constructor used when reading tasks from the database.
+         *
+         * @param taskID Task ID from database
+         * @param taskTitle Title of the task
+         * @param taskStatus Status of the task
+         * @param dueDate Due date
+         * @param taskPriority Priority level
+         * @param taskNote Notes about the task
+         * @param assignedUser Assigned user ID
+         */
         public Task(int taskID, String taskTitle, String taskStatus, java.sql.Date dueDate, String taskPriority, String taskNote, String assignedUser) {
             this.taskID = taskID;
             this.taskTitle = taskTitle;
@@ -25,7 +42,16 @@ public class Crud_updated {
             this.assignedUser = assignedUser;
         }
 
-        // Constructor WITHOUT taskID (for inserting into DB)
+        /**
+         * Constructor used when inserting new tasks into the database.
+         *
+         * @param taskTitle Title of the task
+         * @param taskStatus Status of the task
+         * @param dueDate Due date
+         * @param taskPriority Priority level
+         * @param taskNote Notes about the task
+         * @param assignedUser Assigned user ID
+         */
         public Task(String taskTitle, String taskStatus, java.sql.Date dueDate, String taskPriority, String taskNote, String assignedUser) {
             this.taskTitle = taskTitle;
             this.taskStatus = taskStatus;
@@ -35,6 +61,7 @@ public class Crud_updated {
             this.assignedUser = assignedUser;
         }
 
+        // Getters and Setters
         public int getTaskID() { return taskID; }
         public String getTaskTitle() { return taskTitle; }
         public String getTaskStatus() { return taskStatus; }
@@ -50,11 +77,20 @@ public class Crud_updated {
         public void setTaskNote(String taskNote) { this.taskNote = taskNote; }
         public void setAssignedUser(String assignedUser) { this.assignedUser = assignedUser; }
 
+        /**
+         * Compares tasks based on their priority level for sorting.
+         */
         @Override
         public int compareTo(Task other) {
             return getPriorityValue(this.taskPriority) - getPriorityValue(other.taskPriority);
         }
 
+        /**
+         * Converts priority text into numerical value for comparison.
+         *
+         * @param priority Priority level (HIGH, MEDIUM, LOW)
+         * @return Integer value (1 = High, 2 = Medium, 3 = Low, 4 = Unknown)
+         */
         private int getPriorityValue(String priority) {
             return switch (priority.toUpperCase()) {
                 case "HIGH" -> 1;
@@ -65,11 +101,20 @@ public class Crud_updated {
         }
     }
 
-    public static class DatabaseManager {
+	/**
+     * Handles all database operations including connection and CRUD methods.
+     */
+	public static class DatabaseManager {
         private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18980;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
+        /**
+         * Establishes a database connection.
+         *
+         * @return Connection object
+         * @throws SQLException if connection fails
+         */
         public static Connection connect() throws SQLException {
             try {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -79,6 +124,11 @@ public class Crud_updated {
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
         }
 
+        /**
+         * Adds a new task to the database.
+         *
+         * @param task Task object to insert
+         */
         public static void addTask(Task task) {
             String sql = "INSERT INTO TaskTable (taskTitle, taskStatus, dueDate, taskPriority, taskNote, assignedUserID) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -106,6 +156,11 @@ public class Crud_updated {
             }
         }
 
+        /**
+         * Retrieves all tasks from the database.
+         *
+         * @return List of Task objects
+         */
         public static List<Task> getAllTasks() {
             List<Task> tasks = new ArrayList<>();
             String sql = "SELECT * FROM TaskTable";
@@ -129,6 +184,11 @@ public class Crud_updated {
             return tasks;
         }
 
+        /**
+         * Deletes a task by ID.
+         *
+         * @param taskID Task ID to delete
+         */
         public static void deleteTask(int taskID) {
             String sql = "DELETE FROM TaskTable WHERE taskID = ?";
             try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -140,6 +200,11 @@ public class Crud_updated {
             }
         }
 
+        /**
+         * Updates an existing task in the database.
+         *
+         * @param task Task object containing updated info
+         */
         public static void updateTask(Task task) {
             String sql = "UPDATE TaskTable SET taskTitle=?, taskStatus=?, dueDate=?, taskPriority=?, taskNote=?, assignedUserID=? WHERE taskID=?";
             try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -158,7 +223,12 @@ public class Crud_updated {
         }
     }
 
-    public static void main(String[] args) {
+	/**
+     * Entry point for running the console-based task management system.
+     *
+     * @param args Command-line arguments
+     */
+	public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
 
