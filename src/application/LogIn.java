@@ -52,6 +52,8 @@ public class LogIn implements Initializable {
     private AnchorPane pageVerifyOTP;
     @FXML
     private AnchorPane pageResetPassword;
+    @FXML
+    private Button logInButton;
     
     @FXML
     private TextField code1, code2, code3, code4, code5, code6;
@@ -251,5 +253,16 @@ public class LogIn implements Initializable {
             e.printStackTrace();
         }
     } 
+    
+    @FXML
+    void handleLogInClick(ActionEvent event) {
+    	try {
+            Parent root = FXMLLoader.load(getClass().getResource("Menu.fxml"));
+            Stage stage = (Stage)((javafx.scene.Node)event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 	    
 }
