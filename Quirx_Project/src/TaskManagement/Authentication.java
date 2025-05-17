@@ -7,6 +7,11 @@ import java.io.Console;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
+/**
+ * The {@code Authentication} class handles user registration and password reset
+ * functionalities using email-based OTP verification. It connects to a SQL Server
+ * database, validates user information, and sends OTPs via Gmail SMTP.
+ */
 public class Authentication {
     static Scanner scanner = new Scanner(System.in);
     static String generatedOTP = "";
@@ -17,12 +22,20 @@ public class Authentication {
     static int attemptsRemaining = 3;
     static boolean hasResentOTP = false;
 
-    // DATABASE CONNECTION
+    /**
+     * Manages the database connection to the SQL Server.
+     */
     public static class DatabaseManager {
         private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18980;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
+        /**
+         * Connects to the SQL Server database using the provided credentials.
+         *
+         * @return a {@link Connection} object to the database
+         * @throws SQLException if a database access error occurs
+         */
         public static Connection connect() throws SQLException {
             try {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -33,7 +46,12 @@ public class Authentication {
         }
     }
 
-    // SEND EMAIL OTP
+    /**
+     * Sends an OTP to the specified email address using Gmail SMTP.
+     *
+     * @param to  recipient email address
+     * @param otp the one-time password to send
+     */
     public static void sendOTP(String to, String otp) {
         final String from = "quirxg8@gmail.com";
         final String password = "vnks zpzg decz gyzx"; //
@@ -68,7 +86,11 @@ public class Authentication {
         }
     }
 
-    // Generate and send new OTP
+    /**
+     * Generates a random 6-digit OTP and sends it to the specified email.
+     *
+     * @param email recipient email address
+     */
     public static void generateAndSendOTP(String email) {
         generatedOTP = String.format("%06d", new Random().nextInt(1000000));
         otpGenerationTime = System.currentTimeMillis();
@@ -76,7 +98,14 @@ public class Authentication {
         sendOTP(email, generatedOTP);
     }
 
-    // CHECK IF USERNAME EXISTS
+    /**
+     * Checks if a username already exists in the database.
+     *
+     * @param con   active database connection
+     * @param uname username to check
+     * @return {@code true} if the username is taken, {@code false} otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean isUsernameTaken(Connection con, String uname) throws SQLException {
         String query = "SELECT userName FROM UserTable WHERE userName = ?";
         PreparedStatement ps = con.prepareStatement(query);
@@ -85,7 +114,14 @@ public class Authentication {
         return rs.next();
     }
 
-    // CHECK IF EMAIL EXISTS
+    /**
+     * Checks if an email is already registered in the database.
+     *
+     * @param con   active database connection
+     * @param email email address to check
+     * @return {@code true} if the email is taken, {@code false} otherwise
+     * @throws SQLException if a database access error occurs
+     */
     public static boolean isEmailTaken(Connection con, String email) throws SQLException {
         String query = "SELECT userEmail FROM UserTable WHERE userEmail = ?";
         PreparedStatement ps = con.prepareStatement(query);
@@ -94,7 +130,12 @@ public class Authentication {
         return rs.next();
     }
 
-    // HIDDEN PASSWORD INPUT
+    /**
+     * Reads a password input from the user. Attempts to hide input if supported by the console.
+     *
+     * @param prompt prompt to display
+     * @return the entered password as a {@link String}
+     */
     public static String readPassword(String prompt) {
         Console console = System.console();
         if (console != null) {
@@ -106,7 +147,10 @@ public class Authentication {
         }
     }
 
-    // REGISTER USER WITH EMAIL VERIFICATION
+    /**
+     * Registers a new user by collecting personal information, validating uniqueness,
+     * and verifying the email using an OTP.
+     */
     public static void registerUser() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("First Name: ");
@@ -198,7 +242,9 @@ public class Authentication {
         }
     }
 
-    // RESET PASSWORD
+    /**
+     * Resets the user's password after validating their email and verifying OTP.
+     */
     public static void resetPassword() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("Enter your registered email: ");
@@ -266,7 +312,11 @@ public class Authentication {
         }
     }
 
-    // MAIN PROGRAM
+    /**
+     * Main method to run the authentication system.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         System.out.println("1. Register");
         System.out.println("2. Reset Password");
