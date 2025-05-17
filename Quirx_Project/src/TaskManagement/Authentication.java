@@ -15,7 +15,7 @@ public class Authentication {
     static final long OTP_VALID_DURATION = 5 * 60 * 1000; 
     static final long OTP_RESEND_INTERVAL = 60 * 1000; 
     static int attemptsRemaining = 3;
-    static boolean hasResentOTP = false;
+    static boolean hasResentOTP = false; 
 
     // DATABASE CONNECTION
     public static class DatabaseManager {
