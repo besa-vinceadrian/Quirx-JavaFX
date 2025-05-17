@@ -3,3 +3,31 @@
     -fx-text-fill: #ffb800;
     -fx-cursor: hand;
 }
+
+.save-button:hover,
+.delete-button:hover,
+.cancel-button:hover {
+    -fx-background-color: #e0a700;
+}
+
+
+.save-button{
+	-fx-background-color: #ffb800; 
+	-fx-background-radius: 5;
+	-fx-border-color: black; 
+	-fx-border-radius: 5;
+}
+
+.delete-button{
+	-fx-background-color: #ff3131; 
+	-fx-background-radius: 5; 
+	-fx-border-color: black; 
+	-fx-border-radius: 5;
+}
+
+.cancel-button{
+	-fx-background-color: #f5f5f0; 
+	-fx-border-color: black; 
+	-fx-background-radius: 5; 
+	-fx-border-radius: 5;
+}
