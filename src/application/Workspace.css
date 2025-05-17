@@ -1,33 +1,138 @@
+/* === General Table Styling === */
+.table-view {
+    -fx-table-cell-border-color: #d3d3d3;
+    -fx-border-color: #d3d3d3;
+    -fx-background-color: #f5f5f0;
+    -fx-padding: 0;
+}
 
-.todo-table .table-row-cell {
-    -fx-cell-size: 30px; /* row height */
-	-fx-background-color: #f0f0f0; /* or any color you like */
+.table-row-cell {
+    -fx-cell-size: 30px;
+    -fx-background-color: #f5f5f0;
+}
+
+/* === Header Styling === */
+.table-view .column-header-background {
+    -fx-background-color: #d3d3d3;
 }
 
 .todo-table .column-header-background {
-    -fx-pref-height: 30px; /* header height */
+    -fx-pref-height: 30px;
 }
 
-.todo-table .table-cell  {
-    -fx-font-size: 11px;
-    -fx-alignment: CENTER-LEFT;
+.table-view .column-header,
+.table-view .column-header .label {
+    -fx-background-color: transparent;
+    -fx-font-weight: bold;
 }
 
-/* Target header of task column by style class */
+.todo-table .column-header {
+    -fx-background-color: #f5f5f5;
+}
+
+.todo-table .column-header.sorted {
+    -fx-background-color: #d0eaff;
+    -fx-text-fill: #000000;
+}
+
 .todo-table .column-header.task-header .label {
     -fx-text-fill: #000000;
     -fx-font-size: 14px;
 }
 
-/* Optional: Style all column headers */
-.todo-table .column-header {
-    -fx-background-color: #f5f5f5;
+/* === Cell Styling === */
+.table-cell {
+    -fx-border-color: #d3d3d3;
 }
 
-/* Highlight the sorted column header */
-.todo-table .column-header.sorted {
-    -fx-background-color: #d0eaff; /* light blue for active sort */
-    -fx-text-fill: #000000;        /* text color */
+.todo-table .table-cell {
+    -fx-font-size: 11px;
+    -fx-alignment: CENTER-LEFT;
 }
 
+/* === Status Column Styling === */
+.status-not_started {
+    -fx-background-color: #bababa;
+    -fx-text-fill: black;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
 
+.status-ongoing {
+    -fx-background-color: #ffc107;
+    -fx-text-fill: black;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+.status-done {
+    -fx-background-color: #2dca7b;
+    -fx-text-fill: black;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+/* === Priority Tags Styling === */
+.priority-low, .priority-medium, .priority-high {
+    -fx-text-fill: black;
+    -fx-padding: 3 0 3 0;
+    -fx-background-radius: 9999;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-min-width: 100px;
+    -fx-pref-width: 100px;
+    -fx-max-width: 100px;
+    -fx-label-padding: 0 15 0 15;
+}
+
+.priority-low {
+    -fx-background-color: #fff3c1;
+}
+
+.priority-medium {
+    -fx-background-color: #ffc107;
+}
+
+.priority-high {
+    -fx-background-color: #ff6b2c;
+}
+
+/* === Scrollbar Styling === */
+.table-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
+/* === ComboBox Dropdown Styling === */
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #d3d3d3;
+}
+
+.combo-box-popup .list-cell {
+    -fx-padding: 4 8 4 8;
+}
+
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* === Row Selection === */
+.table-row-cell:filled:selected,
+.table-row-cell:filled:selected:hover {
+    -fx-background: #e0e0e0;
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: black;
+}
+
+/* === Cell Selection === */
+.table-cell:filled:selected {
+    -fx-background-color: #d0d0d0;
+    -fx-text-fill: black;
+}
+
+/* === Focus Styling === */
+.table-view:focused {
+    -fx-background-insets: 0;
+}
