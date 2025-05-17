@@ -1,0 +1,65 @@
+/* signup.css */
+
+/* Root background */
+.root {
+    -fx-background-color: #dde7ff;
+}
+
+/* Right pane background */
+#rightPane {
+    -fx-background-color: #f5f5f0;
+}
+
+/* Common label styles */
+.heading {
+    -fx-text-fill: #23236c;
+    -fx-font-family: "SansSerif";
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
+.subheading {
+    -fx-text-fill: #23236c;
+    -fx-font-family: "SansSerif";
+    -fx-font-size: 18px;
+}
+
+/* Text field and password field styles */
+.input-field {
+    -fx-background-color: #fdfdfc;
+    -fx-border-color: #23236c;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+/* Sign-up button style */
+.signup-button {
+    -fx-background-color: #ffb800;
+    -fx-border-color: #000000;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+/* Hover effect for sign-up button */
+.signup-button:hover {
+    -fx-background-color: #e0a700;
+}
+
+.login-label:hover {
+    -fx-text-fill: #c48e00;
+}
+
+/* "Show" toggle button style */
+.toggle-button {
+    -fx-background-color: #fdfdfc;
+    -fx-text-fill: #ffb800;
+    -fx-cursor: hand;
+}
+
+/* Login link label */
+.login-label {
+    -fx-text-fill: #ffb800;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
