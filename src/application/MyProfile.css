@@ -1,0 +1,5 @@
+.toggle-button {
+    -fx-background-color: #fdfdfc;
+    -fx-text-fill: #ffb800;
+    -fx-cursor: hand;
+}
