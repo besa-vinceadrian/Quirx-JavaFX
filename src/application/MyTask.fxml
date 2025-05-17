@@ -22,11 +22,11 @@
             </Label>
             <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
               <columns>
-                <TableColumn prefWidth="229.60003662109375" text="Task" />
-                <TableColumn minWidth="0.0" prefWidth="120.7999267578125" text="Due Date" />
-                  <TableColumn minWidth="0.0" prefWidth="94.40008544921875" text="Priority" />
-                  <TableColumn minWidth="0.0" prefWidth="112.800048828125" text="Team" />
-                  <TableColumn minWidth="0.0" prefWidth="151.199951171875" text="Assignee" />
+                <TableColumn maxWidth="225.0" minWidth="225.0" prefWidth="225.0" resizable="false" text="Task" />
+                <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
+                  <TableColumn maxWidth="115.0" minWidth="115.0" prefWidth="115.0" resizable="false" text="Team" />
+                  <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
               </columns>
             </TableView>
             <Label prefHeight="30.0" prefWidth="691.0" text="NOT STARTED" textFill="#bababa">
@@ -36,11 +36,11 @@
             </Label>
             <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
                <columns>
-                  <TableColumn prefWidth="229.60003662109375" text="Task" />
-                  <TableColumn minWidth="0.0" prefWidth="120.7999267578125" text="Due Date" />
-                  <TableColumn minWidth="0.0" prefWidth="94.40008544921875" text="Priority" />
-                  <TableColumn minWidth="0.0" prefWidth="112.800048828125" text="Team" />
-                  <TableColumn minWidth="0.0" prefWidth="151.199951171875" text="Assignee" />
+                  <TableColumn maxWidth="225.0" minWidth="225.0" prefWidth="225.0" resizable="false" text="Task" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
+                  <TableColumn maxWidth="115.0" minWidth="115.0" prefWidth="115.0" resizable="false" text="Team" />
+                  <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
                </columns>
             </TableView>
             <Label prefHeight="30.0" prefWidth="691.0" text="COMPLETED" textFill="#2dca7b">
@@ -50,11 +50,11 @@
             </Label>
             <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
                <columns>
-                  <TableColumn prefWidth="229.60003662109375" text="Task" />
-                  <TableColumn minWidth="0.0" prefWidth="120.7999267578125" text="Due Date" />
-                  <TableColumn minWidth="0.0" prefWidth="94.40008544921875" text="Priority" />
-                  <TableColumn minWidth="0.0" prefWidth="112.800048828125" text="Team" />
-                  <TableColumn minWidth="0.0" prefWidth="151.199951171875" text="Assignee" />
+                  <TableColumn maxWidth="225.0" minWidth="225.0" prefWidth="225.0" resizable="false" text="Task" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
+                  <TableColumn maxWidth="115.0" minWidth="115.0" prefWidth="115.0" resizable="false" text="Team" />
+                  <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
                </columns>
             </TableView>
          </children>
