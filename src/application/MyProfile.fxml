@@ -11,7 +11,7 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-color: #f5f5f0;" stylesheets="@MyProfile.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-color: #f5f5f0;" stylesheets="@MyProfile.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MyProfileController">
    <children>
       <Pane prefHeight="67.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
          <children>
@@ -26,7 +26,7 @@
                </image>
             </ImageView>
          </children></Pane>
-      <Pane layoutY="72.0" prefHeight="594.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
+      <Pane fx:id="centerPane" layoutY="72.0" prefHeight="594.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
          <children>
             <ImageView fitHeight="565.0" fitWidth="170.0" layoutX="29.0" layoutY="28.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -64,7 +64,7 @@
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <TextField layoutX="262.0" layoutY="248.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="38.0" prefWidth="367.0" promptText="example@gmail.com">
+            <TextField layoutX="262.0" layoutY="248.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="38.0" prefWidth="367.0" promptText="example@email.com">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -93,7 +93,7 @@
             <Button alignment="CENTER" contentDisplay="CENTER" layoutX="390.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ffb800; -fx-background-radius: 5; -fx-border-color: black; -fx-border-radius: 5;" text="Save Changes" textAlignment="CENTER" />
             <Button alignment="CENTER" contentDisplay="CENTER" layoutX="520.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ff3131; -fx-background-radius: 5; -fx-border-color: black; -fx-border-radius: 5;" text="Delete Account" textAlignment="CENTER" />
             <Button alignment="CENTER" contentDisplay="CENTER" layoutX="262.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #f5f5f0; -fx-border-color: black; -fx-background-radius: 5; -fx-border-radius: 5;" text="Cancel" textAlignment="CENTER" />
-            <PasswordField layoutX="262.0" layoutY="348.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter Password">
+            <PasswordField fx:id="newPasswordField" layoutX="262.0" layoutY="348.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter New Password">
                <font>
                   <Font name="Arial" size="12.0" />
                </font>
@@ -104,7 +104,7 @@
                   <Insets left="12.0" />
                </padding>
             </PasswordField>
-            <PasswordField layoutX="262.0" layoutY="431.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter Confirm Password">
+            <PasswordField fx:id="confirmNewPasswordField" layoutX="262.0" layoutY="431.0" prefHeight="38.0" prefWidth="367.0" promptText="Confirm New Password">
                <font>
                   <Font name="Arial" size="12.0" />
                </font>
@@ -115,8 +115,10 @@
                   <Insets left="12.0" />
                </padding>
             </PasswordField>
-            <Button layoutX="579.0" layoutY="354.0" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
-            <Button layoutX="579.0" layoutY="437.0" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
+            <TextField fx:id="showConfirmNewPasswordField" layoutX="262.0" layoutY="431.0" prefHeight="38.0" prefWidth="367.0" visible="false" />
+            <TextField fx:id="showNewPasswordField" layoutX="262.0" layoutY="347.0" prefHeight="38.0" prefWidth="367.0" visible="false" />
+            <Button fx:id="toggleConfirmPasswordButton" layoutX="579.0" layoutY="437.0" mnemonicParsing="false" onAction="#toggleConfirmPasswordButton" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
+            <Button fx:id="togglePasswordButton" layoutX="579.0" layoutY="354.0" mnemonicParsing="false" onAction="#togglePasswordButton" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
          </children>
       </Pane>
    </children>
