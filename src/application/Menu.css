@@ -26,6 +26,10 @@
 	-fx-background-color: #216dbd;
 }
 
+.add-button:focused {
+	-fx-background-color: #216dbd;
+}
+
 .calendar-date {
 	-fx-background-color: #ffffff;
 	-fx-background-radius: 10;
