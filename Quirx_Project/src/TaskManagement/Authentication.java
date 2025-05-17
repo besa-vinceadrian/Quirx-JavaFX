@@ -1,4 +1,4 @@
-package TaskManagement;
+package Quirx_Project.src.TaskManagement;
 
 import java.sql.*;
 import java.util.*;
@@ -20,13 +20,13 @@ public class Authentication {
     static final long OTP_VALID_DURATION = 5 * 60 * 1000; 
     static final long OTP_RESEND_INTERVAL = 60 * 1000; 
     static int attemptsRemaining = 3;
-    static boolean hasResentOTP = false;
+    static boolean hasResentOTP = false; 
 
     /**
      * Manages the database connection to the SQL Server.
      */
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18980;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:19875;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
@@ -137,14 +137,36 @@ public class Authentication {
      * @return the entered password as a {@link String}
      */
     public static String readPassword(String prompt) {
-        Console console = System.console();
-        if (console != null) {
-            char[] passwordArray = console.readPassword(prompt);
-            return new String(passwordArray);
-        } else {
-            System.out.print(prompt + " (warning: input visible): ");
-            return scanner.nextLine();
+    	System.out.print(prompt);
+
+        StringBuilder password = new StringBuilder();
+        try {
+            Console console = System.console();
+            if (console != null) {
+                char[] passChars = console.readPassword();
+                return new String(passChars);
+            } else {
+                // Fallback: read from System.in and mask with '*'
+                while (true) {
+                    int ch = System.in.read();
+                    if (ch == '\n' || ch == '\r') {
+                        System.out.println();
+                        break;
+                    } else if (ch == 127 || ch == 8) { // Handle backspace
+                        if (password.length() > 0) {
+                            password.deleteCharAt(password.length() - 1);
+                            System.out.print("\b \b");
+                        }
+                    } else {
+                        password.append((char) ch);
+                        System.out.print("*");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return password.toString();
     }
 
     /**
@@ -241,6 +263,30 @@ public class Authentication {
             e.printStackTrace();
         }
     }
+    
+ // LOGIN FEATURE
+    public static void loginUser() {
+        try (Connection con = DatabaseManager.connect()) {
+            System.out.print("Enter Username or Email: ");
+            String userInput = scanner.nextLine();
+            String password = readPassword("Enter Password: ");
+
+            String query = "SELECT * FROM UserTable WHERE (userName = ? OR userEmail = ?) AND userPassword = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, userInput);
+            ps.setString(2, userInput);
+            ps.setString(3, password);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                System.out.println("Login successful! Welcome, " + rs.getString("userFirstName") + " " + rs.getString("userLastName") + ".");
+            } else {
+                System.out.println("Invalid username/email or password. Please try again.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Resets the user's password after validating their email and verifying OTP.
@@ -318,16 +364,20 @@ public class Authentication {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        System.out.println("1. Register");
-        System.out.println("2. Reset Password");
+    	System.out.println("1. Login");
+        System.out.println("2. Register");
+        System.out.println("3. Reset Password");
         System.out.print("Choose option: ");
         int choice = Integer.parseInt(scanner.nextLine());
 
         if (choice == 1) {
-            registerUser();
+            loginUser();
         } else if (choice == 2) {
-            resetPassword();
-        } else {
+            registerUser();
+        } else if (choice == 3) {
+        	resetPassword();
+        }
+        else {
             System.out.println("Invalid choice.");
         }
     }
