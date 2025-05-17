@@ -1,4 +1,4 @@
-package Quirx_Project.src.TaskManagement;
+package TaskManagement;
 
 import java.sql.*;
 import java.util.*;
