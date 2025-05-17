@@ -11,7 +11,7 @@
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #ffffff;" stylesheets="@Workspace.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.WorkspaceController">
    <children>
       <!-- TO-DO TableView -->
-      <TableView fx:id="tableView" editable="true" layoutX="32.0" layoutY="166.0" prefHeight="207.0" prefWidth="640.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 5; -fx-border-color: #d3d3d3;">
+      <TableView fx:id="tableView" editable="true" layoutX="6.0" layoutY="174.0" prefHeight="207.0" prefWidth="691.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 5; -fx-border-color: #d3d3d3;">
         <columns>
             <TableColumn fx:id="completedColumn" maxWidth="25.0" minWidth="25.0" prefWidth="25.0" resizable="false" text="" />
             <TableColumn fx:id="taskColumn" maxWidth="230.0" minWidth="230.0" prefWidth="230.0" resizable="false" text="Task" />
@@ -25,29 +25,29 @@
       <VBox layoutX="32.0" layoutY="14.0" prefHeight="101.0" prefWidth="640.0" />
 
       <!-- COMPLETED TableView -->
-      <TableView fx:id="completedTable" editable="false" layoutX="32.0" layoutY="445.0" prefHeight="207.0" prefWidth="640.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 5; -fx-border-color: #d3d3d3;">
+      <TableView fx:id="completedTable" editable="false" layoutX="6.0" layoutY="453.0" prefHeight="207.0" prefWidth="691.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 5; -fx-border-color: #d3d3d3;">
          <columns>
-            <TableColumn fx:id="taskColumnCompleted" prefWidth="230.0" resizable="false" styleClass="task-header" text="Task" />
-            <TableColumn fx:id="ownerColumnCompleted" prefWidth="89.5999755859375" resizable="false" styleClass="task-header" text="Owner" />
-            <TableColumn fx:id="statusColumnCompleted" prefWidth="95.0" resizable="false" styleClass="task-header" text="Status" />
-            <TableColumn fx:id="dueDateColumnCompleted" prefWidth="87.0" resizable="false" styleClass="task-header" text="Due Date" />
+            <TableColumn fx:id="taskColumnCompleted" maxWidth="253.0" minWidth="253.0" prefWidth="253.0" resizable="false" styleClass="task-header" text="Task" />
+            <TableColumn fx:id="ownerColumnCompleted" maxWidth="89.0" minWidth="89.0" prefWidth="89.0" resizable="false" styleClass="task-header" text="Owner" />
+            <TableColumn fx:id="statusColumnCompleted" maxWidth="95.0" minWidth="95.0" prefWidth="95.0" resizable="false" styleClass="task-header" text="Status" />
+            <TableColumn fx:id="dueDateColumnCompleted" maxWidth="87.0" minWidth="87.0" prefWidth="87.0" resizable="false" styleClass="task-header" text="Due Date" />
             <TableColumn fx:id="priorityColumnCompleted" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" resizable="false" styleClass="task-header" text="Priority" />
          </columns>
       </TableView>
       
-      <Label layoutX="33.0" layoutY="416.0" text="COMPLETED" textFill="#2dca7b">
+      <Label layoutX="7.0" layoutY="416.0" text="COMPLETED" textFill="#2dca7b">
          <font>
-            <Font name="Arial Bold" size="15.0" />
+            <Font name="Arial Bold" size="24.0" />
          </font>
       </Label>
       
-      <Label layoutX="33.0" layoutY="135.0" text="TO-DO" textFill="#4c8bf0">
+      <Label layoutX="7.0" layoutY="135.0" text="TO-DO" textFill="#4c8bf0">
          <font>
-            <Font name="Arial Bold" size="15.0" />
+            <Font name="Arial Bold" size="24.0" />
          </font>
       </Label>
       
-      <Line endX="33.80000305175781" layoutX="133.0" layoutY="438.0" startX="-100.0" stroke="#bababa" />
-      <Line endX="33.80000305175781" layoutX="133.0" layoutY="157.0" startX="-100.0" stroke="#bababa" />
+      <Line endX="75.0" layoutX="107.0" layoutY="446.0" startX="-100.0" stroke="#bababa" />
+      <Line endX="75.0" layoutX="107.0" layoutY="165.0" startX="-100.0" stroke="#bababa" />
    </children>
 </Pane>
