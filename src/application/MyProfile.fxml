@@ -15,13 +15,18 @@
    <children>
       <Pane prefHeight="67.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
          <children>
-            <Label layoutX="19.0" layoutY="8.0" prefHeight="50.0" prefWidth="663.0" text="Username">
+            <Label layoutX="92.0" layoutY="8.0" prefHeight="50.0" prefWidth="597.0" text="Username">
                <font>
                   <Font name="System Bold" size="32.0" />
                </font>
             </Label>
+            <ImageView fitHeight="92.0" fitWidth="88.0" layoutX="1.0" layoutY="-11.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../QuirxImages/LogoYellow.png" />
+               </image>
+            </ImageView>
          </children></Pane>
-      <Pane layoutY="73.0" prefHeight="594.0" prefWidth="703.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
+      <Pane layoutY="72.0" prefHeight="594.0" prefWidth="703.0" style="-fx-background-color: #f5f5f0; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
          <children>
             <ImageView fitHeight="565.0" fitWidth="170.0" layoutX="29.0" layoutY="28.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -33,59 +38,62 @@
                   <Image url="@../../QuirxImages/MyProfileWithWhite.png" />
                </image>
             </ImageView>
-            <Label alignment="CENTER_RIGHT" layoutX="262.0" layoutY="126.0" prefHeight="27.0" prefWidth="45.0" style="-fx-font-weight: bold;" text="Name:" textAlignment="RIGHT">
+            <Label alignment="CENTER_RIGHT" layoutX="262.0" layoutY="137.0" prefHeight="27.0" prefWidth="45.0" style="-fx-font-weight: bold;" text="Name:" textAlignment="RIGHT">
                <font>
                   <Font size="14.0" />
                </font>
             </Label>
-            <TextField layoutX="262.0" layoutY="155.0" prefHeight="38.0" prefWidth="167.0" promptText="Last Name">
+            <TextField layoutX="262.0" layoutY="166.0" prefHeight="38.0" prefWidth="167.0" promptText="Last Name">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <padding>
                   <Insets left="12.0" />
-               </padding></TextField>
-            <TextField layoutX="461.0" layoutY="155.0" prefHeight="38.0" prefWidth="167.0" promptText="First Name">
+               </padding>
+            </TextField>
+            <TextField layoutX="461.0" layoutY="166.0" prefHeight="38.0" prefWidth="167.0" promptText="First Name">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <padding>
                   <Insets left="12.0" />
-               </padding></TextField>
-            <Label alignment="CENTER_RIGHT" layoutX="260.0" layoutY="210.0" prefHeight="27.0" prefWidth="45.0" style="-fx-font-weight: bold;" text="Email:" textAlignment="RIGHT">
+               </padding>
+            </TextField>
+            <Label alignment="CENTER_RIGHT" layoutX="260.0" layoutY="221.0" prefHeight="27.0" prefWidth="45.0" style="-fx-font-weight: bold;" text="Email:" textAlignment="RIGHT">
                <font>
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <TextField layoutX="262.0" layoutY="237.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="38.0" prefWidth="367.0" promptText="example@gmail.com">
+            <TextField layoutX="262.0" layoutY="248.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="38.0" prefWidth="367.0" promptText="example@gmail.com">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
                <padding>
                   <Insets left="12.0" />
-               </padding></TextField>
-            <Label alignment="CENTER_RIGHT" layoutX="260.0" layoutY="321.0" prefHeight="27.0" prefWidth="70.0" style="-fx-font-weight: bold;" text="Password:" textAlignment="RIGHT">
+               </padding>
+            </TextField>
+            <Label alignment="CENTER_RIGHT" layoutX="260.0" layoutY="320.0" prefHeight="27.0" prefWidth="70.0" style="-fx-font-weight: bold;" text="Password:" textAlignment="RIGHT">
                <font>
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <Line endX="367.0" layoutX="221.0" layoutY="305.0" opacity="0.16" startX="78.0" />
-            <Label alignment="CENTER_RIGHT" layoutX="259.0" layoutY="405.0" prefHeight="27.0" prefWidth="127.0" style="-fx-font-weight: bold;" text="Confirm Password:" textAlignment="RIGHT">
+            <Line endX="367.0" layoutX="221.0" layoutY="309.0" opacity="0.16" startX="78.0" />
+            <Label alignment="CENTER_RIGHT" layoutX="259.0" layoutY="404.0" prefHeight="27.0" prefWidth="127.0" style="-fx-font-weight: bold;" text="Confirm Password:" textAlignment="RIGHT">
                <font>
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <Line endX="367.0" layoutX="223.0" layoutY="501.0" opacity="0.16" startX="78.0" />
-            <Label alignment="CENTER" layoutX="361.0" layoutY="38.0" prefHeight="50.0" prefWidth="167.0" text="Profile">
+            <Line endX="367.0" layoutX="223.0" layoutY="490.0" opacity="0.16" startX="78.0" />
+            <Label alignment="CENTER" layoutX="361.0" layoutY="49.0" prefHeight="50.0" prefWidth="167.0" text="Profile">
                <font>
                   <Font name="System Bold" size="32.0" />
                </font>
             </Label>
-            <Line endX="367.0" layoutX="221.0" layoutY="109.0" opacity="0.16" startX="78.0" />
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="393.0" layoutY="520.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ffb800; -fx-background-radius: 5; -fx-border-color: black; -fx-border-radius: 5;" text="Save Changes" textAlignment="CENTER" />
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="524.0" layoutY="520.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ff3131; -fx-background-radius: 5; -fx-border-color: black; -fx-border-radius: 5;" text="Delete Account" textAlignment="CENTER" />
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="262.0" layoutY="520.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ffffff; -fx-border-color: black; -fx-background-radius: 5; -fx-border-radius: 5;" text="Cancel" textAlignment="CENTER" />
-            <PasswordField layoutX="262.0" layoutY="349.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter Password">
+            <Line endX="367.0" layoutX="221.0" layoutY="120.0" opacity="0.16" startX="78.0" />
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="390.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ffb800; -fx-background-radius: 5; -fx-border-color: black; -fx-border-radius: 5;" text="Save Changes" textAlignment="CENTER" />
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="520.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ff3131; -fx-background-radius: 5; -fx-border-color: black; -fx-border-radius: 5;" text="Delete Account" textAlignment="CENTER" />
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="262.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" style="-fx-background-color: #ffffff; -fx-border-color: black; -fx-background-radius: 5; -fx-border-radius: 5;" text="Cancel" textAlignment="CENTER" />
+            <PasswordField layoutX="262.0" layoutY="348.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter Password">
                <font>
                   <Font name="Arial" size="12.0" />
                </font>
@@ -96,7 +104,7 @@
                   <Insets left="12.0" />
                </padding>
             </PasswordField>
-            <PasswordField layoutX="262.0" layoutY="432.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter Confirm Password">
+            <PasswordField layoutX="262.0" layoutY="431.0" prefHeight="38.0" prefWidth="367.0" promptText="Enter Confirm Password">
                <font>
                   <Font name="Arial" size="12.0" />
                </font>
@@ -107,8 +115,9 @@
                   <Insets left="12.0" />
                </padding>
             </PasswordField>
-            <Button layoutX="579.0" layoutY="355.0" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
-            <Button layoutX="579.0" layoutY="438.0" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
-         </children></Pane>
+            <Button layoutX="579.0" layoutY="354.0" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
+            <Button layoutX="579.0" layoutY="437.0" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" styleClass="toggle-button" text="Show" />
+         </children>
+      </Pane>
    </children>
 </Pane>
