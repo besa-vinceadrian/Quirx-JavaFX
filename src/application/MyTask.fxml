@@ -1,63 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #ffffff;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #f5f5f0;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox layoutX="6.0" layoutY="8.0" prefHeight="651.0" prefWidth="691.0" spacing="10.0">
+      <Pane prefHeight="217.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;">
          <children>
-            <Label prefHeight="30.0" prefWidth="691.0" text="ON GOING" textFill="#ffc107">
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
+            <Label layoutX="20.0" layoutY="8.0" prefHeight="30.0" prefWidth="665.0" text="ON GOING" textFill="#ffc107">
                <font>
                   <Font name="Arial Bold" size="24.0" />
                </font>
             </Label>
-            <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
+            <TableView layoutX="19.0" layoutY="43.0" prefHeight="156.0" prefWidth="665.0" styleClass="styleClass=">
               <columns>
-                <TableColumn maxWidth="225.0" minWidth="225.0" prefWidth="225.0" resizable="false" text="Task" />
+                <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" text="Task" />
                 <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
                   <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
-                  <TableColumn maxWidth="115.0" minWidth="115.0" prefWidth="115.0" resizable="false" text="Team" />
+                  <TableColumn maxWidth="113.0" minWidth="113.0" prefWidth="113.0" resizable="false" text="Team" />
                   <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
               </columns>
             </TableView>
-            <Label prefHeight="30.0" prefWidth="691.0" text="NOT STARTED" textFill="#bababa">
+         </children>
+      </Pane>
+      <Pane layoutY="225.0" prefHeight="217.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;">
+         <children>
+            <Label layoutX="19.0" layoutY="7.0" prefHeight="30.0" prefWidth="665.0" text="NOT STARTED" textFill="#bababa">
                <font>
                   <Font name="Arial Bold" size="24.0" />
                </font>
             </Label>
-            <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
+            <TableView layoutX="19.0" layoutY="43.0" prefHeight="156.0" prefWidth="665.0" styleClass="styleClass=">
                <columns>
-                  <TableColumn maxWidth="225.0" minWidth="225.0" prefWidth="225.0" resizable="false" text="Task" />
+                  <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" text="Task" />
                   <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
                   <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
-                  <TableColumn maxWidth="115.0" minWidth="115.0" prefWidth="115.0" resizable="false" text="Team" />
-                  <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
-               </columns>
-            </TableView>
-            <Label prefHeight="30.0" prefWidth="691.0" text="COMPLETED" textFill="#2dca7b">
-               <font>
-                  <Font name="Arial Bold" size="24.0" />
-               </font>
-            </Label>
-            <TableView prefHeight="169.0" prefWidth="691.0" styleClass="styleClass=">
-               <columns>
-                  <TableColumn maxWidth="225.0" minWidth="225.0" prefWidth="225.0" resizable="false" text="Task" />
-                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
-                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
-                  <TableColumn maxWidth="115.0" minWidth="115.0" prefWidth="115.0" resizable="false" text="Team" />
+                  <TableColumn maxWidth="113.0" minWidth="113.0" prefWidth="113.0" resizable="false" text="Team" />
                   <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
                </columns>
             </TableView>
          </children>
-      </VBox>
+      </Pane>
+      <Pane layoutY="449.0" prefHeight="217.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;">
+         <children>
+            <Label layoutX="19.0" layoutY="8.0" prefHeight="30.0" prefWidth="665.0" text="COMPLETED" textFill="#2dca7b">
+               <font>
+                  <Font name="Arial Bold" size="24.0" />
+               </font>
+            </Label>
+            <TableView layoutX="19.0" layoutY="44.0" prefHeight="156.0" prefWidth="665.0" styleClass="styleClass=">
+               <columns>
+                  <TableColumn maxWidth="200.0" minWidth="200.0" prefWidth="200.0" resizable="false" text="Task" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Due Date" />
+                  <TableColumn maxWidth="100.0" minWidth="100.0" prefWidth="100.0" resizable="false" text="Priority" />
+                  <TableColumn maxWidth="113.0" minWidth="113.0" prefWidth="113.0" resizable="false" text="Team" />
+                  <TableColumn maxWidth="150.0" minWidth="150.0" prefWidth="150.0" resizable="false" text="Assignee" />
+               </columns>
+            </TableView>
+         </children>
+      </Pane>
    </children>
 </Pane>
