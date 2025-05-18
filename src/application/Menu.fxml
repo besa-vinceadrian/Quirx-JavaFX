@@ -47,7 +47,7 @@
             </VBox>
             <VBox layoutX="15.0" layoutY="642.0" prefHeight="44.0" prefWidth="279.0">
                <children>
-                  <Button alignment="BASELINE_LEFT" mnemonicParsing="false" prefHeight="40.0" prefWidth="281.0" styleClass="menu-button" text="Logout">
+                  <Button fx:id="logOutButton" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#logOutButton" prefHeight="40.0" prefWidth="281.0" styleClass="menu-button" text="Logout">
                      <font>
                         <Font name="Arial" size="12.0" />
                      </font>
