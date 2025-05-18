@@ -72,7 +72,7 @@ public class Crud_updated {
 
     public static class DatabaseManager {
         private static final String DB_URL =
-            "jdbc:sqlserver://0.tcp.ap.ngrok.io:14438;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+            "jdbc:sqlserver://0.tcp.ap.ngrok.io:19058;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
@@ -90,19 +90,50 @@ public class Crud_updated {
                 """;
             try (Connection c = connect();
                  PreparedStatement st = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                // Validate and set parameters
+                if (t.getTaskTitle() == null || t.getTaskTitle().isEmpty()) {
+                    throw new IllegalArgumentException("Task title cannot be null or empty.");
+                }
                 st.setString(1, t.getTaskTitle());
+
+                if (t.getTaskStatus() == null || !t.getTaskStatus().matches("DONE|IN PROGRESS|NOT STARTED")) {
+                    throw new IllegalArgumentException("Invalid task status: " + t.getTaskStatus());
+                }
                 st.setString(2, t.getTaskStatus());
-                st.setDate  (3, t.getDueDate());
+
+                if (t.getDueDate() == null) {
+                    throw new IllegalArgumentException("Due date cannot be null.");
+                }
+                st.setDate(3, t.getDueDate());
+
+                if (t.getTaskPriority() == null || !t.getTaskPriority().matches("HIGH|MEDIUM|LOW")) {
+                    throw new IllegalArgumentException("Invalid task priority: " + t.getTaskPriority());
+                }
                 st.setString(4, t.getTaskPriority());
-                st.setString(5, t.getTaskNote());
+
+                st.setString(5, t.getTaskNote() != null ? t.getTaskNote() : ""); // Default to empty string if null
+
+                if (t.getAssignedUserID() == null || t.getAssignedUserID().isEmpty()) {
+                    throw new IllegalArgumentException("Assigned User ID cannot be null or empty.");
+                }
                 st.setString(6, t.getAssignedUserID());
+
+                // Execute the query
                 st.executeUpdate();
                 ResultSet rs = st.getGeneratedKeys();
-                System.out.println(rs.next()
-                    ? "✅ Task added with ID: "+ rs.getInt(1)
-                    : "⚠ Task added, but no ID returned.");
-            } catch (SQLException e) { e.printStackTrace(); }
+                if (rs.next()) {
+                    System.out.println("✅ Task added with ID: " + rs.getInt(1));
+                } else {
+                    System.out.println("⚠ Task added, but no ID returned.");
+                }
+            } catch (SQLException e) {
+                System.err.println("❌ SQL Error: " + e.getMessage());
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                System.err.println("❌ Validation Error: " + e.getMessage());
+            }
         }
+
 
         public static List<Task> getAllTasks() {
             List<Task> list = new ArrayList<>();
@@ -176,81 +207,168 @@ public class Crud_updated {
                 3. Update Task
                 4. Delete Task
                 5. Exit
-                """);                 
+                """);
 
-            System.out.print("Choose option: ");  
+            System.out.print("Choose option: ");
+            while (!sc.hasNextInt()) {
+                System.out.println("❌ Invalid input! Please enter a number between 1 and 5.");
+                sc.next(); // Clear invalid input
+                System.out.print("Choose option: ");
+            }
             int ch = sc.nextInt();
-            sc.nextLine();         
+            sc.nextLine(); // Consume newline
 
             switch (ch) {
-                case 1 -> { 
-                    System.out.print("Title: "); String title = sc.nextLine();
+                case 1 -> {
+                    System.out.print("Title: ");
+                    String title = sc.nextLine().trim();
+                    while (title.isEmpty()) {
+                        System.out.println("❌ Title cannot be empty. Please enter a valid title.");
+                        System.out.print("Title: ");
+                        title = sc.nextLine().trim();
+                    }
+
                     String status;
                     do {
                         System.out.print("Status (DONE / IN PROGRESS / NOT STARTED): ");
-                        status = sc.nextLine().toUpperCase();
+                        status = sc.nextLine().toUpperCase().trim();
+                        if (!status.matches("DONE|IN PROGRESS|NOT STARTED")) {
+                            System.out.println("❌ Invalid status! Please enter DONE, IN PROGRESS, or NOT STARTED.");
+                        }
                     } while (!status.matches("DONE|IN PROGRESS|NOT STARTED"));
 
                     System.out.print("Due Date (yyyy-mm-dd): ");
-                    java.sql.Date due = java.sql.Date.valueOf(LocalDate.parse(sc.nextLine()));
+                    java.sql.Date due = null;
+                    while (due == null) {
+                        try {
+                            due = java.sql.Date.valueOf(LocalDate.parse(sc.nextLine().trim()));
+                        } catch (Exception e) {
+                            System.out.println("❌ Invalid date format! Please enter a valid date in yyyy-mm-dd format.");
+                            System.out.print("Due Date (yyyy-mm-dd): ");
+                        }
+                    }
 
                     String priority;
                     do {
                         System.out.print("Priority (HIGH / MEDIUM / LOW): ");
-                        priority = sc.nextLine().toUpperCase();
+                        priority = sc.nextLine().toUpperCase().trim();
+                        if (!priority.matches("HIGH|MEDIUM|LOW")) {
+                            System.out.println("❌ Invalid priority! Please enter HIGH, MEDIUM, or LOW.");
+                        }
                     } while (!priority.matches("HIGH|MEDIUM|LOW"));
 
-                    System.out.print("Note: ");   String note = sc.nextLine();
-                    System.out.print("Assigned User ID: "); String uid = sc.nextLine();
+                    System.out.print("Note: ");
+                    String note = sc.nextLine().trim();
 
-                    DatabaseManager.addTask(
-                        new Task(title, status, due, priority, note, uid));
+                    System.out.print("Assigned User ID: ");
+                    String uid = sc.nextLine().trim();
+                    while (uid.isEmpty()) {
+                        System.out.println("❌ User ID cannot be empty. Please enter a valid User ID.");
+                        System.out.print("Assigned User ID: ");
+                        uid = sc.nextLine().trim();
+                    }
+
+                    DatabaseManager.addTask(new Task(title, status, due, priority, note, uid));
                 }
-                case 2 -> { 
+                case 2 -> {
                     List<Task> tasks = DatabaseManager.getAllTasks();
-                    PriorityQueue<Task> pq = new PriorityQueue<>(tasks);
-                    System.out.println("\n📋 Tasks (by priority):");
-                    while (!pq.isEmpty()) {
-                        Task t = pq.poll();
-                        System.out.println(t.getTaskID() + ": " + t.getTaskTitle()
-                            + " | Status: "   + t.getTaskStatus()
-                            + " | Priority: " + t.getTaskPriority()
-                            + " | Due: "      + t.getDueDate()
-                            + " | Assigned to: " + t.getAssignedUserID()
-                            + " (" + t.getAssignedUserName() + ")");
+                    if (tasks.isEmpty()) {
+                        System.out.println("📋 No tasks found.");
+                    } else {
+                        PriorityQueue<Task> pq = new PriorityQueue<>(tasks);
+                        System.out.println("\n📋 Tasks (by priority):");
+                        while (!pq.isEmpty()) {
+                            Task t = pq.poll();
+                            System.out.println(t.getTaskID() + ": " + t.getTaskTitle()
+                                + " | Status: " + t.getTaskStatus()
+                                + " | Priority: " + t.getTaskPriority()
+                                + " | Due: " + t.getDueDate()
+                                + " | Assigned to: " + t.getAssignedUserID()
+                                + " (" + t.getAssignedUserName() + ")");
+                        }
                     }
                 }
-                case 3 -> { 
-                    System.out.print("Task ID to update: "); int id = sc.nextInt(); sc.nextLine();
-                    System.out.print("New Title: "); String title = sc.nextLine();
+                case 3 -> {
+                    System.out.print("Task ID to update: ");
+                    int id = -1;
+                    while (id < 0) {
+                        if (sc.hasNextInt()) {
+                            id = sc.nextInt();
+                            sc.nextLine(); // Consume newline
+                        } else {
+                            System.out.println("❌ Invalid input! Please enter a valid Task ID.");
+                            sc.next(); // Clear invalid input
+                            System.out.print("Task ID to update: ");
+                        }
+                    }
+
+                    System.out.print("New Title: ");
+                    String title = sc.nextLine().trim();
+                    while (title.isEmpty()) {
+                        System.out.println("❌ Title cannot be empty. Please enter a valid title.");
+                        System.out.print("New Title: ");
+                        title = sc.nextLine().trim();
+                    }
 
                     String status;
                     do {
                         System.out.print("New Status (DONE / IN PROGRESS / NOT STARTED): ");
-                        status = sc.nextLine().toUpperCase();
+                        status = sc.nextLine().toUpperCase().trim();
+                        if (!status.matches("DONE|IN PROGRESS|NOT STARTED")) {
+                            System.out.println("❌ Invalid status! Please enter DONE, IN PROGRESS, or NOT STARTED.");
+                        }
                     } while (!status.matches("DONE|IN PROGRESS|NOT STARTED"));
 
                     System.out.print("New Due Date (yyyy-mm-dd): ");
-                    java.sql.Date due = java.sql.Date.valueOf(LocalDate.parse(sc.nextLine()));
+                    java.sql.Date due = null;
+                    while (due == null) {
+                        try {
+                            due = java.sql.Date.valueOf(LocalDate.parse(sc.nextLine().trim()));
+                        } catch (Exception e) {
+                            System.out.println("❌ Invalid date format! Please enter a valid date in yyyy-mm-dd format.");
+                            System.out.print("New Due Date (yyyy-mm-dd): ");
+                        }
+                    }
 
                     String priority;
                     do {
                         System.out.print("New Priority (HIGH / MEDIUM / LOW): ");
-                        priority = sc.nextLine().toUpperCase();
+                        priority = sc.nextLine().toUpperCase().trim();
+                        if (!priority.matches("HIGH|MEDIUM|LOW")) {
+                            System.out.println("❌ Invalid priority! Please enter HIGH, MEDIUM, or LOW.");
+                        }
                     } while (!priority.matches("HIGH|MEDIUM|LOW"));
 
-                    System.out.print("New Note: "); String note = sc.nextLine();
-                    System.out.print("New Assigned User ID: "); String uid = sc.nextLine();
+                    System.out.print("New Note: ");
+                    String note = sc.nextLine().trim();
 
-                    DatabaseManager.updateTask(
-                        new Task(id, title, status, due, priority, note, uid, null)); 
+                    System.out.print("New Assigned User ID: ");
+                    String uid = sc.nextLine().trim();
+                    while (uid.isEmpty()) {
+                        System.out.println("❌ User ID cannot be empty. Please enter a valid User ID.");
+                        System.out.print("New Assigned User ID: ");
+                        uid = sc.nextLine().trim();
+                    }
+
+                    DatabaseManager.updateTask(new Task(id, title, status, due, priority, note, uid, null));
                 }
-                case 4 -> { 
-                    System.out.print("Task ID to delete: "); int id = sc.nextInt();
+                case 4 -> {
+                    System.out.print("Task ID to delete: ");
+                    int id = -1;
+                    while (id < 0) {
+                        if (sc.hasNextInt()) {
+                            id = sc.nextInt();
+                            sc.nextLine(); // Consume newline
+                        } else {
+                            System.out.println("❌ Invalid input! Please enter a valid Task ID.");
+                            sc.next(); // Clear invalid input
+                            System.out.print("Task ID to delete: ");
+                        }
+                    }
                     DatabaseManager.deleteTask(id);
                 }
                 case 5 -> run = false;
-                default -> System.out.println("❌ Invalid choice! Try again.");
+                default -> System.out.println("❌ Invalid choice! Please enter a number between 1 and 5.");
             }
         }
         sc.close();
