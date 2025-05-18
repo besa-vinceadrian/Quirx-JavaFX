@@ -265,7 +265,7 @@ public class Authentication {
     }
     
  // LOGIN FEATURE
-    public static void loginUser() {
+    public static boolean loginUser() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("Enter Username or Email: ");
             String userInput = scanner.nextLine();
@@ -280,11 +280,14 @@ public class Authentication {
 
             if (rs.next()) {
                 System.out.println("Login successful! Welcome, " + rs.getString("userFirstName") + " " + rs.getString("userLastName") + ".");
+                return true;
             } else {
                 System.out.println("Invalid username/email or password. Please try again.");
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
