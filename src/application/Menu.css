@@ -39,3 +39,19 @@
 	-fx-background-color: #e7e9ed;
     -fx-cursor: hand;
 }
+
+.delete-button {
+	
+    -fx-background-color: #ff3131;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.delete-button:hover {
+    -fx-background-color: #dc143c;
+}
+
+.delete-button .text {
+    -fx-fill: black;
+}
