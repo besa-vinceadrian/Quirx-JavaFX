@@ -9,8 +9,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
 import javafx.geometry.Insets;
 import javafx.util.converter.DefaultStringConverter;
@@ -96,6 +98,9 @@ public class WorkspaceController implements Initializable {
 	        alert.setHeaderText(null);
 	        alert.setContentText("Are you sure you want to delete the task ?");
 	        
+	        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+	        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+	        
 	        Optional<ButtonType> result = alert.showAndWait();
 	        if (result.isPresent() && result.get() == ButtonType.OK) {     	
 	            data.remove(selectedTask);
@@ -117,13 +122,27 @@ public class WorkspaceController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText("Please select a task to delete.");
         alert.showAndWait();
+        
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
     }
     
     @FXML
     private void handleDeleteAll() {
         // Clear all items from the completed table
-        completedTable.getItems().clear();
+    	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Completed Task");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure you want to delete all completed task ?");
         
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+    	
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {     	
+        	completedTable.getItems().clear();
+        }       
     }
 
     private void setupTodoTable() {
@@ -321,7 +340,6 @@ public class WorkspaceController implements Initializable {
                 Task.Priority.LOW
             );
             data.set(event.getTablePosition().getRow(), newTask);
-            data.add(Task.createEmptyTask());
         } else {
             task.setTask(newValue);
         }
