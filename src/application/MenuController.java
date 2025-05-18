@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.text.Font;
 import java.util.Optional;
+import javafx.scene.image.Image;
 
 public class MenuController implements Initializable {
     
@@ -111,22 +112,17 @@ public class MenuController implements Initializable {
         newWorkspaceBtn.getStyleClass().add("menu-button");
         newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
         newWorkspaceBtn.setPrefHeight(30.0);
-        newWorkspaceBtn.setPrefWidth(250.0); // Reduced width to fit delete button
+        newWorkspaceBtn.setPrefWidth(234.0); // Reduced width to fit delete button
         newWorkspaceBtn.setFont(Font.font("Arial", 12));
         newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 40));
         
         // Delete button (small "×" button)
-        Button deleteButton = new Button("×");
+        Button deleteButton = new Button("🗑");
         deleteButton.getStyleClass().add("delete-button");
-        deleteButton.setPrefSize(20, 20);
+        deleteButton.setPrefWidth(40.0);
+        deleteButton.setPrefHeight(30.0);
+        deleteButton.setFont(Font.font("Arial", 16));
         deleteButton.setOnAction(e -> confirmAndDeleteWorkspace(buttonContainer, workspaceName));
-        
-        // Add context menu for alternative deletion method
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> confirmAndDeleteWorkspace(buttonContainer, workspaceName));
-        contextMenu.getItems().add(deleteItem);
-        newWorkspaceBtn.setContextMenu(contextMenu);
         
         // Set action to load workspace
         newWorkspaceBtn.setOnAction(e -> {
@@ -155,11 +151,13 @@ public class MenuController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText("Are you sure you want to delete '" + workspaceName + "'?");
         
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             menuVBox.getChildren().remove(buttonContainer);
             // Here you could also add code to delete from database if needed
-            System.out.println("Deleted workspace: " + workspaceName);
         }
     }
 }
