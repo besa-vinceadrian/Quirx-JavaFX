@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -70,6 +71,13 @@
       
                   <!-- Section Lines -->
             <Line endX="75.0" layoutX="120.0" layoutY="53.0" startX="-100.0" stroke="#bababa" />
+            <Button fx:id="addTaskButton" layoutX="480.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleAddTask" prefHeight="32.0" prefWidth="94.0" styleClass="action-button" text="Add Task" />
+            <Button fx:id="deleteTaskButton" layoutX="591.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleDeleteTask" prefHeight="32.0" prefWidth="94.0" text="Delete">
+               <styleClass>
+                  <String fx:value="action-button" />
+                  <String fx:value="delete-button" />
+               </styleClass>
+            </Button>
          </children>
       </Pane>
       <Button fx:id="inviteButton" alignment="CENTER" contentDisplay="CENTER" layoutX="535.0" mnemonicParsing="false" onAction="#inviteButton" prefHeight="64.0" prefWidth="168.0" styleClass="invite-button" text="🔗 Invite" textAlignment="CENTER">

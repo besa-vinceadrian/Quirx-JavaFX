@@ -1,7 +1,6 @@
 package application;
 
 import javafx.fxml.FXML;
-
 import javafx.fxml.Initializable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -15,7 +14,7 @@ import javafx.scene.control.cell.*;
 import javafx.scene.layout.Region;
 import javafx.geometry.Insets;
 import javafx.util.converter.DefaultStringConverter;
-
+import javafx.application.Platform;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -36,38 +35,23 @@ public class WorkspaceController implements Initializable {
     @FXML private TableColumn<Task, String> dueDateColumnCompleted;
     @FXML private TableColumn<Task, String> priorityColumnCompleted;
     
-    @FXML
-    private Button inviteAgain;
-
-    @FXML
-    private Button inviteButton;
-
-    @FXML
-    private AnchorPane invitePane;
-
-    @FXML
-    private AnchorPane mainAnchorPane;
-
-    @FXML
-    private AnchorPane notifiedPane;
-    
-    @FXML
-    private StackPane inviteStackPane;
-    
-    @FXML
-    private TextField emailField;
-    
-    @FXML
-    private Label workspaceTitle;
-
+    @FXML private Button inviteAgain;
+    @FXML private Button inviteButton;
+    @FXML private AnchorPane invitePane;
+    @FXML private AnchorPane mainAnchorPane;
+    @FXML private AnchorPane notifiedPane;
+    @FXML private StackPane inviteStackPane;
+    @FXML private TextField emailField;
+    @FXML private Label workspaceTitle;
+    @FXML private Button addTaskButton;
+    @FXML private Button deleteTaskButton;
 
     private final ObservableList<Task> data = FXCollections.observableArrayList();
     private final ObservableList<Task> completedData = FXCollections.observableArrayList();
     
- // Method to update the workspace name
     public void setWorkspaceName(String name) {
         if (workspaceTitle != null) {
-            workspaceTitle.setText(name); // e.g., "Project X Workspace"
+            workspaceTitle.setText(name);
         }
     }
 
@@ -80,6 +64,50 @@ public class WorkspaceController implements Initializable {
         data.add(Task.createEmptyTask());
         tableView.setItems(data);
         completedTable.setItems(completedData);
+        
+        // Disable delete button when no task is selected
+        deleteTaskButton.disableProperty().bind(
+            tableView.getSelectionModel().selectedItemProperty().isNull()
+        );
+    }
+
+    @FXML
+    private void handleAddTask(ActionEvent event) {
+        Task newTask = Task.createEmptyTask();
+        data.add(newTask);
+        addCompletedListener(newTask);
+        
+        Platform.runLater(() -> {
+            tableView.scrollTo(newTask);
+            tableView.getSelectionModel().select(newTask);
+            tableView.edit(data.size() - 1, taskColumn);
+        });
+    }
+
+    @FXML
+    private void handleDeleteTask(ActionEvent event) {
+        Task selectedTask = tableView.getSelectionModel().getSelectedItem();
+        
+        if (selectedTask != null) {
+            // Remove from both tables
+            data.remove(selectedTask);
+            completedData.remove(selectedTask);
+            
+            // Ensure there's always at least one empty task
+            if (data.isEmpty()) {
+                handleAddTask(event);
+            }
+        } else {
+            showNoSelectionAlert();
+        }
+    }
+
+    private void showNoSelectionAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("No Selection");
+        alert.setHeaderText(null);
+        alert.setContentText("Please select a task to delete.");
+        alert.showAndWait();
     }
 
     private void setupTodoTable() {
@@ -303,7 +331,7 @@ public class WorkspaceController implements Initializable {
 
     @FXML
     void handleReturnClick(MouseEvent event) {
-		emailField.clear();
+        emailField.clear();
         showWorkspace();
     }
 
@@ -314,33 +342,33 @@ public class WorkspaceController implements Initializable {
 
     @FXML
     void inviteAgain(ActionEvent event) {
-		emailField.clear(); 
+        emailField.clear(); 
         showInvitePane();
     }
 
     @FXML
     void handleContinue(ActionEvent event) {
-		emailField.clear(); 
+        emailField.clear(); 
         showWorkspace();
     }
 
     private void showInvitePane() {
-    	inviteStackPane.setVisible(true);
-    	mainAnchorPane.setVisible(true);
+        inviteStackPane.setVisible(true);
+        mainAnchorPane.setVisible(true);
         invitePane.setVisible(true);
         notifiedPane.setVisible(false);
     }
 
     private void showNotifiedPane() {
-    	inviteStackPane.setVisible(true);
-    	mainAnchorPane.setVisible(true);
+        inviteStackPane.setVisible(true);
+        mainAnchorPane.setVisible(true);
         invitePane.setVisible(false);
         notifiedPane.setVisible(true);
     }
 
     private void showWorkspace() {
-    	inviteStackPane.setVisible(false);
-    	mainAnchorPane.setVisible(false);
+        inviteStackPane.setVisible(false);
+        mainAnchorPane.setVisible(false);
         invitePane.setVisible(false);
         notifiedPane.setVisible(false);  
     }
