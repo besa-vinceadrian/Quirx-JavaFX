@@ -170,3 +170,20 @@
 .link-label:hover {
     -fx-text-fill: #c48e00;
 }
+
+/*=== Invite Button ===*/
+.invite-button {
+	-fx-background-color: #ffffff;
+	-fx-background-radius: 10;	
+	-fx-border-color: #000000;
+	-fx-border-radius: 10;
+}
+
+.invite-button:hover {
+    -fx-background-color: #e7e9ed;
+    -fx-cursor: hand;
+}
+
+.invite-button:focused {
+	-fx-background-color: #cce5ff;
+}
