@@ -109,6 +109,13 @@ public class WorkspaceController implements Initializable {
         alert.setContentText("Please select a task to delete.");
         alert.showAndWait();
     }
+    
+    @FXML
+    private void handleDeleteAll() {
+        // Clear all items from the completed table
+        completedTable.getItems().clear();
+        
+    }
 
     private void setupTodoTable() {
         tableView.setEditable(true);
