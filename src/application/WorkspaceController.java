@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.input.MouseEvent;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
 import javafx.scene.layout.Region;
@@ -49,6 +50,12 @@ public class WorkspaceController implements Initializable {
 
     @FXML
     private AnchorPane notifiedPane;
+    
+    @FXML
+    private StackPane inviteStackPane;
+    
+    @FXML
+    private TextField emailField;
 
 
     private final ObservableList<Task> data = FXCollections.observableArrayList();
@@ -113,7 +120,7 @@ public class WorkspaceController implements Initializable {
         statusColumnCompleted.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getStatus().toString()));
         priorityColumnCompleted.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPriority().toString()));
 
-        // Center-align owner column
+        // owner column
         ownerColumnCompleted.setCellFactory(column -> new TableCell<Task, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -128,7 +135,7 @@ public class WorkspaceController implements Initializable {
             }
         });
 
-        // Center-align due date column
+        // due date column
         dueDateColumnCompleted.setCellFactory(column -> new TableCell<Task, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -143,7 +150,7 @@ public class WorkspaceController implements Initializable {
             }
         });
 
-        // Center-align priority column (modified existing implementation)
+        // priority column 
         priorityColumnCompleted.setCellFactory(column -> new TableCell<Task, String>() {
             private final Label label = new Label();
             @Override
@@ -171,7 +178,7 @@ public class WorkspaceController implements Initializable {
             }
         });
 
-        // Status column remains unchanged
+        // Status column 
         statusColumnCompleted.setCellFactory(column -> new TableCell<Task, String>() {
             @Override
             protected void updateItem(String status, boolean empty) {
@@ -278,53 +285,53 @@ public class WorkspaceController implements Initializable {
         });
     }
     
-    // Called when clicking the initial Invite button in the workspace
+    // switching thru invite pane
     @FXML
     void handleInviteFriend(ActionEvent event) {
         showNotifiedPane();
     }
 
-    // Called when clicking "Return" inside the invite pane
     @FXML
     void handleReturnClick(MouseEvent event) {
+		emailField.clear();
         showWorkspace();
     }
 
-    // Called when clicking "Invite" inside the invitePane
     @FXML
     void inviteButton(ActionEvent event) {
         showInvitePane();
     }
 
-    // Called when clicking "Invite Again" inside the notifiedPane
     @FXML
     void inviteAgain(ActionEvent event) {
+		emailField.clear(); 
         showInvitePane();
     }
 
-    // Optional: Cancel or Continue to Workspace from notifiedPane
     @FXML
     void handleContinue(ActionEvent event) {
+		emailField.clear(); 
         showWorkspace();
     }
 
     private void showInvitePane() {
+    	inviteStackPane.setVisible(true);
     	mainAnchorPane.setVisible(true);
         invitePane.setVisible(true);
         notifiedPane.setVisible(false);
-        // optionally hide other panes if needed
     }
 
     private void showNotifiedPane() {
+    	inviteStackPane.setVisible(true);
     	mainAnchorPane.setVisible(true);
         invitePane.setVisible(false);
         notifiedPane.setVisible(true);
     }
 
     private void showWorkspace() {
+    	inviteStackPane.setVisible(false);
     	mainAnchorPane.setVisible(false);
         invitePane.setVisible(false);
-        notifiedPane.setVisible(false);
-       
+        notifiedPane.setVisible(false);  
     }
 }
