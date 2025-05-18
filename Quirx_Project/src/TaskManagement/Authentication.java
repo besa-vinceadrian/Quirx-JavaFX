@@ -7,6 +7,7 @@ import java.io.Console;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
+
 /**
  * The {@code Authentication} class handles user registration and password reset
  * functionalities using email-based OTP verification. It connects to a SQL Server
