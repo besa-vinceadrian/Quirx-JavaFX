@@ -17,6 +17,7 @@ import javafx.util.converter.DefaultStringConverter;
 import javafx.application.Platform;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Optional;
 
 public class WorkspaceController implements Initializable {
 
@@ -86,12 +87,20 @@ public class WorkspaceController implements Initializable {
 
     @FXML
     private void handleDeleteTask(ActionEvent event) {
-        Task selectedTask = tableView.getSelectionModel().getSelectedItem();
+    	Task selectedTask = tableView.getSelectionModel().getSelectedItem();
         
         if (selectedTask != null) {
             // Remove from both tables
-            data.remove(selectedTask);
-            completedData.remove(selectedTask);
+        	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+	    	alert.setTitle("Delete Task");
+	        alert.setHeaderText(null);
+	        alert.setContentText("Are you sure you want to delete the task ?");
+	        
+	        Optional<ButtonType> result = alert.showAndWait();
+	        if (result.isPresent() && result.get() == ButtonType.OK) {     	
+	            data.remove(selectedTask);
+	            completedData.remove(selectedTask);
+	        }
             
             // Ensure there's always at least one empty task
             if (data.isEmpty()) {
