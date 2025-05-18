@@ -1,10 +1,14 @@
 package application;
 
 import javafx.fxml.FXML;
+
 import javafx.fxml.Initializable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.input.MouseEvent;
+import javafx.event.ActionEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
 import javafx.scene.layout.Region;
@@ -30,6 +34,22 @@ public class WorkspaceController implements Initializable {
     @FXML private TableColumn<Task, String> statusColumnCompleted;
     @FXML private TableColumn<Task, String> dueDateColumnCompleted;
     @FXML private TableColumn<Task, String> priorityColumnCompleted;
+    
+    @FXML
+    private Button inviteAgain;
+
+    @FXML
+    private Button inviteButton;
+
+    @FXML
+    private AnchorPane invitePane;
+
+    @FXML
+    private AnchorPane mainAnchorPane;
+
+    @FXML
+    private AnchorPane notifiedPane;
+
 
     private final ObservableList<Task> data = FXCollections.observableArrayList();
     private final ObservableList<Task> completedData = FXCollections.observableArrayList();
@@ -256,5 +276,55 @@ public class WorkspaceController implements Initializable {
                 data.add(task);
             }
         });
+    }
+    
+    // Called when clicking the initial Invite button in the workspace
+    @FXML
+    void handleInviteFriend(ActionEvent event) {
+        showNotifiedPane();
+    }
+
+    // Called when clicking "Return" inside the invite pane
+    @FXML
+    void handleReturnClick(MouseEvent event) {
+        showWorkspace();
+    }
+
+    // Called when clicking "Invite" inside the invitePane
+    @FXML
+    void inviteButton(ActionEvent event) {
+        showInvitePane();
+    }
+
+    // Called when clicking "Invite Again" inside the notifiedPane
+    @FXML
+    void inviteAgain(ActionEvent event) {
+        showInvitePane();
+    }
+
+    // Optional: Cancel or Continue to Workspace from notifiedPane
+    @FXML
+    void handleContinue(ActionEvent event) {
+        showWorkspace();
+    }
+
+    private void showInvitePane() {
+    	mainAnchorPane.setVisible(true);
+        invitePane.setVisible(true);
+        notifiedPane.setVisible(false);
+        // optionally hide other panes if needed
+    }
+
+    private void showNotifiedPane() {
+    	mainAnchorPane.setVisible(true);
+        invitePane.setVisible(false);
+        notifiedPane.setVisible(true);
+    }
+
+    private void showWorkspace() {
+    	mainAnchorPane.setVisible(false);
+        invitePane.setVisible(false);
+        notifiedPane.setVisible(false);
+       
     }
 }

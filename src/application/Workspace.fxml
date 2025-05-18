@@ -116,7 +116,7 @@
                               <Font name="SansSerif Regular" size="13.0" />
                            </font>
                         </Label>
-                        <Button cancelButton="true" layoutX="21.0" layoutY="162.0" mnemonicParsing="false" onAction="#handleCancel" prefHeight="27.0" prefWidth="150.0" styleClass="continue-button" text="Continue">
+                        <Button cancelButton="true" layoutX="21.0" layoutY="162.0" mnemonicParsing="false" onAction="#handleContinue" prefHeight="27.0" prefWidth="150.0" styleClass="continue-button" text="Continue">
                            <cursor>
                               <Cursor fx:constant="HAND" />
                            </cursor>
@@ -132,7 +132,7 @@
             </AnchorPane>
          </children>
       </StackPane>
-      <Button alignment="CENTER" contentDisplay="CENTER" layoutX="535.0" mnemonicParsing="false" prefHeight="64.0" prefWidth="168.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;" styleClass="invite-button" text="🔗 Invite" textAlignment="CENTER">
+      <Button fx:id="inviteButton" alignment="CENTER" contentDisplay="CENTER" layoutX="535.0" mnemonicParsing="false" onAction="#inviteButton" prefHeight="64.0" prefWidth="168.0" styleClass="invite-button" text="🔗 Invite" textAlignment="CENTER">
          <font>
             <Font name="Arial Bold" size="24.0" />
          </font>

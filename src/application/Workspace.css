@@ -145,7 +145,8 @@
 }
 
 .action-button:hover,
-.continue-button:hover {
+.continue-button:hover,
+.invite-button:hover {
     -fx-background-color: #e0a700;
 }
 
@@ -179,11 +180,3 @@
 	-fx-border-radius: 10;
 }
 
-.invite-button:hover {
-    -fx-background-color: #e7e9ed;
-    -fx-cursor: hand;
-}
-
-.invite-button:focused {
-	-fx-background-color: #cce5ff;
-}
