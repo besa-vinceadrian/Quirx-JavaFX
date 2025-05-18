@@ -56,10 +56,20 @@ public class WorkspaceController implements Initializable {
     
     @FXML
     private TextField emailField;
+    
+    @FXML
+    private Label workspaceTitle;
 
 
     private final ObservableList<Task> data = FXCollections.observableArrayList();
     private final ObservableList<Task> completedData = FXCollections.observableArrayList();
+    
+ // Method to update the workspace name
+    public void setWorkspaceName(String name) {
+        if (workspaceTitle != null) {
+            workspaceTitle.setText(name); // e.g., "Project X Workspace"
+        }
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {

@@ -17,7 +17,7 @@
    <children>
       <Pane prefHeight="64.0" prefWidth="526.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;">
          <children>
-            <Label layoutX="17.0" layoutY="14.0" prefHeight="37.0" prefWidth="497.0" text="Personal Workspace">
+            <Label fx:id="workspaceTitle" layoutX="17.0" layoutY="14.0" prefHeight="37.0" prefWidth="497.0" text="Personal Workspace">
                <font>
                   <Font name="Arial Bold" size="32.0" />
                </font>

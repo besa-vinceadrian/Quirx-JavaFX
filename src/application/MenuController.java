@@ -118,29 +118,33 @@ public class MenuController implements Initializable {
         });
     }
     
-    private void createWorkspaceButton(String workspaceName) {
-        Button newWorkspaceBtn = new Button(workspaceName);
-        newWorkspaceBtn.getStyleClass().add("menu-button");
-        newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
-        newWorkspaceBtn.setPrefHeight(30.0);
-        newWorkspaceBtn.setPrefWidth(297.0);
-        newWorkspaceBtn.setFont(Font.font("Arial", 12));
-        newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 40));
-        
-        // Set action to load workspace content
-        newWorkspaceBtn.setOnAction(e -> {
-            try {
-                Pane view = FXMLLoader.load(getClass().getResource("Workspace.fxml"));
-                windowPane.getChildren().clear();
-                windowPane.getChildren().add(view);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });
-        
-        // Add the new button just before the Group in the VBox
-        // The Group is the last element, so we add at size()-1
-        menuVBox.getChildren().add(menuVBox.getChildren().size() - 1, newWorkspaceBtn);
-    }
+	private void createWorkspaceButton(String workspaceName) {
+	    Button newWorkspaceBtn = new Button(workspaceName);
+	    newWorkspaceBtn.getStyleClass().add("menu-button");
+	    newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
+	    newWorkspaceBtn.setPrefHeight(30.0);
+	    newWorkspaceBtn.setPrefWidth(297.0);
+	    newWorkspaceBtn.setFont(Font.font("Arial", 12));
+	    newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 40));
+	    
+	    // Set action to load workspace content
+	    newWorkspaceBtn.setOnAction(e -> {
+	        try {
+	            FXMLLoader loader = new FXMLLoader(getClass().getResource("Workspace.fxml"));
+	            Pane view = loader.load();
+	            
+	            // Get the controller and set the workspace name
+	            WorkspaceController controller = loader.getController();
+	            controller.setWorkspaceName(workspaceName); // Pass the dynamic name
+	            
+	            windowPane.getChildren().clear();
+	            windowPane.getChildren().add(view);
+	        } catch (Exception ex) {
+	            ex.printStackTrace();
+	        }
+	    });
+	    
+	    menuVBox.getChildren().add(menuVBox.getChildren().size() - 1, newWorkspaceBtn);
+	}
 	
 }
