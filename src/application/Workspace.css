@@ -180,3 +180,11 @@
 	-fx-border-radius: 10;
 }
 
+/*=== Delete Task Button ===*/
+.delete-button{
+	-fx-background-color: #ff3131;
+    -fx-border-color: #000000;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
