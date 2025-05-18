@@ -135,3 +135,38 @@
 .table-view:focused {
     -fx-background-insets: 0;
 }
+
+/*=== Invite a Friend ===*/
+.action-button {
+    -fx-background-color: #ffb800;
+    -fx-border-color: #000000;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.action-button:hover,
+.continue-button:hover {
+    -fx-background-color: #e0a700;
+}
+
+.continue-button{
+	-fx-background-color:  #ffffff; 
+	-fx-border-color:  #000000; 
+	-fx-background-radius: 5; 
+	-fx-border-radius: 5;
+}
+
+.input-field {
+    -fx-border-color: #23236c;
+    -fx-background-color: #fdfdfc;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.link-label {
+    -fx-text-fill: #ffb800;
+}
+
+.link-label:hover {
+    -fx-text-fill: #c48e00;
+}
