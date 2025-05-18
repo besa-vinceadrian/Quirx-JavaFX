@@ -166,7 +166,7 @@
                               <Font name="SansSerif Regular" size="13.0" />
                            </font>
                         </Label>
-                        <TextField layoutX="17.0" layoutY="125.0" prefHeight="32.0" prefWidth="314.0" promptText="Email Address" styleClass="input-field" />
+                        <TextField fx:id="emailField" layoutX="17.0" layoutY="125.0" prefHeight="32.0" prefWidth="314.0" promptText="Email Address" styleClass="input-field" />
                         <Button layoutX="17.0" layoutY="164.0" mnemonicParsing="false" onAction="#handleSendCode" prefHeight="27.0" prefWidth="314.0" styleClass="action-button" text="Send Verification Code">
                            <cursor>
                               <Cursor fx:constant="HAND" />

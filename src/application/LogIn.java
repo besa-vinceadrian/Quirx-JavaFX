@@ -60,6 +60,9 @@ public class LogIn implements Initializable {
     @FXML
     private TextField code1, code2, code3, code4, code5, code6;
     
+    @FXML
+    private TextField emailField;
+    
     private boolean isPasswordVisible = false;
     private boolean isNewPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
@@ -231,6 +234,7 @@ public class LogIn implements Initializable {
 	
 	@FXML
     void handleReturnClick(MouseEvent event) {
+		emailField.clear(); // clear before leaving
 		mainAnchorPane.setVisible(false);
 	    mainAnchorPane.setManaged(false); 
 	    rightPane.requestFocus();
@@ -238,6 +242,7 @@ public class LogIn implements Initializable {
 	// close the forgot password after pressing the cancel
 	@FXML
 	private void handleCancel(ActionEvent event) {
+		emailField.clear(); // clear before leaving
 	    mainAnchorPane.setVisible(false);
 	    mainAnchorPane.setManaged(false);
 	    rightPane.requestFocus();
