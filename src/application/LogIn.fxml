@@ -108,7 +108,7 @@
                            <cursor>
                               <Cursor fx:constant="HAND" />
                            </cursor></Button>
-                        <Button layoutX="178.0" layoutY="191.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="150.0" styleClass="action-button" text="Save Changes">
+                        <Button fx:id="saveChangesButton" layoutX="178.0" layoutY="191.0" mnemonicParsing="false" onAction="#handleSaveChangesClick" prefHeight="27.0" prefWidth="150.0" styleClass="action-button" text="Save Changes">
                            <cursor>
                               <Cursor fx:constant="HAND" />
                            </cursor></Button>
