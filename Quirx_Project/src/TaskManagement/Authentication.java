@@ -271,7 +271,12 @@ public class Authentication {
         }
     }
     
- // LOGIN FEATURE
+    /**
+     * Authenticates a user by matching their username/email and password with
+     * records in the database.
+     *
+     * @return {@code true} if login is successful, {@code false} otherwise
+     */
     public static boolean loginUser() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("Enter Username or Email: ");
