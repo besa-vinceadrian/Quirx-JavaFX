@@ -348,14 +348,27 @@ public class WorkspaceController implements Initializable {
     private void addCompletedListener(Task task) {
         task.completedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                data.remove(task);
-                completedData.add(task);
-            } else {
-                completedData.remove(task);
-                data.add(task);
+                // Ask for confirmation
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Complete Task");
+                alert.setHeaderText(null);
+                alert.setContentText("Are you sure you want to mark this task as completed?");
+                
+                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    data.remove(task);
+                    completedData.add(task);
+                } else {
+                    // Revert checkbox state (uncheck)
+                    task.setCompleted(false);
+                }
             }
         });
     }
+
     
     // switching thru invite pane
     @FXML
