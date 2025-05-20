@@ -45,6 +45,12 @@
                   <TableColumn fx:id="priorityColumnCompleted" maxWidth="118.0" minWidth="118.0" prefWidth="118.0" resizable="false" styleClass="task-header" text="Priority" />
                </columns>
             </TableView>
+            <Button fx:id="deleteAllButton" layoutX="590.0" layoutY="19.0" mnemonicParsing="false" onAction="#handleDeleteAll" prefHeight="32.0" prefWidth="94.0" text="Delete All">
+               <styleClass>
+                  <String fx:value="action-button" />
+                  <String fx:value="delete-button" />
+               </styleClass>
+            </Button>
          </children>
       </Pane>
       <Pane layoutY="70.0" prefHeight="295.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;">

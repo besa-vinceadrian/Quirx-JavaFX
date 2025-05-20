@@ -83,6 +83,9 @@ public class MenuController implements Initializable {
         dialog.setHeaderText(null);
         dialog.setContentText("Enter workspace name:");
         
+        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(workspaceName -> {
             if (!workspaceName.trim().isEmpty()) {

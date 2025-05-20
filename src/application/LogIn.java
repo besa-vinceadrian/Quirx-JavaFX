@@ -232,6 +232,13 @@ public class LogIn implements Initializable {
 	}
 	
 	@FXML
+	// MouseEvent handler for the "Resend OTP" button
+    public void handleResendOTP(MouseEvent event) {
+        // Function intentionally left empty (no operation)
+    }
+
+	
+	@FXML
     void handleReturnClick(MouseEvent event) {
 		emailField.clear(); // clear before leaving
 		mainAnchorPane.setVisible(false);

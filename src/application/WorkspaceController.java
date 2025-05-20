@@ -9,14 +9,17 @@ import javafx.scene.input.MouseEvent;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Region;
 import javafx.geometry.Insets;
 import javafx.util.converter.DefaultStringConverter;
 import javafx.application.Platform;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Optional;
 
 public class WorkspaceController implements Initializable {
 
@@ -86,12 +89,23 @@ public class WorkspaceController implements Initializable {
 
     @FXML
     private void handleDeleteTask(ActionEvent event) {
-        Task selectedTask = tableView.getSelectionModel().getSelectedItem();
+    	Task selectedTask = tableView.getSelectionModel().getSelectedItem();
         
         if (selectedTask != null) {
             // Remove from both tables
-            data.remove(selectedTask);
-            completedData.remove(selectedTask);
+        	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+	    	alert.setTitle("Delete Task");
+	        alert.setHeaderText(null);
+	        alert.setContentText("Are you sure you want to delete the task ?");
+	        
+	        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+	        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+	        
+	        Optional<ButtonType> result = alert.showAndWait();
+	        if (result.isPresent() && result.get() == ButtonType.OK) {     	
+	            data.remove(selectedTask);
+	            completedData.remove(selectedTask);
+	        }
             
             // Ensure there's always at least one empty task
             if (data.isEmpty()) {
@@ -108,6 +122,27 @@ public class WorkspaceController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText("Please select a task to delete.");
         alert.showAndWait();
+        
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
+    }
+    
+    @FXML
+    private void handleDeleteAll() {
+        // Clear all items from the completed table
+    	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Completed Task");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure you want to delete all completed task ?");
+        
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+    	
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {     	
+        	completedTable.getItems().clear();
+        }       
     }
 
     private void setupTodoTable() {
@@ -305,7 +340,6 @@ public class WorkspaceController implements Initializable {
                 Task.Priority.LOW
             );
             data.set(event.getTablePosition().getRow(), newTask);
-            data.add(Task.createEmptyTask());
         } else {
             task.setTask(newValue);
         }
@@ -314,14 +348,27 @@ public class WorkspaceController implements Initializable {
     private void addCompletedListener(Task task) {
         task.completedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                data.remove(task);
-                completedData.add(task);
-            } else {
-                completedData.remove(task);
-                data.add(task);
+                // Ask for confirmation
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Complete Task");
+                alert.setHeaderText(null);
+                alert.setContentText("Are you sure you want to mark this task as completed?");
+                
+                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    data.remove(task);
+                    completedData.add(task);
+                } else {
+                    // Revert checkbox state (uncheck)
+                    task.setCompleted(false);
+                }
             }
         });
     }
+
     
     // switching thru invite pane
     @FXML
