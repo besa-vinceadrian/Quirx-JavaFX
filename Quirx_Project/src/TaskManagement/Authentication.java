@@ -27,7 +27,7 @@ public class Authentication {
      * Manages the database connection to the SQL Server.
      */
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:14438;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:11280;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
@@ -175,7 +175,7 @@ public class Authentication {
      * and verifying the email using an OTP.
      */
     public static void registerUser() {
-        try (Connection con = DatabaseManager.connect()) {
+    	try (Connection con = DatabaseManager.connect()) {
             System.out.print("First Name: ");
             String fname = scanner.nextLine();
             System.out.print("Last Name: ");
@@ -197,6 +197,12 @@ public class Authentication {
             while (true) {
                 System.out.print("Email: ");
                 email = scanner.nextLine();
+
+                // Validate email format and exclude specific domains
+                if (!email.matches("^[\\w.%+-]+@(?!gmail\\.com$|yahoo\\.com$|outlook\\.com$|[\\w.-]+\\.edu$)[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
+                    System.out.println("Invalid email format or domain. Please use a valid email address.");
+                    continue;
+                }
 
                 if (isEmailTaken(con, email)) {
                     System.out.println("Email already exists. Please use a different one.");
@@ -265,7 +271,12 @@ public class Authentication {
         }
     }
     
- // LOGIN FEATURE
+    /**
+     * Authenticates a user by matching their username/email and password with
+     * records in the database.
+     *
+     * @return {@code true} if login is successful, {@code false} otherwise
+     */
     public static boolean loginUser() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("Enter Username or Email: ");

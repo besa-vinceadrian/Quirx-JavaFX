@@ -1,12 +1,23 @@
+/**
+ * Package for task management functionalities, including adding, updating,
+ * deleting, and retrieving tasks from a Microsoft SQL Server database.
+ */
 package TaskManagement;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * Contains classes for managing tasks in a task management system.
+ */
 public class Crud_updated {
 
-    public static class Task implements Comparable<Task> {
+	/**
+     * Represents a task with various properties such as title, status, due date,
+     * priority, note, and assignment details.
+     */
+	public static class Task implements Comparable<Task> {
         private int taskID;
         private String taskTitle;
         private String taskStatus;
@@ -16,6 +27,18 @@ public class Crud_updated {
         private String assignedUserID;     
         private String assignedUserName;   
 
+        /**
+         * Constructs a task with all attributes.
+         *
+         * @param taskID           the task ID
+         * @param taskTitle        the title of the task
+         * @param taskStatus       the status of the task
+         * @param dueDate          the due date of the task
+         * @param taskPriority     the priority of the task
+         * @param taskNote         any notes about the task
+         * @param assignedUserID   the user ID to whom the task is assigned
+         * @param assignedUserName the user name of the assigned user
+         */
         public Task(int taskID, String taskTitle, String taskStatus,
                     java.sql.Date dueDate, String taskPriority,
                     String taskNote, String assignedUserID, String assignedUserName) {
@@ -29,6 +52,16 @@ public class Crud_updated {
             this.assignedUserName = assignedUserName;
         }
 
+        /**
+         * Constructs a task without specifying task ID and user name (for insertion).
+         *
+         * @param taskTitle      the title of the task
+         * @param taskStatus     the status of the task
+         * @param dueDate        the due date of the task
+         * @param taskPriority   the priority of the task
+         * @param taskNote       any notes about the task
+         * @param assignedUserID the user ID to whom the task is assigned
+         */
         public Task(String taskTitle, String taskStatus, java.sql.Date dueDate,
                     String taskPriority, String taskNote, String assignedUserID) {
             this.taskTitle = taskTitle;
@@ -56,10 +89,24 @@ public class Crud_updated {
         public void setAssignedUserID(String v)   { this.assignedUserID = v; } 
         public void setAssignedUserName(String v) { this.assignedUserName = v; } 
 
+        // Getters and setters...
+
+        /**
+         * Compares tasks based on their priority level.
+         *
+         * @param o the task to compare to
+         * @return an integer indicating priority comparison
+         */
         @Override
         public int compareTo(Task o) {
             return priorityVal(this.taskPriority) - priorityVal(o.taskPriority);
         }
+        /**
+         * Converts priority string to numeric value for sorting.
+         *
+         * @param p the priority string
+         * @return numeric representation of priority
+         */
         private int priorityVal(String p) {
             return switch (p.toUpperCase()) {
                 case "HIGH" -> 1;
@@ -70,18 +117,33 @@ public class Crud_updated {
         }
     }
 
-    public static class DatabaseManager {
+	/**
+     * Handles database operations for tasks such as adding, updating, deleting,
+     * and retrieving task records.
+     */
+	public static class DatabaseManager {
         private static final String DB_URL =
             "jdbc:sqlserver://0.tcp.ap.ngrok.io:19058;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
+        /**
+         * Establishes a connection to the SQL Server database.
+         *
+         * @return a {@link Connection} object
+         * @throws SQLException if a database access error occurs
+         */
         public static Connection connect() throws SQLException {
             try { Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver"); }
             catch (ClassNotFoundException e) { e.printStackTrace(); }
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
         }
 
+        /**
+         * Adds a new task to the database.
+         *
+         * @param t the {@link Task} to add
+         */
         public static void addTask(Task t) {
             String sql = """
                 INSERT INTO TaskTable (taskTitle, taskStatus, dueDate,
@@ -90,7 +152,8 @@ public class Crud_updated {
                 """;
             try (Connection c = connect();
                  PreparedStatement st = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                // Validate and set parameters
+                
+            	// Validate and set parameters
                 if (t.getTaskTitle() == null || t.getTaskTitle().isEmpty()) {
                     throw new IllegalArgumentException("Task title cannot be null or empty.");
                 }
@@ -135,6 +198,11 @@ public class Crud_updated {
         }
 
 
+        /**
+         * Retrieves all tasks from the database.
+         *
+         * @return a {@link List} of {@link Task} objects
+         */
         public static List<Task> getAllTasks() {
             List<Task> list = new ArrayList<>();
             String sql = """
@@ -164,6 +232,11 @@ public class Crud_updated {
             return list;
         }
 
+        /**
+         * Deletes a task from the database.
+         *
+         * @param id the task ID to delete
+         */
         public static void deleteTask(int id) {
             try (Connection c = connect();
                  PreparedStatement st = c.prepareStatement("DELETE FROM TaskTable WHERE taskID=?")) {
@@ -173,6 +246,11 @@ public class Crud_updated {
             } catch (SQLException e) { e.printStackTrace(); }
         }
 
+        /**
+         * Updates an existing task in the database.
+         *
+         * @param t the {@link Task} containing updated data
+         */
         public static void updateTask(Task t) {
             String sql = """
                 UPDATE TaskTable
@@ -195,7 +273,12 @@ public class Crud_updated {
         }
     }
 
-    public static void main(String[] args) {
+	/**
+     * Main method providing a console-based interface for task management.
+     *
+     * @param args command-line arguments
+     */
+	public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         boolean run = true;
 
