@@ -7,36 +7,21 @@ import java.io.Console;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
-
-/**
- * The {@code Authentication} class handles user registration and password reset
- * functionalities using email-based OTP verification. It connects to a SQL Server
- * database, validates user information, and sends OTPs via Gmail SMTP.
- */
 public class Authentication {
     static Scanner scanner = new Scanner(System.in);
     static String generatedOTP = "";
     static long otpGenerationTime = 0;
     static long lastOTPSentTime = 0;
-    static final long OTP_VALID_DURATION = 5 * 60 * 1000; 
-    static final long OTP_RESEND_INTERVAL = 60 * 1000; 
+    static final long OTP_VALID_DURATION = 5 * 60 * 1000;
+    static final long OTP_RESEND_INTERVAL = 60 * 1000;
     static int attemptsRemaining = 3;
-    static boolean hasResentOTP = false; 
+    static boolean hasResentOTP = false;
 
-    /**
-     * Manages the database connection to the SQL Server.
-     */
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:11280;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:13659;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 
-        /**
-         * Connects to the SQL Server database using the provided credentials.
-         *
-         * @return a {@link Connection} object to the database
-         * @throws SQLException if a database access error occurs
-         */
         public static Connection connect() throws SQLException {
             try {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -47,15 +32,14 @@ public class Authentication {
         }
     }
 
-    /**
-     * Sends an OTP to the specified email address using Gmail SMTP.
-     *
-     * @param to  recipient email address
-     * @param otp the one-time password to send
-     */
+    public static boolean isValidEmail(String email) {
+        String regex = "^[\\w.%+-]+@(?!gmail\\.com$|yahoo\\.com$|outlook\\.com$|[\\w.-]+\\.edu$)[\\w.-]+\\.[a-zA-Z]{2,6}$";
+        return email.matches(regex);
+    }
+
     public static void sendOTP(String to, String otp) {
         final String from = "quirxg8@gmail.com";
-        final String password = "vnks zpzg decz gyzx"; //
+        final String password = "vnks zpzg decz gyzx";
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -69,7 +53,7 @@ public class Authentication {
             }
         });
 
-        session.setDebug(false); // Enable SMTP logs
+        session.setDebug(false);
 
         try {
             Message message = new MimeMessage(session);
@@ -79,7 +63,7 @@ public class Authentication {
             message.setText("Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes.");
 
             Transport.send(message);
-            lastOTPSentTime = System.currentTimeMillis(); // Track last OTP time
+            lastOTPSentTime = System.currentTimeMillis();
             System.out.println("OTP sent to " + to);
         } catch (MessagingException e) {
             System.out.println("Failed to send OTP email.");
@@ -87,26 +71,16 @@ public class Authentication {
         }
     }
 
-    /**
-     * Generates a random 6-digit OTP and sends it to the specified email.
-     *
-     * @param email recipient email address
-     */
-    public static void generateAndSendOTP(String email) {
+    public static void generateAndSendOTP(String email, boolean isResend) {
         generatedOTP = String.format("%06d", new Random().nextInt(1000000));
         otpGenerationTime = System.currentTimeMillis();
         attemptsRemaining = 3;
         sendOTP(email, generatedOTP);
+        if (isResend) {
+            System.out.println("Note: This is the only OTP resend allowed and it will expire in 5 minutes.");
+        }
     }
 
-    /**
-     * Checks if a username already exists in the database.
-     *
-     * @param con   active database connection
-     * @param uname username to check
-     * @return {@code true} if the username is taken, {@code false} otherwise
-     * @throws SQLException if a database access error occurs
-     */
     public static boolean isUsernameTaken(Connection con, String uname) throws SQLException {
         String query = "SELECT userName FROM UserTable WHERE userName = ?";
         PreparedStatement ps = con.prepareStatement(query);
@@ -115,14 +89,6 @@ public class Authentication {
         return rs.next();
     }
 
-    /**
-     * Checks if an email is already registered in the database.
-     *
-     * @param con   active database connection
-     * @param email email address to check
-     * @return {@code true} if the email is taken, {@code false} otherwise
-     * @throws SQLException if a database access error occurs
-     */
     public static boolean isEmailTaken(Connection con, String email) throws SQLException {
         String query = "SELECT userEmail FROM UserTable WHERE userEmail = ?";
         PreparedStatement ps = con.prepareStatement(query);
@@ -131,15 +97,8 @@ public class Authentication {
         return rs.next();
     }
 
-    /**
-     * Reads a password input from the user. Attempts to hide input if supported by the console.
-     *
-     * @param prompt prompt to display
-     * @return the entered password as a {@link String}
-     */
     public static String readPassword(String prompt) {
-    	System.out.print(prompt);
-
+        System.out.print(prompt);
         StringBuilder password = new StringBuilder();
         try {
             Console console = System.console();
@@ -147,13 +106,12 @@ public class Authentication {
                 char[] passChars = console.readPassword();
                 return new String(passChars);
             } else {
-                // Fallback: read from System.in and mask with '*'
                 while (true) {
                     int ch = System.in.read();
                     if (ch == '\n' || ch == '\r') {
                         System.out.println();
                         break;
-                    } else if (ch == 127 || ch == 8) { // Handle backspace
+                    } else if (ch == 127 || ch == 8) {
                         if (password.length() > 0) {
                             password.deleteCharAt(password.length() - 1);
                             System.out.print("\b \b");
@@ -170,12 +128,8 @@ public class Authentication {
         return password.toString();
     }
 
-    /**
-     * Registers a new user by collecting personal information, validating uniqueness,
-     * and verifying the email using an OTP.
-     */
     public static void registerUser() {
-    	try (Connection con = DatabaseManager.connect()) {
+        try (Connection con = DatabaseManager.connect()) {
             System.out.print("First Name: ");
             String fname = scanner.nextLine();
             System.out.print("Last Name: ");
@@ -185,7 +139,6 @@ public class Authentication {
             while (true) {
                 System.out.print("Username: ");
                 uname = scanner.nextLine();
-
                 if (isUsernameTaken(con, uname)) {
                     System.out.println("Username already exists. Please choose another one.");
                 } else {
@@ -197,10 +150,8 @@ public class Authentication {
             while (true) {
                 System.out.print("Email: ");
                 email = scanner.nextLine();
-
-                // Validate email format and exclude specific domains
-                if (!email.matches("^[\\w.%+-]+@(?!gmail\\.com$|yahoo\\.com$|outlook\\.com$|[\\w.-]+\\.edu$)[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
-                    System.out.println("Invalid email format or domain. Please use a valid email address.");
+                if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                    System.out.println("Invalid email format. Please enter a valid email address.");
                     continue;
                 }
 
@@ -211,8 +162,7 @@ public class Authentication {
                 }
             }
 
-            // Send verification OTP
-            generateAndSendOTP(email);
+            generateAndSendOTP(email, false);
             hasResentOTP = false;
 
             while (true) {
@@ -229,7 +179,7 @@ public class Authentication {
                         System.out.println("You can only resend OTP once.");
                         continue;
                     }
-                    generateAndSendOTP(email);
+                    generateAndSendOTP(email, true);
                     hasResentOTP = true;
                     continue;
                 }
@@ -241,7 +191,7 @@ public class Authentication {
                 }
 
                 if (enteredOTP.equals(generatedOTP)) {
-                    break; // Proceed with registration
+                    break;
                 } else {
                     attemptsRemaining--;
                     if (attemptsRemaining > 0) {
@@ -254,47 +204,48 @@ public class Authentication {
             }
 
             String pass = readPassword("Password: ");
-
-            PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO UserTable (userFirstName, userLastName, userName, userEmail, userPassword) VALUES (?, ?, ?, ?, ?)"
-            );
+            PreparedStatement ps = con.prepareStatement("INSERT INTO UserTable (userFirstName, userLastName, userName, userEmail, userPassword) VALUES (?, ?, ?, ?, ?)");
             ps.setString(1, fname);
             ps.setString(2, lname);
             ps.setString(3, uname);
             ps.setString(4, email);
             ps.setString(5, pass);
             ps.executeUpdate();
-
             System.out.println("Email verified! User registered successfully.");
+
+            // Save logged-in email
+            AuthSession.setLoggedInEmail(email);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Authenticates a user by matching their username/email and password with
-     * records in the database.
-     *
-     * @return {@code true} if login is successful, {@code false} otherwise
-     */
+
     public static boolean loginUser() {
         try (Connection con = DatabaseManager.connect()) {
-            System.out.print("Enter Username or Email: ");
+            System.out.print("Enter Email: ");
             String userInput = scanner.nextLine();
             String password = readPassword("Enter Password: ");
 
-            String query = "SELECT * FROM UserTable WHERE (userName = ? OR userEmail = ?) AND userPassword = ?";
+            String query = "SELECT * FROM UserTable WHERE userEmail = ? AND userPassword = ?";
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, userInput);
-            ps.setString(2, userInput);
-            ps.setString(3, password);
+            ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                String userEmail = rs.getString("userEmail");
                 System.out.println("Login successful! Welcome, " + rs.getString("userFirstName") + " " + rs.getString("userLastName") + ".");
+
+                // Save to session
+                AuthSession.setLoggedInEmail(userEmail);
+
+                // Launch CRUD system with email
+                Crud_updated.main(new String[0], userEmail);
+
                 return true;
             } else {
-                System.out.println("Invalid username/email or password. Please try again.");
+                System.out.println("Invalid email or password. Please try again.");
                 return false;
             }
         } catch (SQLException e) {
@@ -303,9 +254,6 @@ public class Authentication {
         }
     }
 
-    /**
-     * Resets the user's password after validating their email and verifying OTP.
-     */
     public static void resetPassword() {
         try (Connection con = DatabaseManager.connect()) {
             System.out.print("Enter your registered email: ");
@@ -316,7 +264,7 @@ public class Authentication {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                generateAndSendOTP(email);
+                generateAndSendOTP(email, false);
                 hasResentOTP = false;
 
                 while (true) {
@@ -333,7 +281,7 @@ public class Authentication {
                             System.out.println("You can only resend OTP once.");
                             continue;
                         }
-                        generateAndSendOTP(email);
+                        generateAndSendOTP(email, true);
                         hasResentOTP = true;
                         continue;
                     }
@@ -346,10 +294,7 @@ public class Authentication {
 
                     if (enteredOTP.equals(generatedOTP)) {
                         String newPassword = readPassword("Enter new password: ");
-
-                        PreparedStatement updatePs = con.prepareStatement(
-                            "UPDATE UserTable SET userPassword = ? WHERE userEmail = ?"
-                        );
+                        PreparedStatement updatePs = con.prepareStatement("UPDATE UserTable SET userPassword = ? WHERE userEmail = ?");
                         updatePs.setString(1, newPassword);
                         updatePs.setString(2, email);
                         updatePs.executeUpdate();
@@ -373,11 +318,6 @@ public class Authentication {
         }
     }
 
-    /**
-     * Main method to run the authentication system.
-     *
-     * @param args command-line arguments (not used)
-     */
     public static void main(String[] args) {
         boolean running = true;
 
@@ -394,11 +334,24 @@ public class Authentication {
                 case 1 -> loginUser();
                 case 2 -> registerUser();
                 case 3 -> resetPassword();
-                case 4 -> running = false;            // exit loop
+                case 4 -> running = false;
                 default -> System.out.println("Invalid choice.");
             }
         }
 
         System.out.println("👋 Bye! Program exited.");
+    }
+}
+
+// Stores the email of the currently logged-in user
+class AuthSession {
+    private static String loggedInEmail;
+
+    public static void setLoggedInEmail(String email) {
+        loggedInEmail = email;
+    }
+
+    public static String getLoggedInEmail() {
+        return loggedInEmail;
     }
 }

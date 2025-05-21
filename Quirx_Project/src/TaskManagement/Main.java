@@ -29,7 +29,6 @@ public class Main {
                     break;
                 case "2":
                     if (Authentication.loginUser()) {      // returns true on success
-                        Crud_updated.main(new String[0]);        // hand‑off to CRUD UI
                     }
                     break;
                 case "0":
