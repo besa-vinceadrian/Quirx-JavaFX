@@ -3,11 +3,15 @@ package application;
 import javafx.application.Platform;
 
 
+import TaskManagement.Authentication;
+//import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,25 +27,28 @@ public class SignUp implements Initializable {
 
     @FXML
     private AnchorPane rightPane; 	
-    
+    @FXML
+    private TextField firstNameField;
+    @FXML
+    private TextField lastNameField;
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private TextField emailField;
     @FXML
     private PasswordField passwordFieldSU;
-
     @FXML
     private TextField showPasswordFieldSU;
-
     @FXML
     private Button togglePasswordButton;
-    
     @FXML
     private PasswordField confirmPasswordFieldSU;
-
     @FXML
     private TextField showConfirmPasswordFieldSU;
-
     @FXML
     private Button toggleConfirmPasswordButton;
-
+    
+    private Authentication authService;
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
 
@@ -49,6 +56,7 @@ public class SignUp implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // Delay focus so TextField doesn't auto-focus and hide prompt text
         Platform.runLater(() -> rightPane.requestFocus());
+        authService = new Authentication();
         
      // Bind text of visible and hidden fields
         showPasswordFieldSU.textProperty().bindBidirectional(passwordFieldSU.textProperty());
@@ -110,7 +118,57 @@ public class SignUp implements Initializable {
     
  // For the button
     public void handleSignUpButtonClick(ActionEvent event) {
-        loadLoginScene(event.getSource());
+    	String firstName = firstNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
+        String username = usernameField.getText().trim();
+        String email = emailField.getText().trim();
+        String password = passwordFieldSU.getText().trim();
+        String confirmPassword = confirmPasswordFieldSU.getText().trim();
+        
+        if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            showAlert(AlertType.ERROR, "Error", "All fields are required.");
+            return;
+        }
+        
+        if (!password.equals(confirmPassword)) {
+            showAlert(AlertType.ERROR, "Error", "Passwords do not match.");
+            return;
+        }
+        
+        try {
+            if (authService.isUsernameTaken(username)) {
+                showAlert(AlertType.ERROR, "Error", "Username is already taken.");
+                return;
+            }
+            
+            if (authService.isEmailTaken(email)) {
+                showAlert(AlertType.ERROR, "Error", "Email is already registered.");
+                return;
+            }
+            
+            if (!authService.isValidEmail(email)) {
+                showAlert(AlertType.ERROR, "Error", "Invalid email format.");
+                return;
+            }
+            
+            boolean success = authService.registerUser(firstName, lastName, username, email, password);
+            if (success) {
+                showAlert(AlertType.INFORMATION, "Success", "Registration successful!");
+                loadLoginScene(event.getSource());
+            } else {
+                showAlert(AlertType.ERROR, "Error", "Registration failed. Please try again.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(AlertType.ERROR, "Error", "An error occurred. Please try again.");
+        }
+    }
+    
+    private void showAlert(AlertType alertType, String title, String message) {
+    	Alert alert = new Alert(alertType);
+    	alert.setTitle(title);
+    	alert.setContentText(message);
+    	alert.showAndWait();
     }
 
     // For the label
@@ -124,6 +182,7 @@ public class SignUp implements Initializable {
             Parent root = FXMLLoader.load(getClass().getResource("LogIn.fxml"));
             Stage stage = (Stage)((javafx.scene.Node)source).getScene().getWindow();
             stage.setScene(new Scene(root));
+            stage.show();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -61,7 +61,7 @@ public class Crud_updated {
     }
 
     public static class DatabaseManager {
-        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:13659;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+        private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18421;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
         private static final String DB_USER = "QuirxAdmin";
         private static final String DB_PASS = "admin";
 

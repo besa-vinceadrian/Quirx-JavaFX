@@ -36,11 +36,11 @@
             <Label layoutX="70.0" layoutY="169.0" prefHeight="42.0" prefWidth="269.0" text="Create Account" styleClass="heading" />
             <Label layoutX="121.0" layoutY="211.0" prefHeight="23.0" prefWidth="174.0" text="Sign up to get started" styleClass="subheading" />
 
-            <TextField layoutX="50.0" layoutY="270.0" prefHeight="32.0" prefWidth="151.0" promptText="Last Name" styleClass="input-field" />
-            <TextField layoutX="213.0" layoutY="270.0" prefHeight="32.0" prefWidth="151.0" promptText="First Name" styleClass="input-field" />
+            <TextField fx:id="firstNameField" layoutX="50.0" layoutY="270.0" prefHeight="32.0" prefWidth="151.0" promptText="First Name" styleClass="input-field" />
+			<TextField fx:id="lastNameField" layoutX="213.0" layoutY="270.0" prefHeight="32.0" prefWidth="151.0" promptText="Last Name" styleClass="input-field" />
 
-            <TextField layoutX="49.0" layoutY="314.0" prefHeight="32.0" prefWidth="314.0" promptText="Username" styleClass="input-field" />
-            <TextField layoutX="49.0" layoutY="356.0" prefHeight="32.0" prefWidth="314.0" promptText="Email Address" styleClass="input-field" />
+            <TextField fx:id="usernameField" layoutX="49.0" layoutY="314.0" prefHeight="32.0" prefWidth="314.0" promptText="Username" styleClass="input-field" />
+            <TextField fx:id="emailField" layoutX="49.0" layoutY="356.0" prefHeight="32.0" prefWidth="314.0" promptText="Email Address" styleClass="input-field" />
 
             <PasswordField fx:id="passwordFieldSU" layoutX="49.0" layoutY="397.0" prefHeight="32.0" prefWidth="314.0" promptText="Password" styleClass="input-field" />
             <PasswordField fx:id="confirmPasswordFieldSU" layoutX="49.0" layoutY="438.0" prefHeight="32.0" prefWidth="314.0" promptText="Confirm Password" styleClass="input-field" />
