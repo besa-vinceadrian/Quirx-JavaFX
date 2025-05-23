@@ -127,6 +127,20 @@ public class Authentication {
             return false;
         }
     }
+    
+    public boolean loginUserByUsername(String username, String password) {
+        try (Connection con = connect()) {
+            String query = "SELECT * FROM UserTable WHERE userName = ? AND userPassword = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     public boolean resetPassword(String email, String newPassword) {
         try (Connection con = connect()) {

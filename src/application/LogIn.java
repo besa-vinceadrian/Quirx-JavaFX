@@ -1,12 +1,14 @@
 package application;
 
+import TaskManagement.Authentication;
 import javafx.application.Platform;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -19,6 +21,7 @@ import javafx.stage.Stage;
 import javafx.scene.layout.AnchorPane;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class LogIn implements Initializable {
@@ -58,10 +61,14 @@ public class LogIn implements Initializable {
     
     @FXML
     private TextField code1, code2, code3, code4, code5, code6;
-    
+
     @FXML
     private TextField emailField;
     
+    @FXML
+    private TextField usernameField;
+    
+    private Authentication authService;
     private boolean isPasswordVisible = false;
     private boolean isNewPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
@@ -94,7 +101,8 @@ public class LogIn implements Initializable {
         
         mainAnchorPane.setVisible(false);
         mainAnchorPane.setManaged(false);
-
+        
+        authService = new Authentication();
     }
     
     // show and hide password in the main interface
@@ -222,25 +230,76 @@ public class LogIn implements Initializable {
 	}
 	
 	@FXML
-	void handleSendCode(ActionEvent event) {
+	void handleSendCode(ActionEvent event) throws SQLException {
+		String email = usernameField.getText();
+		
+		if (email.isEmpty()) {
+			showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
+			return;
+		}
+		if (!authService.isValidEmail(email)) {
+			showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
+			return;
+		}
+		if (!authService.isEmailTaken(email)) {
+			showAlert(AlertType.ERROR, "Error", "The email is not registered.");
+			return;
+		}
+		
+		authService.generateAndSendOTP(email);
 	    showPage(pageVerifyOTP);
 	}
 	
 	@FXML
 	void handleVerifyOTP(ActionEvent event) {
+		String enteredOTP = code1.getText() + code2.getText() + code3.getText() + 
+				code4.getText() + code5.getText() + code6.getText();
+		
+		if(enteredOTP.isEmpty()) {
+			showAlert(AlertType.ERROR, "Error", "OTP cannot be empty. Please enter the OTP.");
+			return;
+		}
+		if (!authService.verifyOTP(enteredOTP)) {
+			showAlert(AlertType.ERROR, "Error", "Invalid OTP. Please try again.");
+			return;
+		}
+		
 	    showPage(pageResetPassword);
 	}
 	
 	@FXML
 	// MouseEvent handler for the "Resend OTP" button
     public void handleResendOTP(MouseEvent event) {
-        // Function intentionally left empty (no operation)
+		try {
+	        String email = usernameField.getText().trim();
+
+	        if (email.isEmpty()) {
+	            showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
+	            return;
+	        }
+
+	        if (!authService.isValidEmail(email)) {
+	            showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
+	            return;
+	        }
+
+	        if (!authService.isEmailTaken(email)) {
+	            showAlert(AlertType.ERROR, "Error", "The email is not registered.");
+	            return;
+	        }
+
+	        authService.generateAndSendOTP(email);
+	        showAlert(AlertType.INFORMATION, "Success", "A new OTP has been sent to your email.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        showAlert(AlertType.ERROR, "Error", "An error occurred while resending the OTP. Please try again.");
+	    }
     }
 
 	
 	@FXML
     void handleReturnClick(MouseEvent event) {
-		emailField.clear(); // clear before leaving
+		usernameField.clear(); // clear before leaving
 		mainAnchorPane.setVisible(false);
 	    mainAnchorPane.setManaged(false); 
 	    rightPane.requestFocus();
@@ -248,7 +307,7 @@ public class LogIn implements Initializable {
 	// close the forgot password after pressing the cancel
 	@FXML
 	private void handleCancel(ActionEvent event) {
-		emailField.clear(); // clear before leaving
+		usernameField.clear(); // clear before leaving
 	    mainAnchorPane.setVisible(false);
 	    mainAnchorPane.setManaged(false);
 	    rightPane.requestFocus();
@@ -269,20 +328,68 @@ public class LogIn implements Initializable {
     
     @FXML
     void handleLogInClick(ActionEvent event) {
-    	try {
-            Parent root = FXMLLoader.load(getClass().getResource("Menu.fxml"));
-            Stage stage = (Stage)((javafx.scene.Node)event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+    	String username = usernameField.getText().trim();
+        String password = passwordFieldLI.getText().trim();
+        
+        if (username.isEmpty() || password.isEmpty()) {
+            showAlert(AlertType.ERROR, "Error", "Username and Password are required.");
+            return;
+        }
+
+        try {
+            boolean isAuthenticated = authService.loginUserByUsername(username, password);
+            if (isAuthenticated) {
+                showAlert(AlertType.INFORMATION, "Success", "Login successful!");
+                loadMenuScene(event.getSource());
+            } else {
+                showAlert(AlertType.ERROR, "Error", "Invalid username or password.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert(AlertType.ERROR, "Error", "An error occurred. Please try again.");
         }
     }
     
     @FXML
     void handleSaveChangesClick(ActionEvent event) {
-    	try {
-            Parent root = FXMLLoader.load(getClass().getResource("LogIn.fxml"));
-            Stage stage = (Stage)((javafx.scene.Node)event.getSource()).getScene().getWindow();
+        String newPassword = newPasswordFP.getText().trim();
+        String confirmPassword = confirmPasswordFP.getText().trim();
+
+        if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
+            showAlert(AlertType.ERROR, "Error", "Both password fields are required.");
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            showAlert(AlertType.ERROR, "Error", "Passwords do not match.");
+            return;
+        }
+
+        try {
+            String email = usernameField.getText().trim();
+            if (authService.resetPassword(email, newPassword)) {
+                showAlert(AlertType.INFORMATION, "Success", "Password reset successfully!");
+                handleReturnClick(null);
+            } else {
+                showAlert(AlertType.ERROR, "Error", "Failed to reset password. Please try again.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(AlertType.ERROR, "Error", "An error occurred. Please try again.");
+        }
+    }
+    
+    private void showAlert(AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void loadMenuScene(Object source) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("Menu.fxml"));
+            Stage stage = (Stage) ((javafx.scene.Node) source).getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             e.printStackTrace();
