@@ -129,23 +129,20 @@ public class SignUp implements Initializable {
             showAlert(AlertType.ERROR, "Error", "All fields are required.");
             return;
         }
-        
         if (!password.equals(confirmPassword)) {
             showAlert(AlertType.ERROR, "Error", "Passwords do not match.");
             return;
         }
-        
+
         try {
             if (authService.isUsernameTaken(username)) {
                 showAlert(AlertType.ERROR, "Error", "Username is already taken.");
                 return;
             }
-            
             if (authService.isEmailTaken(email)) {
                 showAlert(AlertType.ERROR, "Error", "Email is already registered.");
                 return;
             }
-            
             if (!authService.isValidEmail(email)) {
                 showAlert(AlertType.ERROR, "Error", "Invalid email format.");
                 return;

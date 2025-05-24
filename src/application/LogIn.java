@@ -231,7 +231,7 @@ public class LogIn implements Initializable {
 	
 	@FXML
 	void handleSendCode(ActionEvent event) throws SQLException {
-		String email = usernameField.getText();
+		String email = emailField.getText();
 		
 		if (email.isEmpty()) {
 			showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
@@ -271,18 +271,16 @@ public class LogIn implements Initializable {
 	// MouseEvent handler for the "Resend OTP" button
     public void handleResendOTP(MouseEvent event) {
 		try {
-	        String email = usernameField.getText().trim();
+	        String email = emailField.getText();
 
 	        if (email.isEmpty()) {
 	            showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
 	            return;
 	        }
-
 	        if (!authService.isValidEmail(email)) {
 	            showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
 	            return;
 	        }
-
 	        if (!authService.isEmailTaken(email)) {
 	            showAlert(AlertType.ERROR, "Error", "The email is not registered.");
 	            return;
@@ -366,7 +364,7 @@ public class LogIn implements Initializable {
         }
 
         try {
-            String email = usernameField.getText().trim();
+            String email = emailField.getText().trim();
             if (authService.resetPassword(email, newPassword)) {
                 showAlert(AlertType.INFORMATION, "Success", "Password reset successfully!");
                 handleReturnClick(null);
