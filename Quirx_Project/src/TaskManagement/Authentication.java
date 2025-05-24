@@ -6,7 +6,7 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
 public class Authentication {
-    private static final String DB_URL = "jdbc:sqlserver://0.tcp.ap.ngrok.io:18421;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+    private static final String DB_URL = "jdbc:sqlserver://10.244.202.169:1433;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
     private static final String DB_USER = "QuirxAdmin";
     private static final String DB_PASS = "admin";
 
