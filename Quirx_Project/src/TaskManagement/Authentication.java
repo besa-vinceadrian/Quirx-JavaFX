@@ -4,6 +4,10 @@ import java.sql.*;
 import java.util.*;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import javax.naming.directory.*;
+import javax.naming.NamingException;
+import javax.naming.Context;
+
 
 public class Authentication {
     private static final String DB_URL = "jdbc:sqlserver://10.244.202.169:1433;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
@@ -27,9 +31,26 @@ public class Authentication {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
     }
 
+    public boolean hasMXRecord(String domain) {
+        try {
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");
+            DirContext ctx = new InitialDirContext(env);
+            Attributes attrs = ctx.getAttributes(domain, new String[]{"MX"});
+            return attrs.get("MX") != null;
+        } catch (NamingException e) {
+            return false;
+        }
+    }
+    
     public boolean isValidEmail(String email) {
-        String regex = "^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$";
-        return email.matches(regex);
+        String regex = "^[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]+)\\.[A-Za-z]{2,}$";
+        if (email == null || !email.matches(regex)) {
+            return false;
+        }
+
+        String domain = email.substring(email.indexOf('@') + 1);
+        return hasMXRecord(domain);
     }
 
     public boolean isUsernameTaken(String username) throws SQLException {
