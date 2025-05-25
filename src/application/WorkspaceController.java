@@ -21,43 +21,112 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Optional;
 
+/**
+ * Controller for the workspace interface of the Quirx application.
+ * Manages tasks, including adding, deleting, editing, and marking tasks as completed.
+ * Also handles UI logic for inviting friends and switching between panes.
+ */
 public class WorkspaceController implements Initializable {
 
-    @FXML private TableView<Task> tableView;
+	/**
+	 * Default constructor for Workspace controller.
+	 */
+	public WorkspaceController() {
+	    // Default constructor
+	}
+	
+	/** Table displaying active tasks. */
+	@FXML private TableView<Task> tableView;
+	
+	/** Column for task titles in active table. */
     @FXML private TableColumn<Task, String> taskColumn;
+    
+    /** Column for task owners in active table. */
     @FXML private TableColumn<Task, String> ownerColumn;
+    
+    /** Column for task statuses in active table. */
     @FXML private TableColumn<Task, Task.Status> statusColumn;
+    
+    /** Column for task due dates in active table. */
     @FXML private TableColumn<Task, String> dueDateColumn;
+    
+    /** Column for task priorities in active table. */
     @FXML private TableColumn<Task, Task.Priority> priorityColumn;
+    
+    /** Column indicating task completion in active table. */
     @FXML private TableColumn<Task, Boolean> completedColumn;
 
+    /** Table displaying completed tasks. */
     @FXML private TableView<Task> completedTable;
+    
+    /** Column for task titles in completed table. */
     @FXML private TableColumn<Task, String> taskColumnCompleted;
+    
+    /** Column for task owners in completed table. */
     @FXML private TableColumn<Task, String> ownerColumnCompleted;
+    
+    /** Column for task statuses in completed table. */
     @FXML private TableColumn<Task, String> statusColumnCompleted;
+    
+    /** Column for task due dates in completed table. */
     @FXML private TableColumn<Task, String> dueDateColumnCompleted;
+    
+    /** Column for task priorities in completed table. */
     @FXML private TableColumn<Task, String> priorityColumnCompleted;
     
+    /** Button to resend invite. */
     @FXML private Button inviteAgain;
+    
+    /** Button to initiate invite. */
     @FXML private Button inviteButton;
+    
+    /** Pane containing invite form. */
     @FXML private AnchorPane invitePane;
+    
+    /** Main workspace anchor pane. */
     @FXML private AnchorPane mainAnchorPane;
+    
+    /** Notification pane shown after invite is sent. */
     @FXML private AnchorPane notifiedPane;
+    
+    /** StackPane wrapping workspace and invite panes. */
     @FXML private StackPane inviteStackPane;
+    
+    /** TextField to input email addresses. */
     @FXML private TextField emailField;
+    
+    /** Label displaying the workspace title. */
     @FXML private Label workspaceTitle;
+    
+    /** Button to add a new task. */
     @FXML private Button addTaskButton;
+    
+    /** Button to delete the selected task. */
     @FXML private Button deleteTaskButton;
 
+    /** Observable list containing active tasks. */
     private final ObservableList<Task> data = FXCollections.observableArrayList();
+    
+    /** Observable list containing completed tasks. */
     private final ObservableList<Task> completedData = FXCollections.observableArrayList();
     
+    /**
+     * Sets the name of the current workspace in the UI.
+     * 
+     * @param name The name to display.
+     */
     public void setWorkspaceName(String name) {
         if (workspaceTitle != null) {
             workspaceTitle.setText(name);
         }
     }
 
+    /**
+     * Initializes the controller and sets up table views.
+     * 
+     * @param url Not used.
+     * @param rb  Not used.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupTodoTable();
@@ -74,6 +143,11 @@ public class WorkspaceController implements Initializable {
         );
     }
 
+    /**
+     * Handles the event of adding a new task to the table.
+     * 
+     * @param event The ActionEvent triggered by the add button.
+     */
     @FXML
     private void handleAddTask(ActionEvent event) {
         Task newTask = Task.createEmptyTask();
@@ -87,6 +161,11 @@ public class WorkspaceController implements Initializable {
         });
     }
 
+    /**
+     * Handles the deletion of a selected task with confirmation.
+     * 
+     * @param event The ActionEvent triggered by the delete button.
+     */
     @FXML
     private void handleDeleteTask(ActionEvent event) {
     	Task selectedTask = tableView.getSelectionModel().getSelectedItem();
@@ -116,6 +195,9 @@ public class WorkspaceController implements Initializable {
         }
     }
 
+    /**
+     * Displays a warning when no task is selected for deletion.
+     */
     private void showNoSelectionAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("No Selection");
@@ -128,6 +210,9 @@ public class WorkspaceController implements Initializable {
         
     }
     
+    /**
+     * Deletes all tasks from the completed task table after confirmation.
+     */
     @FXML
     private void handleDeleteAll() {
         // Clear all items from the completed table
@@ -145,6 +230,9 @@ public class WorkspaceController implements Initializable {
         }       
     }
 
+    /**
+     * Configures the task table for active (to-do) tasks.
+     */
     private void setupTodoTable() {
         tableView.setEditable(true);
         tableView.getSelectionModel().setCellSelectionEnabled(true);
@@ -185,6 +273,9 @@ public class WorkspaceController implements Initializable {
         });
     }
 
+    /**
+     * Configures the table for completed tasks.
+     */
     private void setupCompletedTable() {
         // Cell value factories using the same Task properties
         taskColumnCompleted.setCellValueFactory(new PropertyValueFactory<>("task"));
@@ -273,13 +364,24 @@ public class WorkspaceController implements Initializable {
         });
     }
 
-    // Helper methods
+    /**
+     * Creates a centered text field cell for table columns.
+     * 
+     * @param column The column to apply the cell to.
+     * @return A centered TextFieldTableCell.
+     */
     private TextFieldTableCell<Task, String> createCenteredTextFieldCell(TableColumn<Task, String> column) {
         TextFieldTableCell<Task, String> cell = new TextFieldTableCell<>(new DefaultStringConverter());
         cell.setStyle("-fx-alignment: CENTER;");
         return cell;
     }
 
+    /**
+     * Creates a ComboBox cell for task status.
+     * 
+     * @param column The column to apply the cell to.
+     * @return A ComboBoxTableCell for Task.Status.
+     */
     private ComboBoxTableCell<Task, Task.Status> createStatusComboBoxCell(TableColumn<Task, Task.Status> column) {
         ComboBoxTableCell<Task, Task.Status> cell = new ComboBoxTableCell<>(Task.Status.values()) {
             @Override
@@ -304,6 +406,12 @@ public class WorkspaceController implements Initializable {
         return cell;
     }
 
+    /**
+     * Creates a ComboBox cell for task priority.
+     * 
+     * @param column The column to apply the cell to.
+     * @return A ComboBoxTableCell for Task.Priority.
+     */
     private ComboBoxTableCell<Task, Task.Priority> createPriorityComboBoxCell(TableColumn<Task, Task.Priority> column) {
         return new ComboBoxTableCell<Task, Task.Priority>(Task.Priority.values()) {
             private final Label label = new Label();
@@ -328,6 +436,11 @@ public class WorkspaceController implements Initializable {
         };
     }
 
+    /**
+     * Handles editing of task name and fills in default values if needed.
+     * 
+     * @param event The cell edit event triggered on the task column.
+     */
     private void handleTaskEdit(TableColumn.CellEditEvent<Task, String> event) {
         Task task = event.getRowValue();
         String newValue = event.getNewValue();
@@ -345,6 +458,11 @@ public class WorkspaceController implements Initializable {
         }
     }
 
+    /**
+     * Adds a listener to track completion changes for a task.
+     * 
+     * @param task The task to listen on.
+     */
     private void addCompletedListener(Task task) {
         task.completedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
@@ -370,35 +488,62 @@ public class WorkspaceController implements Initializable {
     }
 
     
-    // switching thru invite pane
+    /**
+     * Handles switching to the notified pane after inviting a friend.
+     * 
+     * @param event The ActionEvent from the invite button.
+     */
     @FXML
     void handleInviteFriend(ActionEvent event) {
         showNotifiedPane();
     }
 
+    /**
+     * Handles clicking the return button from the invite pane.
+     * 
+     * @param event The mouse event from the return button.
+     */
     @FXML
     void handleReturnClick(MouseEvent event) {
         emailField.clear();
         showWorkspace();
     }
 
+    /**
+     * Displays the invite form pane.
+     * 
+     * @param event The ActionEvent from the invite button.
+     */
     @FXML
     void inviteButton(ActionEvent event) {
         showInvitePane();
     }
 
+    /**
+     * Handles clicking the invite again button from the notification pane.
+     * 
+     * @param event The ActionEvent from the invite again button.
+     */
     @FXML
     void inviteAgain(ActionEvent event) {
         emailField.clear(); 
         showInvitePane();
     }
 
+    /**
+     * Handles clicking the continue button from the notification pane.
+     * 
+     * @param event The ActionEvent from the continue button.
+     */
     @FXML
     void handleContinue(ActionEvent event) {
         emailField.clear(); 
         showWorkspace();
     }
 
+    /**
+     * Shows the invite pane and hides others.
+     */
     private void showInvitePane() {
         inviteStackPane.setVisible(true);
         mainAnchorPane.setVisible(true);
@@ -406,6 +551,9 @@ public class WorkspaceController implements Initializable {
         notifiedPane.setVisible(false);
     }
 
+    /**
+     * Shows the notification pane and hides others.
+     */
     private void showNotifiedPane() {
         inviteStackPane.setVisible(true);
         mainAnchorPane.setVisible(true);
@@ -413,6 +561,9 @@ public class WorkspaceController implements Initializable {
         notifiedPane.setVisible(true);
     }
 
+    /**
+     * Hides all overlay panes and shows the main workspace.
+     */
     private void showWorkspace() {
         inviteStackPane.setVisible(false);
         mainAnchorPane.setVisible(false);
