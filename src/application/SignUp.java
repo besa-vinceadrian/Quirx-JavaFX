@@ -29,6 +29,13 @@ import java.util.ResourceBundle;
  */
 public class SignUp implements Initializable {
 
+	/**
+	 * Default constructor for SignUp controller.
+	 */
+	public SignUp() {
+	    // Default constructor
+	}
+	
 	/** The container pane for UI elements */
 	@FXML
     private AnchorPane rightPane; 	
