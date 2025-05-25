@@ -33,6 +33,14 @@ import java.util.ResourceBundle;
  */
 public class LogIn implements Initializable {
 	
+	/**
+     * Default constructor for the LogIn controller.
+     * Initializes the controller used for handling login and password recovery.
+     */
+    public LogIn() {
+        // Default constructor
+    }
+	
 	// FXML UI components (Login & Forgot Password)
     
     /** The pane for displaying the login area. */
