@@ -25,7 +25,6 @@ public class Main extends Application {
 			
 			primaryStage.setOnCloseRequest(event -> {
 				event.consume();
-				
 				Alert alert = new Alert(AlertType.CONFIRMATION);
 				alert.setTitle("Close Quirx");
 				alert.setHeaderText(null);

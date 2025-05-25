@@ -74,6 +74,7 @@ public class MenuController implements Initializable {
     	stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
     	
     	Optional<ButtonType> result = alert.showAndWait();
+    	
     	if (result.isPresent() && result.get() == ButtonType.OK) {
     		try {
     			BorderPane root = (BorderPane) FXMLLoader.load(getClass().getResource("LogIn.fxml"));
