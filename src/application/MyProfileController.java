@@ -16,32 +16,59 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 
+/**
+ * Controller class for handling the user's profile and password visibility toggle.
+ */
 public class MyProfileController implements Initializable {
 
-    @FXML
+	/**
+     * Default constructor for the MyProfileController.
+     * Required by JavaFX for FXML loading.
+     */
+    public MyProfileController() {
+        // Default constructor
+    }
+	
+	/** The pane that contains the profile center content. */
+	@FXML
     private Pane centerPane; 	
     
-    @FXML
+	/** Password field for entering a new password (masked input). */
+	@FXML
     private PasswordField newPasswordField;
 
-    @FXML
+	/** Text field for displaying the new password in plain text. */
+	@FXML
     private TextField showNewPasswordField;
 
-    @FXML
+	/** Button to toggle visibility of the new password. */
+	@FXML
     private Button togglePasswordButton;
     
-    @FXML
+	/** Password field for confirming the new password (masked input). */
+	@FXML
     private PasswordField confirmNewPasswordField;
 
-    @FXML
+	/** Text field for displaying the confirmation password in plain text. */
+	@FXML
     private TextField showConfirmNewPasswordField;
 
-    @FXML
+	/** Button to toggle visibility of the confirm password. */
+	@FXML
     private Button toggleConfirmPasswordButton;
 
-    private boolean isPasswordVisible = false;
+	/** Flag to track if the new password is visible. */
+	private boolean isPasswordVisible = false;
+	
+	/** Flag to track if the confirmation password is visible. */
     private boolean isConfirmPasswordVisible = false;
 
+    /**
+     * Initializes the controller. Binds the password fields and sets initial visibility.
+     *
+     * @param location  the location used to resolve relative paths
+     * @param resources the resources used to localize the root object
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Delay focus so TextField doesn't auto-focus and hide prompt text
@@ -59,6 +86,11 @@ public class MyProfileController implements Initializable {
         showConfirmNewPasswordField.setManaged(false);
     } 
     
+    /**
+     * Toggles the visibility of the new password input field.
+     *
+     * @param event the ActionEvent triggered by clicking the toggle button
+     */
     @FXML
     void togglePasswordButton(ActionEvent event) {
         isPasswordVisible = !isPasswordVisible;
@@ -82,6 +114,11 @@ public class MyProfileController implements Initializable {
         }
     }
     
+    /**
+     * Toggles the visibility of the confirm password input field.
+     *
+     * @param event the ActionEvent triggered by clicking the toggle button
+     */
     @FXML
     void toggleConfirmPasswordButton(ActionEvent event) {
         isConfirmPasswordVisible = !isConfirmPasswordVisible;
