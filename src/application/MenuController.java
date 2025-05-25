@@ -65,15 +65,26 @@ public class MenuController implements Initializable {
     
     @FXML
     private void logOutButton(ActionEvent event) {
-        try {
-            BorderPane root = (BorderPane) FXMLLoader.load(getClass().getResource("LogIn.fxml"));
-            Scene scene = new Scene(root, 1024, 700);
-            scene.getStylesheets().add(getClass().getResource("LogIn.css").toExternalForm());
-            Stage currentStage = (Stage) logOutButton.getScene().getWindow();
-            currentStage.setScene(scene);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    	alert.setTitle("Log Out Confirmation");
+    	alert.setHeaderText(null);
+    	alert.setContentText("Are you sure you want to log out?");
+    	
+    	Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+    	stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+    	
+    	Optional<ButtonType> result = alert.showAndWait();
+    	if (result.isPresent() && result.get() == ButtonType.OK) {
+    		try {
+    			BorderPane root = (BorderPane) FXMLLoader.load(getClass().getResource("LogIn.fxml"));
+    			Scene scene = new Scene(root, 1024, 700);
+    			scene.getStylesheets().add(getClass().getResource("LogIn.css").toExternalForm());
+    			Stage currentStage = (Stage) logOutButton.getScene().getWindow();
+    			currentStage.setScene(scene);
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
     }
     
     @FXML
