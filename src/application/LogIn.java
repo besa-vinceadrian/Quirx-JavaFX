@@ -231,7 +231,7 @@ public class LogIn implements Initializable {
 	
 	@FXML
 	void handleSendCode(ActionEvent event) throws SQLException {
-		String email = emailField.getText();
+		String email = emailField.getText().trim();
 		
 		if (email.isEmpty()) {
 			showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
@@ -271,7 +271,12 @@ public class LogIn implements Initializable {
 	// MouseEvent handler for the "Resend OTP" button
     public void handleResendOTP(MouseEvent event) {
 		try {
-	        String email = emailField.getText();
+			if (!authService.canResendOTP()) {
+				showAlert(AlertType.ERROR, "Error", "You must wait 1 minute before resending the OTP.");
+				return;
+			}
+			
+	        String email = emailField.getText().trim();
 
 	        if (email.isEmpty()) {
 	            showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");

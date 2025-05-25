@@ -10,8 +10,8 @@ public class Authentication {
     private static final String DB_USER = "QuirxAdmin";
     private static final String DB_PASS = "admin";
 
-    private static final long OTP_VALID_DURATION = 5 * 60 * 1000;
-    private static final long OTP_RESEND_INTERVAL = 60 * 1000;
+    private static final long OTP_VALID_DURATION = 5 * 60 * 1000; // 5 minutes
+    private static final long OTP_RESEND_INTERVAL = 60 * 1000; // 1 minute
 
     private String generatedOTP;
     private long otpGenerationTime;
@@ -95,6 +95,11 @@ public class Authentication {
             return false; // OTP expired
         }
         return enteredOTP.equals(generatedOTP);
+    }
+    
+    public boolean canResendOTP() {
+    	long currentTime = System.currentTimeMillis();
+    	return (currentTime - lastOTPSentTime) >= OTP_RESEND_INTERVAL;
     }
 
     public boolean registerUser(String fname, String lname, String uname, String email, String password) {
