@@ -116,7 +116,11 @@ public class LogIn implements Initializable {
     
     /** Visibility toggle state trackers. */
     private boolean isPasswordVisible = false;
+    
+    /** Visibility state of the New password field. */
     private boolean isNewPasswordVisible = false;
+    
+    /** Visibility state of the Confirm password field. */
     private boolean isConfirmPasswordVisible = false;
     
     /**
@@ -304,6 +308,11 @@ public class LogIn implements Initializable {
      * @param event MouseEvent trigger.
      */
 	@FXML
+    /**
+     * handleForgotPassword method.
+     *
+     * @param event
+     */
     void handleForgotPassword(MouseEvent event) {
 		mainAnchorPane.setVisible(true);
 	    mainAnchorPane.setManaged(true);
@@ -311,10 +320,11 @@ public class LogIn implements Initializable {
 	}
 	
 	/**
-     * Sends an OTP to the provided email after validation.
-     *
-     * @param event The action event.
-     */
+	 * Handles sending the verification code when triggered.
+	 *
+	 * @param event the action event triggered by the user
+	 * @throws SQLException if a database access error occurs
+	 */
 	@FXML
 	void handleSendCode(ActionEvent event) throws SQLException {
 		String email = emailField.getText().trim();
