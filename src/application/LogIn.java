@@ -24,55 +24,107 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+/**
+ * Controller class for handling login and password recovery in the application.
+ * Manages UI events such as logging in, toggling password visibility, verifying OTP,
+ * and resetting the password. 
+ * 
+ * This class interacts with the {@link TaskManagement.Authentication} service.
+ */
 public class LogIn implements Initializable {
 	
-    @FXML
+	// FXML UI components (Login & Forgot Password)
+    
+    /** The pane for displaying the login area. */
+	@FXML
     private AnchorPane rightPane; 
-    @FXML
+	
+	/** The main container pane for Forgot Password pages. */
+	@FXML
     private AnchorPane mainAnchorPane;
-    @FXML
+	
+	/** Password field used in login. */
+	@FXML
     private PasswordField passwordFieldLI;
-    @FXML
+	
+	/** Text field used to show password in plain text. */
+	@FXML
     private TextField showPasswordFieldLI;
-    @FXML
+	
+	/** Button to toggle visibility of login password. */
+	@FXML
     private Button togglePasswordButtonLI;    
-    @FXML
+	
+	/** Password field for new password during reset. */
+	@FXML
     private PasswordField newPasswordFP;
+	
+	/** Text field to show new password in plain text. */
     @FXML
-    private TextField showNewPasswordFP;    
+    private TextField showNewPasswordFP;  
+    
+    /** Password field for confirm password during reset. */
     @FXML
     private PasswordField confirmPasswordFP;
+    
+    /** Text field to show confirm password in plain text. */
     @FXML
-    private TextField showConfirmPasswordFP;    
+    private TextField showConfirmPasswordFP;
+    
+    /** Button to toggle visibility of new password. */
     @FXML
-    private Button toggleNewPasswordFP;    
+    private Button toggleNewPasswordFP;
+    
+    /** Button to toggle visibility of confirm password. */
     @FXML
-    private Button toggleConfirmPasswordFP; 
+    private Button toggleConfirmPasswordFP;
+    
+    /** Pages used in Forgot Password flow. */
     @FXML
     private AnchorPane pageEmail;
+    
+    /** Pages used in Forgot Password flow. */
     @FXML
     private AnchorPane pageVerifyOTP;
+    
+    /** Pages used in Forgot Password flow. */
     @FXML
     private AnchorPane pageResetPassword;
+    
+    /** Button to log in. */
     @FXML
     private Button logInButton;
+    
+    /** Button to save password reset changes. */
     @FXML
     private Button saveChangesButton;
     
+    /** OTP input fields. */
     @FXML
     private TextField code1, code2, code3, code4, code5, code6;
 
+    /** Email field for password recovery. */
     @FXML
     private TextField emailField;
     
+    /** Username field for login. */
     @FXML
     private TextField usernameField;
     
+    /** Authentication service instance. */
     private Authentication authService;
+    
+    /** Visibility toggle state trackers. */
     private boolean isPasswordVisible = false;
     private boolean isNewPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
     
+    /**
+     * Initializes the controller after the FXML is loaded.
+     *
+     * @param location  The location used to resolve relative paths for the root object.
+     * @param resources The resources used to localize the root object.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // delay focus so TextField doesn't auto-focus and hide prompt text
@@ -105,7 +157,11 @@ public class LogIn implements Initializable {
         authService = new Authentication();
     }
     
-    // show and hide password in the main interface
+    /**
+     * Toggles the visibility of the login password field.
+     *
+     * @param event The action event triggered.
+     */
     @FXML
     void togglePasswordButtonLI(ActionEvent event) {
         isPasswordVisible = !isPasswordVisible;
@@ -129,6 +185,11 @@ public class LogIn implements Initializable {
         }
     }
     
+    /**
+     * Toggles visibility of the new password field in reset form.
+     *
+     * @param event The action event.
+     */
     @FXML
     void toggleNewPasswordFP(ActionEvent event) {
         isNewPasswordVisible = !isNewPasswordVisible;
@@ -152,6 +213,11 @@ public class LogIn implements Initializable {
         }
     }
     
+    /**
+     * Toggles visibility of the confirm password field in reset form.
+     *
+     * @param event The action event.
+     */
     @FXML
     void toggleConfirmPasswordFP(ActionEvent event) {
         isConfirmPasswordVisible = !isConfirmPasswordVisible;
@@ -175,7 +241,13 @@ public class LogIn implements Initializable {
         }
     }
 
-    // set up each code input field to accept only 1 character  
+    /**
+     * Sets up OTP input fields to allow 1-character input and auto-navigation.
+     *
+     * @param current  Current field.
+     * @param next     Next field to move to.
+     * @param previous Previous field to move to on backspace.
+     */  
 	private void setupCodeField(TextField current, TextField next, TextField previous) {
         // center text and set font size
         current.setAlignment(Pos.CENTER);
@@ -208,7 +280,11 @@ public class LogIn implements Initializable {
         });
     }
 	
-	// Shows only the requested page, hides the others
+	/**
+     * Displays only the specified page and hides others.
+     *
+     * @param pageToShow The AnchorPane to be displayed.
+     */
 	private void showPage(AnchorPane pageToShow) {
 	    pageEmail.setVisible(false);
 	    pageVerifyOTP.setVisible(false);
@@ -222,6 +298,11 @@ public class LogIn implements Initializable {
 	    pageToShow.setManaged(true);
 	}	
 	
+	/**
+     * Handles the Forgot Password link click event.
+     *
+     * @param event MouseEvent trigger.
+     */
 	@FXML
     void handleForgotPassword(MouseEvent event) {
 		mainAnchorPane.setVisible(true);
@@ -229,6 +310,11 @@ public class LogIn implements Initializable {
 		showPage(pageEmail);
 	}
 	
+	/**
+     * Sends an OTP to the provided email after validation.
+     *
+     * @param event The action event.
+     */
 	@FXML
 	void handleSendCode(ActionEvent event) throws SQLException {
 		String email = emailField.getText().trim();
@@ -250,6 +336,11 @@ public class LogIn implements Initializable {
 	    showPage(pageVerifyOTP);
 	}
 	
+	/**
+     * Verifies the user-entered OTP code.
+     *
+     * @param event The action event.
+     */
 	@FXML
 	void handleVerifyOTP(ActionEvent event) {
 		String enteredOTP = code1.getText() + code2.getText() + code3.getText() + 
@@ -267,8 +358,12 @@ public class LogIn implements Initializable {
 	    showPage(pageResetPassword);
 	}
 	
+	/**
+     * Resends the OTP to the provided email address if allowed.
+     *
+     * @param event Mouse event.
+     */
 	@FXML
-	// MouseEvent handler for the "Resend OTP" button
     public void handleResendOTP(MouseEvent event) {
 		try {
 			if (!authService.canResendOTP()) {
@@ -300,6 +395,11 @@ public class LogIn implements Initializable {
     }
 
 	
+	/**
+     * Closes the Forgot Password view and resets focus.
+     *
+     * @param event MouseEvent trigger.
+     */
 	@FXML
     void handleReturnClick(MouseEvent event) {
 		usernameField.clear(); // clear before leaving
@@ -307,7 +407,12 @@ public class LogIn implements Initializable {
 	    mainAnchorPane.setManaged(false); 
 	    rightPane.requestFocus();
 	}
-	// close the forgot password after pressing the cancel
+	
+	/**
+     * Cancels the Forgot Password process and returns to login screen.
+     *
+     * @param event Action event.
+     */
 	@FXML
 	private void handleCancel(ActionEvent event) {
 		usernameField.clear(); // clear before leaving
@@ -317,7 +422,11 @@ public class LogIn implements Initializable {
 	}
 	
 
-    // switch pages between sign up and login
+	/**
+     * Switches to the Sign Up page.
+     *
+     * @param event Mouse event.
+     */
     @FXML
     void handleSignUpClick(MouseEvent event) {
         try {
@@ -329,6 +438,11 @@ public class LogIn implements Initializable {
         }
     } 
     
+    /**
+     * Authenticates user login credentials.
+     *
+     * @param event Action event.
+     */
     @FXML
     void handleLogInClick(ActionEvent event) {
     	String username = usernameField.getText().trim();
@@ -353,6 +467,11 @@ public class LogIn implements Initializable {
         }
     }
     
+    /**
+     * Handles saving a new password after reset.
+     *
+     * @param event Action event.
+     */
     @FXML
     void handleSaveChangesClick(ActionEvent event) {
         String newPassword = newPasswordFP.getText().trim();
@@ -382,6 +501,13 @@ public class LogIn implements Initializable {
         }
     }
     
+    /**
+     * Displays an alert dialog.
+     *
+     * @param alertType Alert type (INFO, ERROR, etc.)
+     * @param title     Alert title.
+     * @param message   Alert message.
+     */
     private void showAlert(AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -389,6 +515,11 @@ public class LogIn implements Initializable {
         alert.showAndWait();
     }
     
+    /**
+     * Loads the main menu scene after successful login.
+     *
+     * @param source The source object (UI Node).
+     */
     private void loadMenuScene(Object source) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("Menu.fxml"));
