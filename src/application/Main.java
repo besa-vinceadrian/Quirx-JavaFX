@@ -11,7 +11,26 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
 
+/**
+ * The entry point of the Quirx JavaFX application.
+ * This class sets up and displays the initial sign-up screen.
+ */
 public class Main extends Application {
+	
+	/**
+     * Default constructor for the Main class.
+     * Initializes the JavaFX application.
+     */
+    public Main() {
+        super();
+    }
+
+	
+	/**
+     * Starts the primary stage of the JavaFX application.
+     *
+     * @param primaryStage the primary stage for this application
+     */
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -43,6 +62,11 @@ public class Main extends Application {
 		}
 	}
 	
+	/**
+     * The main method that launches the JavaFX application.
+     *
+     * @param args the command-line arguments
+     */
 	public static void main(String[] args) {
 		launch(args);
 	}
