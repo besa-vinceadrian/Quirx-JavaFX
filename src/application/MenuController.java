@@ -17,53 +17,105 @@ import javafx.scene.text.Font;
 import java.util.Optional;
 import javafx.scene.image.Image;
 
+/**
+ * Controller for the main menu of the application.
+ * Handles navigation between different views (Dashboard, My Tasks, Workspace),
+ * workspace creation/deletion, and logout logic.
+ */
 public class MenuController implements Initializable {
     
-    @FXML
+	/**
+	 * Default constructor for MenuController.
+	 * Used by JavaFX for controller initialization.
+	 */
+	public MenuController() {
+	    // Default constructor
+	}
+	
+	/** Root anchor pane. */
+	@FXML
     private AnchorPane anchorPaneId;
     
-    @FXML
+	/** Pane used to display loaded views. */
+	@FXML
     private Pane windowPane;
     
-    @FXML
+	/** Button to navigate to Dashboard/Profile view. */
+	@FXML
     private Button dashboardButton;
     
-    @FXML
+	/** Button to navigate to My Task view. */
+	@FXML
     private Button myTaskButton;
     
-    @FXML
+	/** Button to navigate to Workspace view. */
+	@FXML
     private Button workspaceButton;
     
-    @FXML
+	/** Button to log out from the application. */
+	@FXML
     private Button logOutButton;
     
-    @FXML
+	/** Button to add a new workspace dynamically. */
+	@FXML
     private Button addWorkspaceButton;
     
-    @FXML
+	/** VBox that holds the menu buttons and dynamically added workspaces. */
+	@FXML
     private VBox menuVBox;
     
-    @Override
+	/**
+     * Initializes the controller.
+     * Removes focus from input elements on launch.
+     *
+     * @param location  location used to resolve relative paths
+     * @param resources resources used to localize root object
+     */
+	@Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> anchorPaneId.requestFocus());
     }
     
-    @FXML
+	/**
+     * Handles click on Dashboard button.
+     * Loads the "MyProfile.fxml" view.
+     *
+     * @param event ActionEvent triggered by the button
+     */
+	@FXML
     private void dashboardButton(ActionEvent event) {
         loadView("MyProfile.fxml");
     }
     
-    @FXML
+	/**
+     * Handles click on My Task button.
+     * Loads the "MyTask.fxml" view.
+     *
+     * @param event ActionEvent triggered by the button
+     */
+	@FXML
     private void myTaskButton(ActionEvent event) {
         loadView("MyTask.fxml");
     }
     
-    @FXML
+	/**
+     * Handles click on Workspace button.
+     * Loads the "Workspace.fxml" view.
+     *
+     * @param event ActionEvent triggered by the button
+     */
+	@FXML
     private void workspaceButton(ActionEvent event) {
         loadView("Workspace.fxml");
     }
     
-    @FXML
+	/**
+     * Handles click on Log Out button.
+     * Shows confirmation dialog and logs out if confirmed.
+     *
+     * @param event ActionEvent triggered by the button
+     */
+	@FXML
     private void logOutButton(ActionEvent event) {
     	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
     	alert.setTitle("Log Out Confirmation");
@@ -87,7 +139,13 @@ public class MenuController implements Initializable {
     	}
     }
     
-    @FXML
+	/**
+     * Handles click on Add Workspace button.
+     * Prompts user for workspace name and creates new workspace button dynamically.
+     *
+     * @param event ActionEvent triggered by the button
+     */
+	@FXML
     private void handleAddWorkspace(ActionEvent event) {
         TextInputDialog dialog = new TextInputDialog("New Workspace");
         dialog.setTitle("New Workspace");
@@ -105,7 +163,12 @@ public class MenuController implements Initializable {
         });
     }
     
-    private void loadView(String fxmlFile) {
+	/**
+     * Loads the specified FXML view into the window pane.
+     *
+     * @param fxmlFile the FXML file name to load
+     */
+	private void loadView(String fxmlFile) {
         try {
             Pane view = FXMLLoader.load(getClass().getResource(fxmlFile));
             windowPane.getChildren().clear();
@@ -115,7 +178,12 @@ public class MenuController implements Initializable {
         }
     }
     
-    private void createWorkspaceButton(String workspaceName) {
+	/**
+     * Dynamically creates a workspace button with delete functionality.
+     *
+     * @param workspaceName the name of the new workspace
+     */
+	private void createWorkspaceButton(String workspaceName) {
         // Create a container for the workspace button and delete button
         HBox buttonContainer = new HBox();
         buttonContainer.setAlignment(Pos.CENTER_LEFT);
@@ -159,7 +227,13 @@ public class MenuController implements Initializable {
         menuVBox.getChildren().add(menuVBox.getChildren().size() - 1, buttonContainer);
     }
     
-    private void confirmAndDeleteWorkspace(HBox buttonContainer, String workspaceName) {
+	/**
+     * Confirms and deletes a workspace from the menu.
+     *
+     * @param buttonContainer the HBox container for the workspace
+     * @param workspaceName   the name of the workspace to delete
+     */
+	private void confirmAndDeleteWorkspace(HBox buttonContainer, String workspaceName) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Workspace");
         alert.setHeaderText(null);
