@@ -37,7 +37,7 @@ public class LogIn implements Initializable {
      * Default constructor for the LogIn controller.
      * Initializes the controller used for handling login and password recovery.
      */
-    public LogIn() {
+    public LogIn() { 
         // Default constructor
     }
 	

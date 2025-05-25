@@ -23,35 +23,72 @@ import javafx.scene.layout.AnchorPane;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller class for the Sign-Up screen.
+ * Handles user registration, password visibility toggles, and navigation to the login screen.
+ */
 public class SignUp implements Initializable {
 
-    @FXML
+	/** The container pane for UI elements */
+	@FXML
     private AnchorPane rightPane; 	
+	
+	/** TextField for user's first name */
     @FXML
     private TextField firstNameField;
+    
+    /** TextField for user's last name */
     @FXML
     private TextField lastNameField;
+    
+    /** TextField for username input */
     @FXML
     private TextField usernameField;
+    
+    /** TextField for email input */
     @FXML
     private TextField emailField;
+    
+    /** Hidden password input field */
     @FXML
     private PasswordField passwordFieldSU;
+    
+    /** Visible version of the password input */
     @FXML
     private TextField showPasswordFieldSU;
+    
+    /** Button to toggle password visibility */
     @FXML
     private Button togglePasswordButton;
+    
+    /** Hidden confirm password input field */
     @FXML
     private PasswordField confirmPasswordFieldSU;
+    
+    /** Visible version of the confirm password input */
     @FXML
     private TextField showConfirmPasswordFieldSU;
+    
+    /** Button to toggle confirm password visibility */
     @FXML
     private Button toggleConfirmPasswordButton;
     
+    /** Service for user authentication and registration logic */
     private Authentication authService;
+    
+    /** Flag indicating if the password is visible */
     private boolean isPasswordVisible = false;
+    
+    /** Flag indicating if the confirm password is visible */
     private boolean isConfirmPasswordVisible = false;
 
+    /**
+     * Initializes the controller.
+     * Sets up bindings between password fields and sets default visibility.
+     *
+     * @param location  The location used to resolve relative paths.
+     * @param resources The resources used to localize the root object.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Delay focus so TextField doesn't auto-focus and hide prompt text
@@ -70,6 +107,11 @@ public class SignUp implements Initializable {
         showConfirmPasswordFieldSU.setManaged(false);
     } 
     
+    /**
+     * Handles the toggle button click to show/hide password field.
+     *
+     * @param event The ActionEvent triggered by the button.
+     */
     @FXML
     void togglePasswordButton(ActionEvent event) {
         isPasswordVisible = !isPasswordVisible;
@@ -93,6 +135,11 @@ public class SignUp implements Initializable {
         }
     }
     
+    /**
+     * Handles the toggle button click to show/hide confirm password field.
+     *
+     * @param event The ActionEvent triggered by the button.
+     */
     @FXML
     void toggleConfirmPasswordButton(ActionEvent event) {
         isConfirmPasswordVisible = !isConfirmPasswordVisible;
@@ -116,7 +163,12 @@ public class SignUp implements Initializable {
         }
     }
     
- // For the button
+    /**
+     * Handles the sign-up button click.
+     * Validates user input and attempts to register a new user.
+     *
+     * @param event The ActionEvent triggered by the Sign-Up button.
+     */
     public void handleSignUpButtonClick(ActionEvent event) {
     	String firstName = firstNameField.getText().trim();
         String lastName = lastNameField.getText().trim();
@@ -161,6 +213,13 @@ public class SignUp implements Initializable {
         }
     }
     
+    /**
+     * Displays an alert with a given type, title, and message.
+     *
+     * @param alertType The type of alert (e.g., ERROR, INFORMATION).
+     * @param title     The title of the alert.
+     * @param message   The message displayed in the alert.
+     */
     private void showAlert(AlertType alertType, String title, String message) {
     	Alert alert = new Alert(alertType);
     	alert.setTitle(title);
@@ -168,12 +227,20 @@ public class SignUp implements Initializable {
     	alert.showAndWait();
     }
 
-    // For the label
+    /**
+     * Handles the click event for navigating to the login screen.
+     *
+     * @param event The MouseEvent triggered by clicking a login label.
+     */
     public void handleLoginClick(MouseEvent event) {
         loadLoginScene(event.getSource());
     }
 
-    // Reusable method to load login.fxml
+    /**
+     * Loads the LogIn.fxml scene and replaces the current window content.
+     *
+     * @param source The source object that triggered the event (used to get the current stage).
+     */
     private void loadLoginScene(Object source) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("LogIn.fxml"));
