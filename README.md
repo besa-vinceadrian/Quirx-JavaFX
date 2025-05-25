@@ -29,7 +29,7 @@ Quirx is a desktop-based task management application developed to help individua
 | Language       | Java (Java 8+) |
 | UI Framework   | JavaFX (Designed via SceneBuilder) |
 | Database       | SQL Server |
-| Database Access| JDBC + ngrok for tunneling remote DB |
+| Database Access| JDBC + ZeroTier for remote access DB |
 | Email Service  | Jakarta Mail (Jakarta EE JARs) |
 | IDE            | Eclipse |
 | Database Mgmt  | SQL Server Management Studio (SSMS) |
@@ -40,7 +40,7 @@ Quirx is a desktop-based task management application developed to help individua
 - **Java** – Primary programming language  
 - **SceneBuilder** – For creating the GUI visually  
 - **JDBC** – For Java-SQL Server connectivity  
-- **ngrok** – To expose the local SQL Server database for remote access  
+- **ZeroTier** – Allowing remote access to the local SQL Server instance  
 - **Jakarta Mail JARs** – For sending task assignment and deadline emails  
 - **Git** – Version control using CLI and Eclipse integration  
 
