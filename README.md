@@ -9,7 +9,6 @@ Quirx is a desktop-based task management application developed to help individua
 - 📌 Prioritize tasks as High, Medium, or Low
 - 🗂 Monitor task statuses: Not Started, Ongoing, Done
 - 📨 Email notifications for task assignments and deadlines (via Jakarta Mail)
-- 📊 In-app task analytics and session reporting
 - 📦 Local SQL database with remote access via **ngrok**
 - 🖱️ Drag-and-drop JavaFX interface built with **SceneBuilder**
 - 🔐 Real-time error logging and basic validation
@@ -19,7 +18,7 @@ Quirx is a desktop-based task management application developed to help individua
 - Deliver a reliable and user-friendly task management application
 - Support task assignment and collaboration in team workspaces
 - Enable priority-based task tracking
-- Provide in-app analytics and email-based reminders
+- Provide email-based reminders
 - Design a scalable structure for both personal and team usage
 
 ## 🛠️ Tech Stack
@@ -44,11 +43,10 @@ Quirx is a desktop-based task management application developed to help individua
 - **Jakarta Mail JARs** – For sending task assignment and deadline emails  
 - **Git** – Version control using CLI and Eclipse integration  
 
-## 📋 Reporting & Analytics
+## 📋 Reporting &
 
 - **Session Reports:** Track created, completed, and overdue tasks  
 - **In-App Feedback:** Real-time notifications, error messages, and status updates  
-- **Analytics Dashboard (Planned):** Future feature to show charts and task trends  
 - **Logged Errors:** Invalid inputs, assignment failures, and database issues  
 
 ## ⚠️ Limitations & Constraints
