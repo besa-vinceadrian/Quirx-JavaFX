@@ -10,6 +10,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.DatePicker;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -26,7 +28,7 @@ public class WorkspaceController implements Initializable {
         if (selectedTask != null) {
             showEditTaskDialog(selectedTask);
         } else {
-            showAlert("No Selection", "Please select a task to edit.");
+            showAlertWithType(Alert.AlertType.WARNING, "No Selection", "Please select a task to edit.");
         }
     }
     
@@ -91,32 +93,71 @@ public class WorkspaceController implements Initializable {
         ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
         
+        // Get the Save button and add validation
+        Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
+        
+        // Add event filter to validate date before saving
+        saveButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+            try {
+                // Validate due date is not in the past
+                LocalDate selectedDate = dueDateField.getValue();
+                if (selectedDate != null && selectedDate.isBefore(LocalDate.now())) {
+                    showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be set to a date before today. Please select today's date or a future date.");
+                    event.consume(); // Prevent dialog from closing
+                    return;
+                }
+            } catch (Exception e) {
+                showAlertWithType(Alert.AlertType.ERROR, "Date Validation Error", "An error occurred while validating the due date: " + e.getMessage());
+                event.consume(); // Prevent dialog from closing
+                return;
+            }
+        });
+        
         // FIXED: Convert result with proper DatePicker handling
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
-                return new Task(
-                    taskField.getText().trim(),
-                    ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "",
-                    statusCombo.getValue(),
-                    dueDateField.getValue() != null ? dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM-dd-yy")) : "",
-                    priorityCombo.getValue()
-                );
+                try {
+                    return new Task(
+                        taskField.getText().trim(),
+                        ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "",
+                        statusCombo.getValue(),
+                        dueDateField.getValue() != null ? dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM-dd-yy")) : "",
+                        priorityCombo.getValue()
+                    );
+                } catch (Exception e) {
+                    showAlertWithType(Alert.AlertType.ERROR, "Error", "An error occurred while processing the task data: " + e.getMessage());
+                    return null;
+                }
             }
             return null;
         });
         
+        // Set icon for dialog - RIGHT BEFORE dialog.showAndWait()
+        try {
+            dialog.setOnShown(e -> {
+                Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+            });
+        } catch (Exception e) {
+            System.err.println("Could not set dialog icon: " + e.getMessage());
+        }
+        
         Optional<Task> result = dialog.showAndWait();
         result.ifPresent(editedTask -> {
             if (!editedTask.getTask().isEmpty()) {
-                // Update the existing task with new values
-                taskToEdit.setTask(editedTask.getTask());
-                taskToEdit.setOwner(editedTask.getOwner());
-                taskToEdit.setStatus(editedTask.getStatus());
-                taskToEdit.setDueDate(editedTask.getDueDate());
-                taskToEdit.setPriority(editedTask.getPriority());
-                
-                // Refresh the table to show updated values
-                tableView.refresh();
+                try {
+                    // Update the existing task with new values
+                    taskToEdit.setTask(editedTask.getTask());
+                    taskToEdit.setOwner(editedTask.getOwner());
+                    taskToEdit.setStatus(editedTask.getStatus());
+                    taskToEdit.setDueDate(editedTask.getDueDate());
+                    taskToEdit.setPriority(editedTask.getPriority());
+                    
+                    // Refresh the table to show updated values
+                    tableView.refresh();
+                } catch (Exception e) {
+                    showAlertWithType(Alert.AlertType.ERROR, "Update Error", "An error occurred while updating the task: " + e.getMessage());
+                }
             }
         });
     }
@@ -484,19 +525,27 @@ public class WorkspaceController implements Initializable {
                 
                 // Check if both Task description and Owner are empty
                 if (taskDescription.isEmpty() && ownerValue.isEmpty()) {
-                    showAlert("Validation Error", "Task description and owner cannot be empty");
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description and owner cannot be empty");
                     event.consume(); // Prevent dialog from closing
                     return;
                 }
                 // Check if only Task description is empty
                 else if (taskDescription.isEmpty()) {
-                    showAlert("Validation Error", "Task description cannot be empty");
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description cannot be empty");
                     event.consume(); // Prevent dialog from closing
                     return;
                 }
                 // Check if only Owner is empty
                 else if (ownerValue.isEmpty()) {
-                    showAlert("Validation Error", "Owner cannot be empty");
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Owner cannot be empty");
+                    event.consume(); // Prevent dialog from closing
+                    return;
+                }
+                
+                // NEW: Validate due date is not in the past
+                LocalDate selectedDate = dueDateField.getValue();
+                if (selectedDate != null && selectedDate.isBefore(LocalDate.now())) {
+                    showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be set to a date before today. Please select today's date or a future date.");
                     event.consume(); // Prevent dialog from closing
                     return;
                 }
@@ -505,7 +554,7 @@ public class WorkspaceController implements Initializable {
                 
             } catch (Exception e) {
                 // Handle any other unexpected errors
-                showAlert("Error", "An unexpected error occurred while validating the task: " + e.getMessage());
+                showAlertWithType(Alert.AlertType.ERROR, "Error", "An unexpected error occurred while validating the task: " + e.getMessage());
                 event.consume(); // Prevent dialog from closing
             }
         });
@@ -526,12 +575,22 @@ public class WorkspaceController implements Initializable {
                     );
                     
                 } catch (Exception e) {
-                    showAlert("Error", "An unexpected error occurred while creating the task: " + e.getMessage());
+                    showAlertWithType(Alert.AlertType.ERROR, "Error", "An unexpected error occurred while creating the task: " + e.getMessage());
                     return null;
                 }
             }
             return null;
         });
+        
+        // Set icon for dialog - RIGHT BEFORE dialog.showAndWait()
+        try {
+            dialog.setOnShown(e -> {
+                Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+            });
+        } catch (Exception e) {
+            System.err.println("Could not set dialog icon: " + e.getMessage());
+        }
         
         // Show dialog and handle result
         Optional<Task> result = dialog.showAndWait();
@@ -541,7 +600,7 @@ public class WorkspaceController implements Initializable {
                 todoTasks.add(task);
                 // Listener will be added automatically by the list change listener in setupTodoTable
             } catch (Exception e) {
-                showAlert("Error", "Failed to add task to the list: " + e.getMessage());
+                showAlertWithType(Alert.AlertType.ERROR, "Error", "Failed to add task to the list: " + e.getMessage());
             }
         });
     }
@@ -574,12 +633,15 @@ public class WorkspaceController implements Initializable {
             alert.setHeaderText("Are you sure you want to delete this task?");
             alert.setContentText(selectedTask.getTask());
             
+            // Set icon for alert
+            setAlertIcon(alert);
+            
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 todoTasks.remove(selectedTask);
             }
         } else {
-            showAlert("No Selection", "Please select a task to delete.");
+            showAlertWithType(Alert.AlertType.WARNING, "No Selection", "Please select a task to delete.");
         }
     }
     
@@ -591,12 +653,15 @@ public class WorkspaceController implements Initializable {
             alert.setHeaderText("Are you sure you want to delete all completed tasks?");
             alert.setContentText("This action cannot be undone.");
             
+            // Set icon for alert
+            setAlertIcon(alert);
+            
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 completedTasks.clear();
             }
         } else {
-            showAlert("No Tasks", "There are no completed tasks to delete.");
+            showAlertWithType(Alert.AlertType.INFORMATION, "No Tasks", "There are no completed tasks to delete.");
         }
     }
     
@@ -607,6 +672,9 @@ public class WorkspaceController implements Initializable {
             confirmAlert.setTitle("Complete Task");
             confirmAlert.setHeaderText("Mark task as completed?");
             confirmAlert.setContentText("Are you sure you want to mark \"" + task.getTask() + "\" as completed?\n\nThis will move the task to the completed section.");
+            
+            // Set icon for alert
+            setAlertIcon(confirmAlert);
             
             Optional<ButtonType> result = confirmAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -641,12 +709,12 @@ public class WorkspaceController implements Initializable {
     private void handleInviteFriend() {
         String email = emailField.getText().trim();
         if (email.isEmpty()) {
-            showAlert("Invalid Email", "Please enter an email address.");
+            showAlertWithType(Alert.AlertType.WARNING, "Invalid Email", "Please enter an email address.");
             return;
         }
         
         if (!isValidEmail(email)) {
-            showAlert("Invalid Email", "Please enter a valid email address.");
+            showAlertWithType(Alert.AlertType.ERROR, "Invalid Email", "Please enter a valid email address.");
             return;
         }
         
@@ -684,7 +752,65 @@ public class WorkspaceController implements Initializable {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        
+        // Set icon for alert
+        setAlertIcon(alert);
+        
         alert.showAndWait();
+    }
+    
+    /**
+     * Show alert with specific AlertType and automatically set icon
+     * @param alertType The type of alert (INFORMATION, WARNING, ERROR, CONFIRMATION)
+     * @param title The alert title
+     * @param message The alert message
+     */
+    private void showAlertWithType(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        
+        // Set icon for alert
+        setAlertIcon(alert);
+        
+        alert.showAndWait();
+    }
+    
+    /**
+     * Helper method to set icon for Alert windows
+     * @param alert The Alert to set the icon for
+     */
+    private void setAlertIcon(Alert alert) {
+        try {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        } catch (Exception e) {
+            // If icon loading fails, continue without icon
+            System.err.println("Warning: Could not load alert icon: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Helper method to set icon for Dialog windows
+     * @param dialog The Dialog to set the icon for
+     */
+    private void setDialogIcon(Dialog<?> dialog) {
+        try {
+            // Set icon when dialog is shown
+            dialog.setOnShowing(event -> {
+                try {
+                    Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+                } catch (Exception e) {
+                    // If icon loading fails, continue without icon
+                    System.err.println("Warning: Could not load dialog icon: " + e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            // If setting up icon fails, continue without icon
+            System.err.println("Warning: Could not set up dialog icon: " + e.getMessage());
+        }
     }
     
     /**
