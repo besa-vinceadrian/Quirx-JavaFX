@@ -3,10 +3,14 @@ package application;
 import TaskManagement.MyProfile;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -85,7 +89,7 @@ public class MyProfileController implements Initializable {
         String confirmPassword = confirmNewPasswordField.getText().trim();
         
         if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
-        	System.out.println("Password does not match.");
+        	System.out.println("Password do not match.");
             return;
         }
         
@@ -94,12 +98,16 @@ public class MyProfileController implements Initializable {
             userProfile.setLastName(lastNameField.getText());
             if (!newPassword.isEmpty()) {
                 userProfile.setPassword(newPassword);
+                showAlert(AlertType.INFORMATION, "Success", "Password updated successfully.");
+            }
+            else {
+            	showAlert(AlertType.INFORMATION, "Info", "Personal information updated successfully.");
             }
             userProfile.updateUser();
-            System.out.println("success");
+            showAlert(AlertType.INFORMATION, "Success", "Profile updated successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println(e);
+            showAlert(AlertType.ERROR, "Error", "An error occured while saving changes.");
         }
     }
     
@@ -119,28 +127,36 @@ public class MyProfileController implements Initializable {
         // Show dialog and wait for response
         alert.showAndWait().ifPresent(response -> {
             if (response == buttonTypeYes) {
-                try {
+            	 TextInputDialog passwordDialog = new TextInputDialog();
+                 passwordDialog.setTitle("Password Confirmation");
+                 passwordDialog.setHeaderText("Enter your password to confirm account deletion:");
+                 passwordDialog.setContentText("Password:");
+
+                 // Show dialog and wait for input
+                 passwordDialog.showAndWait().ifPresent(password -> {
+                	 try {
                     // Attempt to delete the account
-                    if (userProfile.deleteAccount()) {
-                        // Account deleted successfully
-                        showAlert(AlertType.INFORMATION, "Success", "Your account has been deleted successfully.");
+                		 if (userProfile.validatePassword(password)) {
+                			 if (userProfile.deleteAccount()) {
+                				 // Account deleted successfully
+                				 showAlert(AlertType.INFORMATION, "Success", "Your account has been deleted successfully.");
                         
-                        // Close the application or return to login screen
-                        Stage stage = (Stage) deleteAccountButton.getScene().getWindow();
-                        stage.close();
-                        
-                        // Alternatively, return to login screen:
-                        // FXMLLoader loader = new FXMLLoader(getClass().getResource("LogIn.fxml"));
-                        // Parent root = loader.load();
-                        // stage.setScene(new Scene(root));
-                    } else {
-                        showAlert(AlertType.ERROR, "Error", "Failed to delete account. Please try again.");
+                				 // Close the application or return to login screen
+                				 Stage stage = (Stage) deleteAccountButton.getScene().getWindow();
+                				 Parent root = FXMLLoader.load(getClass().getResource("SignUp.fxml"));
+                				 stage.setScene(new Scene(root));
+                			 } else {
+                				 showAlert(AlertType.ERROR, "Error", "Failed to delete account. Please try again.");
+                			 }
+                		} else {
+                			showAlert(AlertType.ERROR, "Error", "Incorrect password. Account deletion canceled.");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     showAlert(AlertType.ERROR, "Error", "An error occurred while deleting your account.");
                 }
-            }
+            });
+          }
         });
     }
 

@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 public class MyProfile {
     private int userId;
@@ -59,6 +60,32 @@ public class MyProfile {
             stmt.setInt(4, userId);
             stmt.executeUpdate();
         }
+    }
+    
+    /**
+     * Validates the provided password against the stored password in the database.
+     * 
+     * @param inputPassword The password to validate.
+     * @return true if the password matches, false otherwise.
+     */
+    		
+    public boolean validatePassword(String inputPassword) {
+    	String query = "SELECT userPassword FROM UserTable WHERE userID = ?";
+    	
+    	try (Connection conn = getConnection();
+    		PreparedStatement stmt = conn.prepareStatement(query)) {
+    		
+    		stmt.setInt(1, this.userId);
+    		ResultSet rs = stmt.executeQuery();
+    		
+    		if (rs.next()) {
+    			String storedPassword = rs.getString("userPassword");
+    			return storedPassword.equals(inputPassword);
+    		}
+    	} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
     }
     
     /**
