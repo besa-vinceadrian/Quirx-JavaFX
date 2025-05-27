@@ -83,7 +83,7 @@ Quirx is a desktop-based task management application developed to help individua
 - Jakarta Mail libraries
 
 4. **Database Setup:**
-- Configure SQL Server and expose it using ngrok
+- Configure SQL Server and expose it using Zero Tier One
 - Update JDBC credentials in your source code
 
 5. **Run the Application**
