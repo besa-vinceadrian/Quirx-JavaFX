@@ -312,7 +312,7 @@ public class LogIn implements Initializable {
                     showAlert(AlertType.ERROR, "Error", "User ID not found.");
                 }
             } else {
-                showAlert(AlertType.ERROR, "Error", "Invalid username or password.");
+                showAlert(AlertType.ERROR, "Error", "Incorrect username or password.");
             }
         } catch (Exception e) {
             e.printStackTrace();
