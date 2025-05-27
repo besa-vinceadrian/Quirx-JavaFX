@@ -5,12 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 
 public class MyProfile {
     private int userId;
     private String firstName;
     private String lastName;
+    private String userName;
     private String email;
     private String password;
 
@@ -18,10 +18,11 @@ public class MyProfile {
     private static final String DB_USER = "QuirxAdmin";
     private static final String DB_PASS = "admin";
 
-    public MyProfile(int userId, String firstName, String lastName, String email, String password) {
+    public MyProfile(int userId, String firstName, String lastName, String userName, String email, String password) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.userName = userName;
         this.email = email;
         this.password = password;
     }
@@ -41,6 +42,7 @@ public class MyProfile {
                     rs.getInt("userID"),
                     rs.getString("userFirstName"),
                     rs.getString("userLastName"),
+                    rs.getString("userName"),
                     rs.getString("userEmail"),
                     rs.getString("userPassword")
                 );
@@ -51,13 +53,14 @@ public class MyProfile {
     }
 
     public void updateUser() throws SQLException {
-        String query = "UPDATE UserTable SET userFirstName = ?, userLastName = ?, userPassword = ? WHERE userID = ?";
+        String query = "UPDATE UserTable SET userFirstName = ?, userLastName = ?, userEmail = ?, userPassword = ? WHERE userID = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, firstName);
             stmt.setString(2, lastName);
-            stmt.setString(3, password);
-            stmt.setInt(4, userId);
+            stmt.setString(3, email);
+            stmt.setString(4, password);
+            stmt.setInt(5, userId);
             stmt.executeUpdate();
         }
     }
@@ -114,6 +117,7 @@ public class MyProfile {
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getUsername() { return userName; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getPassword() { return password; }

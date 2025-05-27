@@ -16,7 +16,7 @@
    <children>
       <Pane prefHeight="67.0" prefWidth="703.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-radius: 10; -fx-border-color: #000000;">
          <children>
-            <Label layoutX="92.0" layoutY="8.0" prefHeight="50.0" prefWidth="597.0" text="Username">
+            <Label fx:id="userNameLabel" layoutX="92.0" layoutY="8.0" prefHeight="50.0" prefWidth="597.0" text="Username">
                <font>
                   <Font name="System Bold" size="32.0" />
                </font>

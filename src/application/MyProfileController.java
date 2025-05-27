@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
@@ -28,6 +29,9 @@ public class MyProfileController implements Initializable {
     
     @FXML 
     private Pane centerPane;
+    
+    @FXML
+    private Label userNameLabel;
     
     @FXML 
     private TextField firstNameField;
@@ -73,6 +77,7 @@ public class MyProfileController implements Initializable {
         try {
             userProfile = MyProfile.loadUserById(userId);
             Platform.runLater(() -> {
+            	userNameLabel.setText(userProfile.getUsername());
                 firstNameField.setText(userProfile.getFirstName());
                 lastNameField.setText(userProfile.getLastName());
                 emailField.setText(userProfile.getEmail());
@@ -96,6 +101,7 @@ public class MyProfileController implements Initializable {
         try {
             userProfile.setFirstName(firstNameField.getText());
             userProfile.setLastName(lastNameField.getText());
+            userProfile.setEmail(emailField.getText());
             if (!newPassword.isEmpty()) {
                 userProfile.setPassword(newPassword);
                 showAlert(AlertType.INFORMATION, "Success", "Password updated successfully.");
