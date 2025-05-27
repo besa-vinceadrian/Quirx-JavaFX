@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -45,11 +44,10 @@
                   <TableColumn fx:id="priorityColumnCompleted" maxWidth="118.0" minWidth="118.0" prefWidth="118.0" resizable="false" styleClass="task-header" text="Priority" />
                </columns>
             </TableView>
-            <Button fx:id="deleteAllButton" layoutX="590.0" layoutY="19.0" mnemonicParsing="false" onAction="#handleDeleteAll" prefHeight="32.0" prefWidth="94.0" text="Delete All">
-               <styleClass>
-                  <String fx:value="action-button" />
-                  <String fx:value="delete-button" />
-               </styleClass>
+            <Button fx:id="deleteAllButton" layoutX="635.0" layoutY="17.0" mnemonicParsing="false" onAction="#handleDeleteAll" prefHeight="32.0" prefWidth="32.0" styleClass="delete-button" text="">
+               <font>
+                  <Font name="dripicons-v2" size="20.0" />
+               </font>
             </Button>
          </children>
       </Pane>
@@ -77,13 +75,24 @@
       
                   <!-- Section Lines -->
             <Line endX="75.0" layoutX="120.0" layoutY="53.0" startX="-100.0" stroke="#bababa" />
-            <Button fx:id="addTaskButton" layoutX="480.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleAddTask" prefHeight="32.0" prefWidth="94.0" styleClass="action-button" text="Add Task" />
-            <Button fx:id="editTaskButton" layoutX="585" layoutY="18" mnemonicParsing="false" onAction="#handleEditTask" prefHeight="32.0" prefWidth="94.0" styleClass="action-button" text="Edit" />
-			<Button fx:id="deleteTaskButton" layoutX="690" layoutY="18" mnemonicParsing="false" onAction="#handleDeleteTask" prefHeight="32.0" prefWidth="94.0" text="Delete">
-               <styleClass>
-                  <String fx:value="action-button" />
-                  <String fx:value="delete-button" />
-               </styleClass>
+            <Button fx:id="addTaskButton" layoutX="509.0" layoutY="17.0" mnemonicParsing="false" onAction="#handleAddTask" prefHeight="32.0" prefWidth="32.0" styleClass="action-button" text="" textAlignment="CENTER">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font name="dripicons-v2" size="20.0" />
+               </font></Button>
+            <Button fx:id="editTaskButton" layoutX="573.0" layoutY="17.0" mnemonicParsing="false" onAction="#handleEditTask" prefHeight="32.0" prefWidth="32.0" styleClass="edit-button" text="*" textAlignment="CENTER">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font name="dripicons-v2" size="20.0" />
+               </font></Button>
+			<Button fx:id="deleteTaskButton" layoutX="637.0" layoutY="17.0" mnemonicParsing="false" onAction="#handleDeleteTask" prefHeight="32.0" prefWidth="32.0" styleClass="delete-button" text="" textAlignment="CENTER">
+               <font>
+                  <Font name="dripicons-v2" size="20.0" />
+               </font>
             </Button>
          </children>
       </Pane>

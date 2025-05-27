@@ -114,7 +114,7 @@ public class Task {
     }
     
     public void setPriority(String priority) { 
-        this.priority.set(priority != null ? priority : "Medium"); 
+        this.priority.set(priority != null ? priority : "Low"); 
     }
     
     public StringProperty priorityProperty() { 

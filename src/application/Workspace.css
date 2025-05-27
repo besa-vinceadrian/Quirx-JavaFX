@@ -144,10 +144,28 @@
     -fx-background-radius: 5;
 }
 
-.action-button:hover,
-.continue-button:hover,
-.invite-button:hover {
-    -fx-background-color: #e0a700;
+.edit-button{
+	-fx-background-color: #2dca7b;
+    -fx-border-color: #000000;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.action-button:hover {
+    -fx-background-color: derive(#ffc107, -15%);	
+}
+
+.edit-button:hover{
+	-fx-background-color: derive(#2dca7b, -15%);
+}
+
+.invite-button:hover,
+.continue-button:hover{
+	-fx-background-color: derive(#ffffff, -15%);
+}
+
+.delete.button:hover{
+	-fx-background-color: derive(#ff3131, -15%);
 }
 
 .continue-button{
