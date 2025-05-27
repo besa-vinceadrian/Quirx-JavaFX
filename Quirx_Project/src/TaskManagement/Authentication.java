@@ -8,7 +8,6 @@ import javax.naming.directory.*;
 import javax.naming.NamingException;
 import javax.naming.Context;
 
-
 public class Authentication {
     private static final String DB_URL = "jdbc:sqlserver://10.244.202.169:1433;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
     private static final String DB_USER = "QuirxAdmin";
@@ -29,6 +28,19 @@ public class Authentication {
             e.printStackTrace();
         }
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+    }
+
+    public int getUserIdByUsername(String username) throws SQLException {
+        try (Connection con = connect()) {
+            String query = "SELECT userID FROM UserTable WHERE userName = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("userID");
+            }
+            return -1; // User not found
+        }
     }
 
     public boolean hasMXRecord(String domain) {
@@ -89,7 +101,6 @@ public class Authentication {
             }
         });
 
-        
         try {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(from));
@@ -120,8 +131,8 @@ public class Authentication {
     }
     
     public boolean canResendOTP() {
-    	long currentTime = System.currentTimeMillis();
-    	return (currentTime - lastOTPSentTime) >= OTP_RESEND_INTERVAL;
+        long currentTime = System.currentTimeMillis();
+        return (currentTime - lastOTPSentTime) >= OTP_RESEND_INTERVAL;
     }
 
     public boolean registerUser(String fname, String lname, String uname, String email, String password) {

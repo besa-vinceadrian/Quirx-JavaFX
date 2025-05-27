@@ -24,130 +24,41 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-/**
- * Controller class for handling login and password recovery in the application.
- * Manages UI events such as logging in, toggling password visibility, verifying OTP,
- * and resetting the password. 
- * 
- * This class interacts with the {@link TaskManagement.Authentication} service.
- */
 public class LogIn implements Initializable {
-	
-	/**
-     * Default constructor for the LogIn controller.
-     * Initializes the controller used for handling login and password recovery.
-     */
-    public LogIn() { 
-        // Default constructor
-    }
-	
-	// FXML UI components (Login & Forgot Password)
     
-    /** The pane for displaying the login area. */
-	@FXML
-    private AnchorPane rightPane; 
-	
-	/** The main container pane for Forgot Password pages. */
-	@FXML
-    private AnchorPane mainAnchorPane;
-	
-	/** Password field used in login. */
-	@FXML
-    private PasswordField passwordFieldLI;
-	
-	/** Text field used to show password in plain text. */
-	@FXML
-    private TextField showPasswordFieldLI;
-	
-	/** Button to toggle visibility of login password. */
-	@FXML
-    private Button togglePasswordButtonLI;    
-	
-	/** Password field for new password during reset. */
-	@FXML
-    private PasswordField newPasswordFP;
-	
-	/** Text field to show new password in plain text. */
-    @FXML
-    private TextField showNewPasswordFP;  
+    @FXML private AnchorPane rightPane; 
+    @FXML private AnchorPane mainAnchorPane;
+    @FXML private PasswordField passwordFieldLI;
+    @FXML private TextField showPasswordFieldLI;
+    @FXML private Button togglePasswordButtonLI;    
+    @FXML private PasswordField newPasswordFP;
+    @FXML private TextField showNewPasswordFP;  
+    @FXML private PasswordField confirmPasswordFP;
+    @FXML private TextField showConfirmPasswordFP;
+    @FXML private Button toggleNewPasswordFP;
+    @FXML private Button toggleConfirmPasswordFP;
+    @FXML private AnchorPane pageEmail;
+    @FXML private AnchorPane pageVerifyOTP;
+    @FXML private AnchorPane pageResetPassword;
+    @FXML private Button logInButton;
+    @FXML private Button saveChangesButton;
+    @FXML private TextField code1, code2, code3, code4, code5, code6;
+    @FXML private TextField emailField;
+    @FXML private TextField usernameField;
     
-    /** Password field for confirm password during reset. */
-    @FXML
-    private PasswordField confirmPasswordFP;
-    
-    /** Text field to show confirm password in plain text. */
-    @FXML
-    private TextField showConfirmPasswordFP;
-    
-    /** Button to toggle visibility of new password. */
-    @FXML
-    private Button toggleNewPasswordFP;
-    
-    /** Button to toggle visibility of confirm password. */
-    @FXML
-    private Button toggleConfirmPasswordFP;
-    
-    /** Pages used in Forgot Password flow. */
-    @FXML
-    private AnchorPane pageEmail;
-    
-    /** Pages used in Forgot Password flow. */
-    @FXML
-    private AnchorPane pageVerifyOTP;
-    
-    /** Pages used in Forgot Password flow. */
-    @FXML
-    private AnchorPane pageResetPassword;
-    
-    /** Button to log in. */
-    @FXML
-    private Button logInButton;
-    
-    /** Button to save password reset changes. */
-    @FXML
-    private Button saveChangesButton;
-    
-    /** OTP input fields. */
-    @FXML
-    private TextField code1, code2, code3, code4, code5, code6;
-
-    /** Email field for password recovery. */
-    @FXML
-    private TextField emailField;
-    
-    /** Username field for login. */
-    @FXML
-    private TextField usernameField;
-    
-    /** Authentication service instance. */
     private Authentication authService;
-    
-    /** Visibility toggle state trackers. */
     private boolean isPasswordVisible = false;
-    
-    /** Visibility state of the New password field. */
     private boolean isNewPasswordVisible = false;
-    
-    /** Visibility state of the Confirm password field. */
     private boolean isConfirmPasswordVisible = false;
     
-    /**
-     * Initializes the controller after the FXML is loaded.
-     *
-     * @param location  The location used to resolve relative paths for the root object.
-     * @param resources The resources used to localize the root object.
-     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // delay focus so TextField doesn't auto-focus and hide prompt text
         Platform.runLater(() -> rightPane.requestFocus());
         
-        // bind text of visible and hidden fields
         showPasswordFieldLI.textProperty().bindBidirectional(passwordFieldLI.textProperty());
         showNewPasswordFP.textProperty().bindBidirectional(newPasswordFP.textProperty());
         showConfirmPasswordFP.textProperty().bindBidirectional(confirmPasswordFP.textProperty());
         
-        // start with password hidden (PasswordField shown)
         showPasswordFieldLI.setVisible(false);
         showPasswordFieldLI.setManaged(false);
         showNewPasswordFP.setVisible(false);
@@ -155,13 +66,12 @@ public class LogIn implements Initializable {
         showConfirmPasswordFP.setVisible(false);
         showConfirmPasswordFP.setManaged(false);
         
-        // initialization for every TextField
-        setupCodeField(code1, code2, null);    // First field has no previous
+        setupCodeField(code1, code2, null);
         setupCodeField(code2, code3, code1);
         setupCodeField(code3, code4, code2);
         setupCodeField(code4, code5, code3);
         setupCodeField(code5, code6, code4);
-        setupCodeField(code6, null, code5);    // Last field has no next
+        setupCodeField(code6, null, code5);
         
         mainAnchorPane.setVisible(false);
         mainAnchorPane.setManaged(false);
@@ -169,11 +79,6 @@ public class LogIn implements Initializable {
         authService = new Authentication();
     }
     
-    /**
-     * Toggles the visibility of the login password field.
-     *
-     * @param event The action event triggered.
-     */
     @FXML
     void togglePasswordButtonLI(ActionEvent event) {
         isPasswordVisible = !isPasswordVisible;
@@ -185,7 +90,7 @@ public class LogIn implements Initializable {
             passwordFieldLI.setManaged(false);
             showPasswordFieldLI.requestFocus();
             showPasswordFieldLI.positionCaret(showPasswordFieldLI.getText().length());
-            togglePasswordButtonLI.setText("Hide"); // update icon or text
+            togglePasswordButtonLI.setText("Hide");
         } else {
             passwordFieldLI.setVisible(true);
             passwordFieldLI.setManaged(true);
@@ -193,15 +98,10 @@ public class LogIn implements Initializable {
             showPasswordFieldLI.setManaged(false);
             passwordFieldLI.requestFocus();
             passwordFieldLI.positionCaret(passwordFieldLI.getText().length());
-            togglePasswordButtonLI.setText("Show"); // update icon or text
+            togglePasswordButtonLI.setText("Show");
         }
     }
     
-    /**
-     * Toggles visibility of the new password field in reset form.
-     *
-     * @param event The action event.
-     */
     @FXML
     void toggleNewPasswordFP(ActionEvent event) {
         isNewPasswordVisible = !isNewPasswordVisible;
@@ -225,11 +125,6 @@ public class LogIn implements Initializable {
         }
     }
     
-    /**
-     * Toggles visibility of the confirm password field in reset form.
-     *
-     * @param event The action event.
-     */
     @FXML
     void toggleConfirmPasswordFP(ActionEvent event) {
         isConfirmPasswordVisible = !isConfirmPasswordVisible;
@@ -253,19 +148,10 @@ public class LogIn implements Initializable {
         }
     }
 
-    /**
-     * Sets up OTP input fields to allow 1-character input and auto-navigation.
-     *
-     * @param current  Current field.
-     * @param next     Next field to move to.
-     * @param previous Previous field to move to on backspace.
-     */  
-	private void setupCodeField(TextField current, TextField next, TextField previous) {
-        // center text and set font size
+    private void setupCodeField(TextField current, TextField next, TextField previous) {
         current.setAlignment(Pos.CENTER);
         current.setFont(Font.font(18));
 
-        // limit input length to 1 char, auto-move forward on input
         current.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.length() > 1) {
                 current.setText(newVal.substring(0, 1));
@@ -276,175 +162,124 @@ public class LogIn implements Initializable {
             }
         });
 
-        // handle backspace key press
         current.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.BACK_SPACE) {
-                // only jump back if caret is at start AND current field is empty
                 if (current.getCaretPosition() == 0 && (current.getText() == null || current.getText().isEmpty()) && previous != null) {
                     previous.requestFocus();
-                    // put caret at the end of previous field text so user can delete
                     if (previous.getText() != null) {
                         previous.positionCaret(previous.getText().length());
                     }
-                    event.consume(); // prevent backspace from deleting previous text immediately
+                    event.consume();
                 }
             }
         });
     }
-	
-	/**
-     * Displays only the specified page and hides others.
-     *
-     * @param pageToShow The AnchorPane to be displayed.
-     */
-	private void showPage(AnchorPane pageToShow) {
-	    pageEmail.setVisible(false);
-	    pageVerifyOTP.setVisible(false);
-	    pageResetPassword.setVisible(false);
+    
+    private void showPage(AnchorPane pageToShow) {
+        pageEmail.setVisible(false);
+        pageVerifyOTP.setVisible(false);
+        pageResetPassword.setVisible(false);
 
-	    pageEmail.setManaged(false);
-	    pageVerifyOTP.setManaged(false);
-	    pageResetPassword.setManaged(false);
-	    
-	    pageToShow.setVisible(true);
-	    pageToShow.setManaged(true);
-	}	
-	
-	/**
-     * Handles the Forgot Password link click event.
-     *
-     * @param event MouseEvent trigger.
-     */
-	@FXML
-    /**
-     * handleForgotPassword method.
-     *
-     * @param event
-     */
+        pageEmail.setManaged(false);
+        pageVerifyOTP.setManaged(false);
+        pageResetPassword.setManaged(false);
+        
+        pageToShow.setVisible(true);
+        pageToShow.setManaged(true);
+    }    
+    
+    @FXML
     void handleForgotPassword(MouseEvent event) {
-		mainAnchorPane.setVisible(true);
-	    mainAnchorPane.setManaged(true);
-		showPage(pageEmail);
-	}
-	
-	/**
-	 * Handles sending the verification code when triggered.
-	 *
-	 * @param event the action event triggered by the user
-	 * @throws SQLException if a database access error occurs
-	 */
-	@FXML
-	void handleSendCode(ActionEvent event) throws SQLException {
-		String email = emailField.getText().trim();
-		
-		if (email.isEmpty()) {
-			showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
-			return;
-		}
-		if (!authService.isValidEmail(email)) {
-			showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
-			return;
-		}
-		if (!authService.isEmailTaken(email)) {
-			showAlert(AlertType.ERROR, "Error", "The email is not registered.");
-			return;
-		}
-		
-		authService.generateAndSendOTP(email);
-	    showPage(pageVerifyOTP);
-	}
-	
-	/**
-     * Verifies the user-entered OTP code.
-     *
-     * @param event The action event.
-     */
-	@FXML
-	void handleVerifyOTP(ActionEvent event) {
-		String enteredOTP = code1.getText() + code2.getText() + code3.getText() + 
-				code4.getText() + code5.getText() + code6.getText();
-		
-		if(enteredOTP.isEmpty()) {
-			showAlert(AlertType.ERROR, "Error", "OTP cannot be empty. Please enter the OTP.");
-			return;
-		}
-		if (!authService.verifyOTP(enteredOTP)) {
-			showAlert(AlertType.ERROR, "Error", "Invalid OTP. Please try again.");
-			return;
-		}
-		
-	    showPage(pageResetPassword);
-	}
-	
-	/**
-     * Resends the OTP to the provided email address if allowed.
-     *
-     * @param event Mouse event.
-     */
-	@FXML
+        mainAnchorPane.setVisible(true);
+        mainAnchorPane.setManaged(true);
+        showPage(pageEmail);
+    }
+    
+    @FXML
+    void handleSendCode(ActionEvent event) throws SQLException {
+        String email = emailField.getText().trim();
+        
+        if (email.isEmpty()) {
+            showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
+            return;
+        }
+        if (!authService.isValidEmail(email)) {
+            showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
+            return;
+        }
+        if (!authService.isEmailTaken(email)) {
+            showAlert(AlertType.ERROR, "Error", "The email is not registered.");
+            return;
+        }
+        
+        authService.generateAndSendOTP(email);
+        showPage(pageVerifyOTP);
+    }
+    
+    @FXML
+    void handleVerifyOTP(ActionEvent event) {
+        String enteredOTP = code1.getText() + code2.getText() + code3.getText() + 
+                code4.getText() + code5.getText() + code6.getText();
+        
+        if(enteredOTP.isEmpty()) {
+            showAlert(AlertType.ERROR, "Error", "OTP cannot be empty. Please enter the OTP.");
+            return;
+        }
+        if (!authService.verifyOTP(enteredOTP)) {
+            showAlert(AlertType.ERROR, "Error", "Invalid OTP. Please try again.");
+            return;
+        }
+        
+        showPage(pageResetPassword);
+    }
+    
+    @FXML
     public void handleResendOTP(MouseEvent event) {
-		try {
-			if (!authService.canResendOTP()) {
-				showAlert(AlertType.ERROR, "Error", "You must wait 1 minute before resending the OTP.");
-				return;
-			}
-			
-	        String email = emailField.getText().trim();
+        try {
+            if (!authService.canResendOTP()) {
+                showAlert(AlertType.ERROR, "Error", "You must wait 1 minute before resending the OTP.");
+                return;
+            }
+            
+            String email = emailField.getText().trim();
 
-	        if (email.isEmpty()) {
-	            showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
-	            return;
-	        }
-	        if (!authService.isValidEmail(email)) {
-	            showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
-	            return;
-	        }
-	        if (!authService.isEmailTaken(email)) {
-	            showAlert(AlertType.ERROR, "Error", "The email is not registered.");
-	            return;
-	        }
+            if (email.isEmpty()) {
+                showAlert(AlertType.ERROR, "Error", "Email address field cannot be empty.");
+                return;
+            }
+            if (!authService.isValidEmail(email)) {
+                showAlert(AlertType.ERROR, "Error", "Invalid email address format.");
+                return;
+            }
+            if (!authService.isEmailTaken(email)) {
+                showAlert(AlertType.ERROR, "Error", "The email is not registered.");
+                return;
+            }
 
-	        authService.generateAndSendOTP(email);
-	        showAlert(AlertType.INFORMATION, "Success", "A new OTP has been sent to your email.");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        showAlert(AlertType.ERROR, "Error", "An error occurred while resending the OTP. Please try again.");
-	    }
+            authService.generateAndSendOTP(email);
+            showAlert(AlertType.INFORMATION, "Success", "A new OTP has been sent to your email.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(AlertType.ERROR, "Error", "An error occurred while resending the OTP. Please try again.");
+        }
     }
 
-	
-	/**
-     * Closes the Forgot Password view and resets focus.
-     *
-     * @param event MouseEvent trigger.
-     */
-	@FXML
+    @FXML
     void handleReturnClick(MouseEvent event) {
-		usernameField.clear(); // clear before leaving
-		mainAnchorPane.setVisible(false);
-	    mainAnchorPane.setManaged(false); 
-	    rightPane.requestFocus();
-	}
-	
-	/**
-     * Cancels the Forgot Password process and returns to login screen.
-     *
-     * @param event Action event.
-     */
-	@FXML
-	private void handleCancel(ActionEvent event) {
-		usernameField.clear(); // clear before leaving
-	    mainAnchorPane.setVisible(false);
-	    mainAnchorPane.setManaged(false);
-	    rightPane.requestFocus();
-	}
-	
-
-	/**
-     * Switches to the Sign Up page.
-     *
-     * @param event Mouse event.
-     */
+        usernameField.clear();
+        mainAnchorPane.setVisible(false);
+        mainAnchorPane.setManaged(false); 
+        rightPane.requestFocus();
+    }
+    
+    @FXML
+    private void handleCancel(ActionEvent event) {
+        usernameField.clear();
+        mainAnchorPane.setVisible(false);
+        mainAnchorPane.setManaged(false);
+        rightPane.requestFocus();
+    }
+    
     @FXML
     void handleSignUpClick(MouseEvent event) {
         try {
@@ -456,14 +291,9 @@ public class LogIn implements Initializable {
         }
     } 
     
-    /**
-     * Authenticates user login credentials.
-     *
-     * @param event Action event.
-     */
     @FXML
     void handleLogInClick(ActionEvent event) {
-    	String username = usernameField.getText().trim();
+        String username = usernameField.getText().trim();
         String password = passwordFieldLI.getText().trim();
         
         if (username.isEmpty() || password.isEmpty()) {
@@ -474,8 +304,13 @@ public class LogIn implements Initializable {
         try {
             boolean isAuthenticated = authService.loginUserByUsername(username, password);
             if (isAuthenticated) {
-                showAlert(AlertType.INFORMATION, "Success", "Login successful!");
-                loadMenuScene(event.getSource());
+                int userId = authService.getUserIdByUsername(username);
+                if (userId != -1) {
+                    showAlert(AlertType.INFORMATION, "Success", "Login successful!");
+                    loadMenuScene(event.getSource(), userId);
+                } else {
+                    showAlert(AlertType.ERROR, "Error", "User ID not found.");
+                }
             } else {
                 showAlert(AlertType.ERROR, "Error", "Invalid username or password.");
             }
@@ -485,11 +320,6 @@ public class LogIn implements Initializable {
         }
     }
     
-    /**
-     * Handles saving a new password after reset.
-     *
-     * @param event Action event.
-     */
     @FXML
     void handleSaveChangesClick(ActionEvent event) {
         String newPassword = newPasswordFP.getText().trim();
@@ -519,13 +349,6 @@ public class LogIn implements Initializable {
         }
     }
     
-    /**
-     * Displays an alert dialog.
-     *
-     * @param alertType Alert type (INFO, ERROR, etc.)
-     * @param title     Alert title.
-     * @param message   Alert message.
-     */
     private void showAlert(AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -533,19 +356,18 @@ public class LogIn implements Initializable {
         alert.showAndWait();
     }
     
-    /**
-     * Loads the main menu scene after successful login.
-     *
-     * @param source The source object (UI Node).
-     */
-    private void loadMenuScene(Object source) {
+    private void loadMenuScene(Object source, int userId) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("Menu.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Menu.fxml"));
+            Parent root = loader.load();
+            
+            MenuController menuController = loader.getController();
+            menuController.setUserId(userId);
+            
             Stage stage = (Stage) ((javafx.scene.Node) source).getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-	    
 }
