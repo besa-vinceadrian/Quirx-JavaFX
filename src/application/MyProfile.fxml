@@ -44,7 +44,7 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <TextField layoutX="262.0" layoutY="166.0" prefHeight="38.0" prefWidth="167.0" promptText="Last Name">
+            <TextField fx:id="lastNameField" layoutX="262.0" layoutY="166.0" prefHeight="38.0" prefWidth="167.0" promptText="Last Name">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -52,7 +52,7 @@
                   <Insets left="12.0" />
                </padding>
             </TextField>
-            <TextField layoutX="461.0" layoutY="166.0" prefHeight="38.0" prefWidth="167.0" promptText="First Name">
+            <TextField fx:id="firstNameField" layoutX="461.0" layoutY="166.0" prefHeight="38.0" prefWidth="167.0" promptText="First Name">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -65,7 +65,7 @@
                   <Font name="Arial" size="14.0" />
                </font>
             </Label>
-            <TextField layoutX="262.0" layoutY="248.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="38.0" prefWidth="367.0" promptText="example@email.com">
+            <TextField fx:id="emailField" layoutX="262.0" layoutY="248.0" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="38.0" prefWidth="367.0" promptText="example@email.com">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -91,15 +91,11 @@
                </font>
             </Label>
             <Line endX="367.0" layoutX="221.0" layoutY="120.0" opacity="0.16" startX="78.0" />
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="390.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" styleClass="save-button" text="Save Changes" textAlignment="CENTER">
+            <Button fx:id="saveChangesButton" alignment="CENTER" contentDisplay="CENTER" layoutX="324.0" layoutY="510.0" mnemonicParsing="false" onAction="#handleSaveChanges" prefHeight="27.0" prefWidth="109.0" styleClass="save-button" text="Save Changes" textAlignment="CENTER">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor></Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="520.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" styleClass="delete-button" text="Delete Account" textAlignment="CENTER">
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor></Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="262.0" layoutY="509.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="109.0" styleClass="cancel-button" text="Cancel" textAlignment="CENTER">
+            <Button fx:id="deleteAccountButton" alignment="CENTER" contentDisplay="CENTER" layoutX="454.0" layoutY="510.0" mnemonicParsing="false" onAction="#handleDeleteAccount" prefHeight="27.0" prefWidth="109.0" styleClass="delete-button" text="Delete Account" textAlignment="CENTER">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor></Button>
