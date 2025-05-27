@@ -89,7 +89,7 @@ public class MyProfileController implements Initializable {
         String confirmPassword = confirmNewPasswordField.getText().trim();
         
         if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
-        	System.out.println("Password do not match.");
+        	showAlert(AlertType.ERROR, "Error", "New password and confirm password do not match.");
             return;
         }
         
