@@ -1,288 +1,199 @@
 package application;
 
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
- * Represents a task in the Quirx task management system.
- * Each task has a description, owner, status, due date, priority level,
- * and a completion flag (used with a checkbox in the UI).
+ * Task model class representing a task in the workspace application.
+ * Uses JavaFX properties for data binding with UI components.
  */
 public class Task {
-	
-	/** The task description. */
-	private final StringProperty task;
-	
-	/** The owner of the task. */
+    private final BooleanProperty completed;
+    private final StringProperty task;
     private final StringProperty owner;
-    
-    /** The status of the task. */
-    private final ObjectProperty<Status> status;
-    
-    /** The due date of the task. */
+    private final StringProperty status;
     private final StringProperty dueDate;
+    private final StringProperty priority;
     
-    /** The priority level of the task. */
-    private final ObjectProperty<Priority> priority;
-    
-    /** Indicates whether the task is completed (for checkbox use). */
-    private final BooleanProperty completed; // ✅ Added checkbox property
-
     /**
-     * Represents the status of a task, with a display name and associated CSS style class.
-     * Used to indicate progress state in the UI.
+     * Constructor to create a new Task with all properties.
+     * 
+     * @param task The task description
+     * @param owner The person responsible for the task
+     * @param status Current status of the task
+     * @param dueDate Due date for the task (as string)
+     * @param priority Priority level of the task
      */
-    public enum Status {
-    	/** No status specified. */
-    	EMPTY("", ""),
-        
-    	/** Task has not yet started. */
-    	NOT_STARTED("Not Started", "status-not_started"),
-        
-    	/** Task is currently in progress. */
-    	ONGOING("Ongoing", "status-ongoing"),
-        
-    	/** Task has been completed. */
-    	DONE("Done", "status-done");
-
-    	/** Display name for the status. */
-    	private final String displayName;
-    	
-    	/** CSS style class for the status. */
-        private final String styleClass;
-
-        /**
-         * Constructs a new Status enum value.
-         *
-         * @param displayName the display name
-         * @param styleClass the associated CSS class
-         */
-        Status(String displayName, String styleClass) {
-            this.displayName = displayName;
-            this.styleClass = styleClass;
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
-
-        /**
-         * Gets the CSS style class associated with the status.
-         * @return the CSS style class
-         */
-        public String getStyleClass() {
-            return styleClass;
-        }
-    }
-
-    /**
-     * Represents the priority of a task, with a display name and associated CSS style class.
-     * Used to visually differentiate urgency levels in the UI.
-     */
-    public enum Priority {
-    	/** No priority specified. */
-    	EMPTY("", ""),
-        
-    	/** Low priority. */
-    	LOW("Low", "priority-low"),
-        
-    	/** Medium priority. */
-    	MEDIUM("Medium", "priority-medium"),
-        
-    	/** High priority. */
-    	HIGH("High", "priority-high");
-
-    	/** Display name for the priority. */
-    	private final String displayName;
-    	
-    	/** CSS style class for the priority. */
-        private final String styleClass;
-
-        /**
-         * Constructs a new Priority enum value.
-         *
-         * @param displayName the display name
-         * @param styleClass the associated CSS class
-         */
-        Priority(String displayName, String styleClass) {
-            this.displayName = displayName;
-            this.styleClass = styleClass;
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
-
-        /**
-         * Gets the CSS style class associated with the priority.
-         * @return the CSS style class
-         */
-        public String getStyleClass() {
-            return styleClass;
-        }
-    }
-
-    /**
-     * Constructs a Task with specified values.
-     *
-     * @param task the description of the task
-     * @param owner the person responsible for the task
-     * @param status the current status of the task
-     * @param dueDate the due date of the task
-     * @param priority the priority level of the task
-     */
-    public Task(String task, String owner, Status status, String dueDate, Priority priority) {
+    public Task(String task, String owner, String status, String dueDate, String priority) {
+        this.completed = new SimpleBooleanProperty(false);
         this.task = new SimpleStringProperty(task);
         this.owner = new SimpleStringProperty(owner);
-        this.status = new SimpleObjectProperty<>(status);
+        this.status = new SimpleStringProperty(status);
         this.dueDate = new SimpleStringProperty(dueDate);
-        this.priority = new SimpleObjectProperty<>(priority);
-        this.completed = new SimpleBooleanProperty(false); // default unchecked
+        this.priority = new SimpleStringProperty(priority);
     }
-
+    
     /**
-     * Creates and returns a Task with default empty values.
-     *
-     * @return an empty Task instance
+     * Alternative constructor for creating a task that's already completed.
      */
-    public static Task createEmptyTask() {
-        return new Task("", "", Status.EMPTY, "", Priority.EMPTY);
+    public Task(String task, String owner, String status, String dueDate, String priority, boolean completed) {
+        this(task, owner, status, dueDate, priority);
+        this.completed.set(completed);
     }
-
-    // === Getters ===
-    /**
-     * Returns the task description.
-     *
-     * @return the task description
-     */
-    public String getTask() { return task.get(); }
+    
+    // Completed property methods
+    public boolean isCompleted() { 
+        return completed.get(); 
+    }
+    
+    public void setCompleted(boolean completed) { 
+        this.completed.set(completed); 
+    }
+    
+    public BooleanProperty completedProperty() { 
+        return completed; 
+    }
+    
+    // Task property methods
+    public String getTask() { 
+        return task.get(); 
+    }
+    
+    public void setTask(String task) { 
+        this.task.set(task != null ? task : ""); 
+    }
+    
+    public StringProperty taskProperty() { 
+        return task; 
+    }
+    
+    // Owner property methods
+    public String getOwner() { 
+        return owner.get(); 
+    }
+    
+    public void setOwner(String owner) { 
+        this.owner.set(owner != null ? owner : ""); 
+    }
+    
+    public StringProperty ownerProperty() { 
+        return owner; 
+    }
+    
+    // Status property methods
+    public String getStatus() { 
+        return status.get(); 
+    }
+    
+    public void setStatus(String status) { 
+        this.status.set(status != null ? status : "Not Started"); 
+    }
+    
+    public StringProperty statusProperty() { 
+        return status; 
+    }
+    
+    // Due date property methods
+    public String getDueDate() { 
+        return dueDate.get(); 
+    }
+    
+    public void setDueDate(String dueDate) { 
+        this.dueDate.set(dueDate != null ? dueDate : ""); 
+    }
+    
+    public StringProperty dueDateProperty() { 
+        return dueDate; 
+    }
+    
+    // Priority property methods
+    public String getPriority() { 
+        return priority.get(); 
+    }
+    
+    public void setPriority(String priority) { 
+        this.priority.set(priority != null ? priority : "Medium"); 
+    }
+    
+    public StringProperty priorityProperty() { 
+        return priority; 
+    }
     
     /**
-     * Returns the task owner.
-     *
-     * @return the task owner
+     * Utility method to check if the task is overdue.
+     * Note: This assumes the due date is in YYYY-MM-DD format.
+     * 
+     * @return true if the task is overdue, false otherwise
      */
-    public String getOwner() { return owner.get(); }
-    
-    /**
-     * Returns the task status.
-     *
-     * @return the current task status
-     */
-    public Status getStatus() { return status.get(); }
-    
-    /**
-     * Returns the due date of the task.
-     *
-     * @return the task due date
-     */
-    public String getDueDate() { return dueDate.get(); }
-    
-    /**
-     * Returns the task priority.
-     *
-     * @return the task priority
-     */
-    public Priority getPriority() { return priority.get(); }
-    
-    /**
-     * Returns whether the task is completed.
-     *
-     * @return true if the task is marked as completed, false otherwise
-     */
-    public boolean isCompleted() { return completed.get(); }
-
-    // === Property getters ===
-    public StringProperty taskProperty() { return task; }
-    public StringProperty ownerProperty() { return owner; }
-    public ObjectProperty<Status> statusProperty() { return status; }
-    public StringProperty dueDateProperty() { return dueDate; }
-    public ObjectProperty<Priority> priorityProperty() { return priority; }
-    public BooleanProperty completedProperty() { return completed; }
-
-    // === Setters ===
-    /**
-     * Sets the task description.
-     *
-     * @param value the new task description
-     */
-    public void setTask(String value) { task.set(value); }
-    
-    /**
-     * Sets the task owner.
-     *
-     * @param value the new task owner
-     */
-    public void setOwner(String value) { owner.set(value); }
-    
-    /**
-     * Sets the task status.
-     *
-     * @param value the new task status
-     */
-    public void setStatus(Status value) { status.set(value); }
-    
-    /**
-     * Sets the task due date.
-     *
-     * @param value the new due date
-     */
-    public void setDueDate(String value) { dueDate.set(value); }
-    
-    /**
-     * Sets the task priority.
-     *
-     * @param value the new priority
-     */
-    public void setPriority(Priority value) { priority.set(value); }
-    
-    /**
-     * Marks the task as completed or not.
-     *
-     * @param value whether the task is completed
-     */
-    public void setCompleted(boolean value) { completed.set(value); }
-
-    // === Convenience string-based setters for deserialization ===
-    /**
-     * Sets the task status from a string.
-     * @param value the status string (e.g., "Not Started", "Done")
-     */
-    public void setStatus(String value) {
+    public boolean isOverdue() {
+        if (isCompleted() || getDueDate().isEmpty()) {
+            return false;
+        }
+        
         try {
-            status.set(Status.valueOf(value.replace(" ", "_").toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            status.set(Status.EMPTY);
+            java.time.LocalDate dueLocalDate = java.time.LocalDate.parse(getDueDate());
+            return dueLocalDate.isBefore(java.time.LocalDate.now());
+        } catch (Exception e) {
+            // If date parsing fails, assume not overdue
+            return false;
         }
     }
-
+    
     /**
-     * Sets the task priority from a string.
-     * @param value the priority string (e.g., "Low", "High")
+     * Get a formatted display string for the due date.
+     * 
+     * @return formatted due date string
      */
-    public void setPriority(String value) {
+    public String getFormattedDueDate() {
+        if (getDueDate().isEmpty()) {
+            return "No due date";
+        }
+        
         try {
-            priority.set(Priority.valueOf(value.toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            priority.set(Priority.EMPTY);
+            java.time.LocalDate date = java.time.LocalDate.parse(getDueDate());
+            return date.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy"));
+        } catch (Exception e) {
+            return getDueDate(); // Return original if parsing fails
         }
     }
-
-    // === CSS Style class accessors ===
+    
     /**
-     * Gets the CSS class for the task's current status.
-     * @return the CSS class string for the status
+     * Check if this task has high priority.
+     * 
+     * @return true if priority is "High"
      */
-    public String getStatusStyleClass() {
-        return getStatus() != null ? getStatus().getStyleClass() : "";
+    public boolean isHighPriority() {
+        return "High".equals(getPriority());
     }
-
+    
     /**
-     * Gets the CSS class for the task's current priority.
-     * @return the CSS class string for the priority
+     * Get a summary string representation of the task.
+     * 
+     * @return formatted task summary
      */
-    public String getPriorityStyleClass() {
-        return getPriority() != null ? getPriority().getStyleClass() : "";
+    @Override
+    public String toString() {
+        return String.format("Task{task='%s', owner='%s', status='%s', dueDate='%s', priority='%s', completed=%s}",
+                getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
+    }
+    
+    /**
+     * Create a copy of this task.
+     * 
+     * @return new Task instance with same values
+     */
+    public Task copy() {
+        return new Task(getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
+    }
+    
+    /**
+     * Validate if the task has all required fields filled.
+     * 
+     * @return true if task is valid
+     */
+    public boolean isValid() {
+        return !getTask().trim().isEmpty() && !getOwner().trim().isEmpty();
     }
 }

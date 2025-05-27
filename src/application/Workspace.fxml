@@ -78,7 +78,8 @@
                   <!-- Section Lines -->
             <Line endX="75.0" layoutX="120.0" layoutY="53.0" startX="-100.0" stroke="#bababa" />
             <Button fx:id="addTaskButton" layoutX="480.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleAddTask" prefHeight="32.0" prefWidth="94.0" styleClass="action-button" text="Add Task" />
-            <Button fx:id="deleteTaskButton" layoutX="591.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleDeleteTask" prefHeight="32.0" prefWidth="94.0" text="Delete">
+            <Button fx:id="editTaskButton" layoutX="585" layoutY="18" mnemonicParsing="false" onAction="#handleEditTask" prefHeight="32.0" prefWidth="94.0" styleClass="action-button" text="Edit" />
+			<Button fx:id="deleteTaskButton" layoutX="690" layoutY="18" mnemonicParsing="false" onAction="#handleDeleteTask" prefHeight="32.0" prefWidth="94.0" text="Delete">
                <styleClass>
                   <String fx:value="action-button" />
                   <String fx:value="delete-button" />
