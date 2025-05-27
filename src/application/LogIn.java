@@ -9,6 +9,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -353,6 +354,16 @@ public class LogIn implements Initializable {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setContentText(message);
+        
+        // Add icon to alert window
+        try {
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        } catch (Exception e) {
+            // If icon loading fails, continue without icon
+            System.err.println("Could not load alert icon: " + e.getMessage());
+        }
+        
         alert.showAndWait();
     }
     
