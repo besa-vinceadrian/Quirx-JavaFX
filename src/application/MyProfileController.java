@@ -16,6 +16,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.scene.control.PasswordField;
 import javafx.event.ActionEvent;
@@ -121,6 +122,12 @@ public class MyProfileController implements Initializable {
 			showAlert(AlertType.ERROR, "Error", "Email address cannot be empty.");
 			return;
 		}
+        // Validate email format
+        if (!isValidEmail(email)) {
+            showAlert(AlertType.ERROR, "Error", "Please enter a valid email address.");
+            return;
+        }
+        
         try {
             // Check if the email is already registered
             if (!email.equals(userProfile.getEmail()) && authService.isEmailTaken(email)) {
@@ -157,6 +164,10 @@ public class MyProfileController implements Initializable {
         alert.setTitle("Delete Account");
         alert.setHeaderText("Are you sure you want to delete your account?");
         alert.setContentText("This action cannot be undone. All your data will be permanently deleted.");
+        
+        // Set custom icon
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
 
         // Customize the buttons
         ButtonType buttonTypeYes = new ButtonType("Yes, Delete");
@@ -170,6 +181,10 @@ public class MyProfileController implements Initializable {
                  passwordDialog.setTitle("Password Confirmation");
                  passwordDialog.setHeaderText("Enter your password to confirm account deletion:");
                  passwordDialog.setContentText("Password:");
+                 
+                 // Set custom icon for password dialog
+                 Stage passwordStage = (Stage) passwordDialog.getDialogPane().getScene().getWindow();
+                 passwordStage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
 
                  // Show dialog and wait for input
                  passwordDialog.showAndWait().ifPresent(password -> {
@@ -181,9 +196,9 @@ public class MyProfileController implements Initializable {
                 				 showAlert(AlertType.INFORMATION, "Success", "Your account has been deleted successfully.");
                         
                 				 // Close the application or return to login screen
-                				 Stage stage = (Stage) deleteAccountButton.getScene().getWindow();
+                				 Stage mainStage = (Stage) deleteAccountButton.getScene().getWindow();
                 				 Parent root = FXMLLoader.load(getClass().getResource("SignUp.fxml"));
-                				 stage.setScene(new Scene(root));
+                				 mainStage.setScene(new Scene(root));
                 			 } else {
                 				 showAlert(AlertType.ERROR, "Error", "Failed to delete account. Please try again.");
                 			 }
@@ -263,6 +278,16 @@ public class MyProfileController implements Initializable {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        
+        // Set custom icon
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
         alert.showAndWait();
+    }
+    
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
     }
 }
