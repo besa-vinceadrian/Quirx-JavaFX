@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
 
 import TaskManagement.TaskDAO;
 
-public class WorkspaceController implements Initializable {
+public class GroupWorkspaceController implements Initializable {
 
 	@FXML private Label workspaceTitle;
     @FXML private TableView<TaskModel> tableView;

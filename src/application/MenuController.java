@@ -16,32 +16,98 @@ import javafx.geometry.Pos;
 import javafx.scene.text.Font;
 import java.util.Optional;
 import javafx.scene.image.Image;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MenuController implements Initializable {
+	
+	private int userId;
     
-    private int userId;
+    @FXML
+    private AnchorPane anchorPaneId;
     
-    @FXML private AnchorPane anchorPaneId;
-    @FXML private Pane windowPane;
-    @FXML private Button dashboardButton;
-    @FXML private Button myTaskButton;
-    @FXML private Button workspaceButton;
-    @FXML private Button logOutButton;
-    @FXML private Button addWorkspaceButton;
-    @FXML private VBox menuVBox;
+    @FXML
+    private Pane windowPane;
+    
+    @FXML
+    private Button dashboardButton;
+    
+    @FXML
+    private Button myTaskButton;
+    
+    @FXML
+    private Button personalWorkspaceButton;
+    
+    @FXML
+    private Button groupWorkspaceButton;
+    
+    @FXML
+    private Button logOutButton;
+    
+    @FXML
+    private Button addWorkspaceButton;
+    
+    @FXML
+    private VBox menuVBox;
+    
+    @FXML
+    private Font originalFont;
     
     public void setUserId(int userId) {
         this.userId = userId;
     }
     
+    // Container for group workspaces
+    private VBox groupWorkspaceContainer;
+    private boolean isGroupWorkspaceExpanded = false;
+    private List<HBox> createdWorkspaces = new ArrayList<>();
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> anchorPaneId.requestFocus());
+        originalFont = groupWorkspaceButton.getFont(); // Store original font
+        initializeGroupWorkspaceContainer();
+    }
+    
+    private void initializeGroupWorkspaceContainer() {
+        // Create container for group workspaces
+        groupWorkspaceContainer = new VBox();
+        groupWorkspaceContainer.setSpacing(2);
+        groupWorkspaceContainer.setPadding(new Insets(0, 0, 0, 0)); // Indent the sub-items
+        groupWorkspaceContainer.setVisible(false);
+        groupWorkspaceContainer.setManaged(false);
+        
+        // Find the index of group workspace button and add container after it
+        int groupWorkspaceIndex = -1;
+        for (int i = 0; i < menuVBox.getChildren().size(); i++) {
+            if (menuVBox.getChildren().get(i) == groupWorkspaceButton) {
+                groupWorkspaceIndex = i;
+                break;
+            }
+        }
+        
+        if (groupWorkspaceIndex != -1) {
+            menuVBox.getChildren().add(groupWorkspaceIndex + 1, groupWorkspaceContainer);
+        }
+        
+        // Update group workspace button text to show arrow
+        updateGroupWorkspaceButtonText();
+    }
+    
+    private void updateGroupWorkspaceButtonText() {
+        String arrow = isGroupWorkspaceExpanded ? "▼" : "▶";
+        String baseText = "Group Workspace";
+        groupWorkspaceButton.setText(arrow + " " + baseText);
+        
+     // Restore the original font
+        if (originalFont != null) {
+            groupWorkspaceButton.setFont(originalFont);
+        }
     }
     
     @FXML
     private void dashboardButton(ActionEvent event) {
-        try {
+    	try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MyProfile.fxml"));
             Pane view = loader.load();
             
@@ -61,11 +127,11 @@ public class MenuController implements Initializable {
     public void setUsername(String username) {
         this.username = username;
     }
-
+    
     
     @FXML
     private void myTaskButton(ActionEvent event) {
-        try {
+    	try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MyTask.fxml"));
             Pane view = loader.load();
 
@@ -78,15 +144,14 @@ public class MenuController implements Initializable {
             e.printStackTrace();
         }
     }
-
     
     @FXML
-    private void workspaceButton(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Workspace.fxml"));
+    private void personalWorkspaceButton(ActionEvent event) {
+    	try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("PersonalWorkspace.fxml"));
             Pane view = loader.load();
 
-            WorkspaceController controller = loader.getController();
+            PersonalWorkspaceController controller = loader.getController();
             controller.setUsername(username);          // Pass username
 
             windowPane.getChildren().clear();
@@ -95,11 +160,22 @@ public class MenuController implements Initializable {
             e.printStackTrace();
         }
     }
-
+    
+    @FXML
+    private void groupWorkspaceButton(ActionEvent event) {
+        toggleGroupWorkspaceDropdown();
+    }
+    
+    private void toggleGroupWorkspaceDropdown() {
+        isGroupWorkspaceExpanded = !isGroupWorkspaceExpanded;
+        groupWorkspaceContainer.setVisible(isGroupWorkspaceExpanded);
+        groupWorkspaceContainer.setManaged(isGroupWorkspaceExpanded);
+        updateGroupWorkspaceButtonText();
+    }
     
     @FXML
     private void logOutButton(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Log Out Confirmation");
         alert.setHeaderText(null);
         alert.setContentText("Are you sure you want to log out?");
@@ -149,47 +225,60 @@ public class MenuController implements Initializable {
         }
     }
     
-    
-    
     private void createWorkspaceButton(String workspaceName) {
+        // Create a container for the workspace button and delete button
         HBox buttonContainer = new HBox();
         buttonContainer.setAlignment(Pos.CENTER_LEFT);
-        buttonContainer.setSpacing(5);
+        buttonContainer.setSpacing(0);
+        buttonContainer.setPrefWidth(274.0); // Total width to match the main menu items
         
-        Button newWorkspaceBtn = new Button(workspaceName);
+        // Workspace button (smaller and indented)
+        Button newWorkspaceBtn = new Button("  " + workspaceName); // Added spaces for visual indentation
         newWorkspaceBtn.getStyleClass().add("menu-button");
         newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
-        newWorkspaceBtn.setPrefHeight(30.0);
-        newWorkspaceBtn.setPrefWidth(234.0);
-        newWorkspaceBtn.setFont(Font.font("Arial", 12));
-        newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 40));
+        newWorkspaceBtn.setPrefHeight(30.0); // Slightly smaller than main buttons
+        newWorkspaceBtn.setPrefWidth(234.0); // Increased to accommodate smaller spacer
+        newWorkspaceBtn.setFont(Font.font("Arial", 12)); // Slightly smaller font
+        newWorkspaceBtn.setPadding(new Insets(0, 10, 0, 40)); // Less padding since it's already indented
         
-        Button deleteButton = new Button("ðŸ—‘");
+        // Spacer to push delete button to the center position of add button
+        Region spacer = new Region();
+        spacer.setPrefWidth(5.0); // Reduced to move delete button more to the left
+        
+        // Delete button 
+        Button deleteButton = new Button("🗑");
         deleteButton.getStyleClass().add("delete-button");
-        deleteButton.setPrefWidth(40.0);
+        deleteButton.setPrefWidth(40.0); // Match add button width
         deleteButton.setPrefHeight(30.0);
         deleteButton.setFont(Font.font("Arial", 16));
+        newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 10)); 
         deleteButton.setOnAction(e -> confirmAndDeleteWorkspace(buttonContainer, workspaceName));
         
+        // Set action to load workspace
         newWorkspaceBtn.setOnAction(e -> {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("Workspace.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupWorkspace.fxml"));
                 Pane view = loader.load();
-
-                WorkspaceController controller = loader.getController();
+                
+                GroupWorkspaceController controller = loader.getController();
                 controller.setWorkspaceName(workspaceName);
-                controller.setUsername(username);          // Pass username
-
+                
                 windowPane.getChildren().clear();
                 windowPane.getChildren().add(view);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
-
         
-        buttonContainer.getChildren().addAll(newWorkspaceBtn, deleteButton);
-        menuVBox.getChildren().add(menuVBox.getChildren().size() - 1, buttonContainer);
+        // Add the container to the group workspace container
+        buttonContainer.getChildren().addAll(newWorkspaceBtn, spacer, deleteButton);
+        groupWorkspaceContainer.getChildren().add(buttonContainer);
+        createdWorkspaces.add(buttonContainer);
+        
+        // Automatically expand the dropdown when a new workspace is added
+        if (!isGroupWorkspaceExpanded) {
+            toggleGroupWorkspaceDropdown();
+        }
     }
     
     private void confirmAndDeleteWorkspace(HBox buttonContainer, String workspaceName) {
@@ -203,7 +292,13 @@ public class MenuController implements Initializable {
         
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            menuVBox.getChildren().remove(buttonContainer);
+            groupWorkspaceContainer.getChildren().remove(buttonContainer);
+            createdWorkspaces.remove(buttonContainer);
+            
+            // If no workspaces left, collapse the dropdown
+            if (createdWorkspaces.isEmpty() && isGroupWorkspaceExpanded) {
+                toggleGroupWorkspaceDropdown();
+            }
         }
     }
 }

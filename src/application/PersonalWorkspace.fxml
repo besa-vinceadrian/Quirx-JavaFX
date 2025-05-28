@@ -12,7 +12,7 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #f5f5f0;" stylesheets="@Workspace.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.WorkspaceController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="666.0" prefWidth="703.0" style="-fx-background-radius: 10; -fx-background-color: #f5f5f0;" stylesheets="@PersonalWorkspace.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.PersonalWorkspaceController">
    
    <children>
       <Pane prefHeight="64.0" prefWidth="526.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-border-color: #000000; -fx-border-radius: 10;">
