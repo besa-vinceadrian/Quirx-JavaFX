@@ -39,10 +39,29 @@ public class MyTaskController {
 
     private String username;
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     @FXML
     public void initialize() {
+        // Make all tables non-clickable/non-selectable
+        ongoingTableView.setRowFactory(tv -> {
+            javafx.scene.control.TableRow<MyTask> row = new javafx.scene.control.TableRow<>();
+            row.setMouseTransparent(true);
+            return row;
+        });
+        
+        notStartedTableView.setRowFactory(tv -> {
+            javafx.scene.control.TableRow<MyTask> row = new javafx.scene.control.TableRow<>();
+            row.setMouseTransparent(true);
+            return row;
+        });
+        
+        completedTableView.setRowFactory(tv -> {
+            javafx.scene.control.TableRow<MyTask> row = new javafx.scene.control.TableRow<>();
+            row.setMouseTransparent(true);
+            return row;
+        });
+
         // ONGOING columns
         ongoingTaskColumn.setCellValueFactory(new PropertyValueFactory<>("taskTitle"));
         ongoingDueDateColumn.setCellValueFactory(cellData -> {
