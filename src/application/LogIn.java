@@ -330,7 +330,10 @@ public class LogIn implements Initializable {
             showAlert(AlertType.ERROR, "Error", "Both password fields are required.");
             return;
         }
-
+        if (newPassword.length() < 8 || confirmPassword.length() < 8) {
+        	showAlert(AlertType.ERROR, "Error", "Password must be at least 8 characters long and above.");
+			return;
+		}
         if (!newPassword.equals(confirmPassword)) {
             showAlert(AlertType.ERROR, "Error", "Passwords do not match.");
             return;
