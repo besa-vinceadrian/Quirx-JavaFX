@@ -2,9 +2,7 @@ package application;
 
 import javafx.application.Platform;
 
-
 import TaskManagement.Authentication;
-//import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
@@ -102,7 +100,7 @@ public class SignUp implements Initializable {
         Platform.runLater(() -> rightPane.requestFocus());
         authService = new Authentication();
         
-     // Bind text of visible and hidden fields
+        // Bind text of visible and hidden fields
         showPasswordFieldSU.textProperty().bindBidirectional(passwordFieldSU.textProperty());
         showConfirmPasswordFieldSU.textProperty().bindBidirectional(confirmPasswordFieldSU.textProperty());
 
@@ -130,7 +128,7 @@ public class SignUp implements Initializable {
             passwordFieldSU.setManaged(false);
             showPasswordFieldSU.requestFocus();
             showPasswordFieldSU.positionCaret(showPasswordFieldSU.getText().length());
-            togglePasswordButton.setText("Hide"); // update icon or text
+            togglePasswordButton.setText("Hide");
         } else {
             passwordFieldSU.setVisible(true);
             passwordFieldSU.setManaged(true);
@@ -138,7 +136,7 @@ public class SignUp implements Initializable {
             showPasswordFieldSU.setManaged(false);
             passwordFieldSU.requestFocus();
             passwordFieldSU.positionCaret(passwordFieldSU.getText().length());
-            togglePasswordButton.setText("Show"); // update icon or text
+            togglePasswordButton.setText("Show");
         }
     }
     
@@ -184,6 +182,10 @@ public class SignUp implements Initializable {
         String password = passwordFieldSU.getText().trim();
         String confirmPassword = confirmPasswordFieldSU.getText().trim();
         
+        if (password.length() < 8 || password.length() > 64) {
+            showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
+            return;
+        }
         if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showAlert(AlertType.ERROR, "Error", "All fields are required.");
             return;

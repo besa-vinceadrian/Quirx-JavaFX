@@ -19,7 +19,7 @@ public class Authentication {
     private String generatedOTP;
     private long otpGenerationTime;
     private long lastOTPSentTime;
-    private boolean hasResentOTP;
+    private boolean hasResentOTP = false;
 
     public Connection connect() throws SQLException {
         try {
