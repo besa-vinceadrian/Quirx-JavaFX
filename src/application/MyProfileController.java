@@ -1,5 +1,6 @@
 package application;
 
+import TaskManagement.Authentication;
 import TaskManagement.MyProfile;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -66,6 +67,7 @@ public class MyProfileController implements Initializable {
     @FXML
     private Button deleteAccountButton;
     
+    private Authentication authService = new Authentication();
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
 
@@ -100,6 +102,13 @@ public class MyProfileController implements Initializable {
             showAlert(AlertType.ERROR, "Error", "All fields cannot be empty.");
             return;
         }
+        if (firstName.equals(userProfile.getFirstName()) &&
+                lastName.equals(userProfile.getLastName()) &&
+                email.equals(userProfile.getEmail()) &&
+                newPassword.isEmpty()) {
+                showAlert(AlertType.ERROR, "Error", "No changes were made.");
+                return;
+            }
         if (firstName.isEmpty()) {
         	showAlert(AlertType.ERROR, "Error", "First name cannot be empty.");
 			return;
@@ -112,6 +121,12 @@ public class MyProfileController implements Initializable {
 			showAlert(AlertType.ERROR, "Error", "Email address cannot be empty.");
 			return;
 		}
+        try {
+            // Check if the email is already registered
+            if (!email.equals(userProfile.getEmail()) && authService.isEmailTaken(email)) {
+                showAlert(AlertType.ERROR, "Error", "The email address is already registered.");
+                return;
+            }
         if (!newPassword.isEmpty() && (newPassword.length() < 8 || newPassword.length() > 64)) {
         	showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
         	return;
@@ -121,7 +136,6 @@ public class MyProfileController implements Initializable {
             return;
         }
         
-        try {
             userProfile.setFirstName(firstNameField.getText());
             userProfile.setLastName(lastNameField.getText());
             userProfile.setEmail(emailField.getText());
