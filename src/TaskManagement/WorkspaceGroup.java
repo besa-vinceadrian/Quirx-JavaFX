@@ -44,7 +44,7 @@ public class WorkspaceGroup {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(FROM));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-            message.setSubject("You've been invited to join a workspace on Quirx");
+            message.setSubject("You've been invited to a workspace on Quirx");
             
             String htmlContent = "<html><body>" +
             		"<h2>Workspace Invitation</h2>" +
