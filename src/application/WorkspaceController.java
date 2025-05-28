@@ -177,7 +177,7 @@ public class WorkspaceController implements Initializable {
                             case "not started":
                                 setStyle("-fx-background-color: #BABABA; -fx-text-fill: #000000; -fx-alignment: CENTER;");
                                 break;
-                            case "ongoing":
+                            case "in progress":
                                 setStyle("-fx-background-color: #FFC107; -fx-text-fill: #000000; -fx-alignment: CENTER;");
                                 break;
                             case "done":
@@ -312,7 +312,7 @@ public class WorkspaceController implements Initializable {
 	                        case "not started":
 	                            setStyle("-fx-background-color: #BABABA; -fx-text-fill: #000000; -fx-alignment: CENTER;");
 	                            break;
-	                        case "ongoing":
+	                        case "in progress":
 	                            setStyle("-fx-background-color: #FFC107; -fx-text-fill: #000000; -fx-alignment: CENTER;");
 	                            break;
 	                        case "done":
@@ -416,7 +416,7 @@ public class WorkspaceController implements Initializable {
         ownerCombo.setEditable(true);
 
         ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Not Started", "Ongoing", "Done");
+        statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
         statusCombo.setValue(taskToEdit.getStatus());
 
         DatePicker dueDateField = new DatePicker();
@@ -509,7 +509,7 @@ public class WorkspaceController implements Initializable {
         ownerCombo.setEditable(false); // Allow custom input if needed
 
         ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Not Started", "Ongoing", "Done");
+        statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
         statusCombo.setValue("Not Started");
 
         // FIXED: Replace TextField with DatePicker
