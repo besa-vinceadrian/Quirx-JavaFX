@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 import TaskManagement.TaskDAO;
+import TaskManagement.WorkspaceGroup;
 
 public class GroupWorkspaceController implements Initializable {
 
@@ -771,27 +772,47 @@ public class GroupWorkspaceController implements Initializable {
             return;
         }
 
-        // Optional: check if the username exists in your system (optional but recommended)
+        // Check if the username exists
         if (!TaskDAO.doesUserExist(username)) {
             showAlertWithType(Alert.AlertType.ERROR, "User Not Found", "The specified username does not exist.");
             return;
         }
 
-        int currentWorkspaceID = currentWorkspaceIDG; // You already have this field
+        // Get user email
+        String recipientEmail = TaskDAO.getUserEmail(username);
+        if (recipientEmail == null) {
+            showAlertWithType(Alert.AlertType.ERROR, "Error", "Could not retrieve email for the user.");
+            return;
+        }
+
+        int currentWorkspaceID = currentWorkspaceIDG;
+        String workspaceName = currentWorkspaceName;
 
         // Call DAO method to add member
         boolean success = TaskDAO.addMemberToWorkspace(currentWorkspaceID, username);
 
         if (success) {
-            invitePane.setVisible(false);
-            notifiedPane.setVisible(true);
-            usernameField.clear();
+            // Send email notification
+            boolean emailSent = WorkspaceGroup.sendInvitationEmail(
+                recipientEmail, 
+                workspaceName, 
+                this.username // current user who is inviting
+            );
+            
+            if (emailSent) {
+                invitePane.setVisible(false);
+                notifiedPane.setVisible(true);
+                usernameField.clear();
+            } else {
+                showAlertWithType(Alert.AlertType.WARNING, 
+                    "Invitation Sent", 
+                    "User was added to workspace but email notification failed to send.");
+            }
         } else {
             showAlertWithType(Alert.AlertType.ERROR, "Failed", "User is already in the workspace or an error occurred.");
         }
     }
-
-    
+  
     @FXML
     private void handleContinue() {
         inviteStackPane.setVisible(false);
@@ -867,7 +888,7 @@ public class GroupWorkspaceController implements Initializable {
         }
     }
     
-    // Add this new method to update the title
+ // Add this new method to update the title
     public void updateWorkspaceTitle(String workspaceName) {
         if (workspaceTitle != null && workspaceName != null && !workspaceName.trim().isEmpty()) {
             workspaceTitle.setText(workspaceName.trim());

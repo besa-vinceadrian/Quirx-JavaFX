@@ -120,7 +120,7 @@
                               <Font name="SansSerif Regular" size="13.0" />
                            </font>
                         </Label>
-                        <TextField fx:id="usernameField" layoutX="18.0" layoutY="120.0" prefHeight="32.0" prefWidth="314.0" promptText="Email Address" styleClass="input-field" />
+                        <TextField fx:id="usernameField" layoutX="18.0" layoutY="120.0" prefHeight="32.0" prefWidth="314.0" promptText="Enter Username" styleClass="input-field" />
                         <Button layoutX="18.0" layoutY="159.0" mnemonicParsing="false" onAction="#handleInviteFriend" prefHeight="27.0" prefWidth="314.0" styleClass="action-button" text="Invite">
                            <cursor>
                               <Cursor fx:constant="HAND" />

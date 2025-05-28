@@ -613,5 +613,21 @@ public class TaskDAO {
 
         return false;
     }
+    
+    public static String getUserEmail(String username) {
+        String sql = "SELECT userEmail FROM UserTable WHERE userName = ?";
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+            
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getString("userEmail");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error fetching user email: " + e.getMessage());
+        }
+        return null;
+    }
 
 }
