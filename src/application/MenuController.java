@@ -163,15 +163,23 @@ public class MenuController implements Initializable {
     
     @FXML
     private void personalWorkspaceButton(ActionEvent event) {
-    	try {
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PersonalWorkspace.fxml"));
             Pane view = loader.load();
 
             PersonalWorkspaceController controller = loader.getController();
             controller.setUsername(username);      
             controller.setWorkspaceData(workspaceId, workspaceName);
+            
+            // Set the workspace name in the UI
+            controller.setWorkspaceName(workspaceName);
+            
             windowPane.getChildren().clear();
             windowPane.getChildren().add(view);
+            
+            // The alert will automatically show after tasks are loaded due to the 
+            // Platform.runLater call in the modified loadTasks method
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -24,6 +24,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 import javafx.event.ActionEvent;
+import java.util.ArrayList;
+import javafx.application.Platform;
 
 import java.net.URL;
 import java.util.List;
@@ -128,8 +130,10 @@ public class PersonalWorkspaceController implements Initializable {
             }
         }
 
-        tableView.setItems(todoTasks); // Items will appear in DAO-sorted order
-        // tableView.sort(); ❌ Removed – we trust the DAO sort
+        tableView.setItems(todoTasks);
+        
+        // Show urgent tasks alert after loading tasks
+        Platform.runLater(() -> checkAndShowDueDateAlert());
     }
     
     private void setupTodoTable() {
@@ -844,6 +848,105 @@ public class PersonalWorkspaceController implements Initializable {
             // If setting up icon fails, continue without icon
             System.err.println("Warning: Could not set up dialog icon: " + e.getMessage());
         }
+    }
+    
+    private void checkAndShowDueDateAlert() {
+        if (username == null || username.isBlank() || currentWorkspaceID <= 0) {
+            return;
+        }
+        
+        List<TaskModel> allTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceID);
+        List<TaskModel> urgentTasks = new ArrayList<>();
+        
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        
+        for (TaskModel task : allTasks) {
+            // Skip completed tasks
+            if ("Done".equalsIgnoreCase(task.getStatus())) {
+                continue;
+            }
+            
+            String dueDateStr = task.getDueDate();
+            if (dueDateStr != null && !dueDateStr.trim().isEmpty()) {
+                try {
+                    LocalDate dueDate = LocalDate.parse(dueDateStr, formatter);
+                    
+                    // Check if task is due today or tomorrow
+                    if (dueDate.isEqual(today) || dueDate.isEqual(tomorrow)) {
+                        urgentTasks.add(task);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error parsing date for task: " + task.getTask() + " - " + e.getMessage());
+                }
+            }
+        }
+        
+        if (!urgentTasks.isEmpty()) {
+            showUrgentTasksAlert(urgentTasks);
+        }
+    }
+
+    private void showUrgentTasksAlert(List<TaskModel> urgentTasks) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Urgent Tasks Alert");
+        alert.setHeaderText("You have tasks due soon!");
+        
+        StringBuilder content = new StringBuilder();
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        
+        // Separate tasks due today and tomorrow
+        List<TaskModel> todayTasks = new ArrayList<>();
+        List<TaskModel> tomorrowTasks = new ArrayList<>();
+        
+        for (TaskModel task : urgentTasks) {
+            try {
+                LocalDate dueDate = LocalDate.parse(task.getDueDate(), formatter);
+                if (dueDate.isEqual(today)) {
+                    todayTasks.add(task);
+                } else {
+                    tomorrowTasks.add(task);
+                }
+            } catch (Exception e) {
+                // Skip if date parsing fails
+            }
+        }
+        
+        // Add today's tasks
+        if (!todayTasks.isEmpty()) {
+            content.append("📅 DUE TODAY:\n");
+            for (TaskModel task : todayTasks) {
+                content.append("• ").append(task.getTask())
+                       .append(" (").append(task.getPriority()).append(" priority)")
+                       .append("\n");
+            }
+            content.append("\n");
+        }
+        
+        // Add tomorrow's tasks
+        if (!tomorrowTasks.isEmpty()) {
+            content.append("⏰ DUE TOMORROW:\n");
+            for (TaskModel task : tomorrowTasks) {
+                content.append("• ").append(task.getTask())
+                       .append(" (").append(task.getPriority()).append(" priority)")
+                       .append("\n");
+            }
+        }
+        
+        alert.setContentText(content.toString());
+        
+        // Set icon for alert
+        setAlertIcon(alert);
+        
+        // Make the alert resizable and larger
+        alert.setResizable(true);
+        alert.getDialogPane().setPrefWidth(450);
+        alert.getDialogPane().setPrefHeight(300);
+        
+        alert.showAndWait();
     }
 
     public void setWorkspaceName(String workspaceName) {
