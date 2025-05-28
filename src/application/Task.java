@@ -1,199 +1,226 @@
 package application;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Task model class representing a task in the workspace application.
  * Uses JavaFX properties for data binding with UI components.
  */
 public class Task {
-    private final BooleanProperty completed;
-    private final StringProperty task;
-    private final StringProperty owner;
-    private final StringProperty status;
-    private final StringProperty dueDate;
-    private final StringProperty priority;
-    
-    /**
-     * Constructor to create a new Task with all properties.
-     * 
-     * @param task The task description
-     * @param owner The person responsible for the task
-     * @param status Current status of the task
-     * @param dueDate Due date for the task (as string)
-     * @param priority Priority level of the task
-     */
-    public Task(String task, String owner, String status, String dueDate, String priority) {
-        this.completed = new SimpleBooleanProperty(false);
-        this.task = new SimpleStringProperty(task);
-        this.owner = new SimpleStringProperty(owner);
-        this.status = new SimpleStringProperty(status);
-        this.dueDate = new SimpleStringProperty(dueDate);
-        this.priority = new SimpleStringProperty(priority);
+
+    private final IntegerProperty taskID = new SimpleIntegerProperty(); // For database
+    private final IntegerProperty workspaceID = new SimpleIntegerProperty(); // For workspace grouping
+    private final BooleanProperty completed = new SimpleBooleanProperty(false);
+
+    private final StringProperty taskTitle = new SimpleStringProperty();
+    private final StringProperty userOwner = new SimpleStringProperty();
+    private final StringProperty taskStatus = new SimpleStringProperty("Not Started");
+    private final StringProperty dueDate = new SimpleStringProperty();
+    private final StringProperty taskPriority = new SimpleStringProperty("Low");
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+    /** Constructor for a new Task (default: not completed). */
+    public Task(String title, String owner, String status, String dueDate, String priority) {
+        this.taskTitle.set(title != null ? title : "");
+        this.userOwner.set(owner != null ? owner : "");
+        this.taskStatus.set(status != null ? status : "Not Started");
+        this.dueDate.set(dueDate != null ? dueDate : "");
+        this.taskPriority.set(priority != null ? priority : "Low");
     }
-    
-    /**
-     * Alternative constructor for creating a task that's already completed.
-     */
-    public Task(String task, String owner, String status, String dueDate, String priority, boolean completed) {
-        this(task, owner, status, dueDate, priority);
+
+    /** Constructor including completion state. */
+    public Task(String title, String owner, String status, String dueDate, String priority, boolean completed) {
+        this(title, owner, status, dueDate, priority);
         this.completed.set(completed);
     }
+
+    // === DAO-compatible getter aliases ===
     
-    // Completed property methods
-    public boolean isCompleted() { 
-        return completed.get(); 
+    public String getTask() {
+        return taskTitle.get() != null ? taskTitle.get() : "";
     }
-    
-    public void setCompleted(boolean completed) { 
-        this.completed.set(completed); 
+
+    public String getOwner() {
+        return userOwner.get() != null ? userOwner.get() : "";
     }
-    
-    public BooleanProperty completedProperty() { 
-        return completed; 
+
+    public String getStatus() {
+        return taskStatus.get() != null ? taskStatus.get() : "Not Started";
     }
-    
-    // Task property methods
-    public String getTask() { 
-        return task.get(); 
+
+    public String getDueDate() {
+        return dueDate.get() != null ? dueDate.get() : "";
     }
-    
-    public void setTask(String task) { 
-        this.task.set(task != null ? task : ""); 
+
+    public String getPriority() {
+        return taskPriority.get() != null ? taskPriority.get() : "Low";
     }
-    
-    public StringProperty taskProperty() { 
-        return task; 
+
+
+    public String getTaskTitle() {
+        return getTask();
     }
-    
-    // Owner property methods
-    public String getOwner() { 
-        return owner.get(); 
+
+    public String getUserOwner() {
+        return getOwner();
     }
-    
-    public void setOwner(String owner) { 
-        this.owner.set(owner != null ? owner : ""); 
+
+    public String getTaskStatus() {
+        return getStatus();
     }
-    
-    public StringProperty ownerProperty() { 
-        return owner; 
+
+    public String getTaskPriority() {
+        return getPriority();
     }
-    
-    // Status property methods
-    public String getStatus() { 
-        return status.get(); 
+
+    // === Property Getters and Setters ===
+
+    public int getTaskID() {
+        return taskID.get();
     }
-    
-    public void setStatus(String status) { 
-        this.status.set(status != null ? status : "Not Started"); 
+
+    public void setTaskID(int id) {
+        this.taskID.set(id);
     }
-    
-    public StringProperty statusProperty() { 
-        return status; 
+
+    public IntegerProperty taskIDProperty() {
+        return taskID;
     }
-    
-    // Due date property methods
-    public String getDueDate() { 
-        return dueDate.get(); 
+
+    public int getWorkspaceID() {
+        return workspaceID.get();
     }
-    
-    public void setDueDate(String dueDate) { 
-        this.dueDate.set(dueDate != null ? dueDate : ""); 
+
+    public void setWorkspaceID(int value) {
+        workspaceID.set(value);
     }
-    
-    public StringProperty dueDateProperty() { 
-        return dueDate; 
+
+    public IntegerProperty workspaceIDProperty() {
+        return workspaceID;
     }
-    
-    // Priority property methods
-    public String getPriority() { 
-        return priority.get(); 
+
+    public boolean isCompleted() {
+        return completed.get();
     }
-    
-    public void setPriority(String priority) { 
-        this.priority.set(priority != null ? priority : "Low"); 
+
+    public void setCompleted(boolean value) {
+        completed.set(value);
     }
-    
-    public StringProperty priorityProperty() { 
-        return priority; 
+
+    public BooleanProperty completedProperty() {
+        return completed;
     }
-    
-    /**
-     * Utility method to check if the task is overdue.
-     * Note: This assumes the due date is in YYYY-MM-DD format.
-     * 
-     * @return true if the task is overdue, false otherwise
-     */
+
+    public void setTask(String value) {
+        taskTitle.set(value != null ? value : "");
+    }
+
+    public StringProperty taskProperty() {
+        return taskTitle;
+    }
+
+    public void setOwner(String value) {
+        userOwner.set(value != null ? value : "");
+    }
+
+    public StringProperty ownerProperty() {
+        return userOwner;
+    }
+
+
+    public void setStatus(String value) {
+        taskStatus.set(value != null ? value : "Not Started");
+    }
+
+    public StringProperty statusProperty() {
+        return taskStatus;
+    }
+
+    public void setDueDate(String value) {
+        dueDate.set(value != null ? value : "");
+    }
+
+    public StringProperty dueDateProperty() {
+        return dueDate;
+    }
+
+    public void setPriority(String value) {
+        taskPriority.set(value != null ? value : "Low");
+    }
+
+    public StringProperty priorityProperty() {
+        return taskPriority;
+    }
+
+    // === Utility Methods ===
+
+    public boolean isValid() {
+        return !getTask().trim().isEmpty() && !getOwner().trim().isEmpty();
+    }
+
     public boolean isOverdue() {
-        if (isCompleted() || getDueDate().isEmpty()) {
-            return false;
-        }
-        
+        if (isCompleted() || getDueDate().isEmpty()) return false;
+
         try {
-            java.time.LocalDate dueLocalDate = java.time.LocalDate.parse(getDueDate());
-            return dueLocalDate.isBefore(java.time.LocalDate.now());
-        } catch (Exception e) {
-            // If date parsing fails, assume not overdue
+            LocalDate due = LocalDate.parse(getDueDate(), FORMATTER);
+            return due.isBefore(LocalDate.now());
+        } catch (DateTimeParseException e) {
             return false;
         }
     }
-    
-    /**
-     * Get a formatted display string for the due date.
-     * 
-     * @return formatted due date string
-     */
+
     public String getFormattedDueDate() {
-        if (getDueDate().isEmpty()) {
-            return "No due date";
-        }
-        
+        if (getDueDate().isEmpty()) return "No due date";
+
         try {
-            java.time.LocalDate date = java.time.LocalDate.parse(getDueDate());
-            return date.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy"));
-        } catch (Exception e) {
-            return getDueDate(); // Return original if parsing fails
+            LocalDate date = LocalDate.parse(getDueDate(), FORMATTER);
+            return date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
+        } catch (DateTimeParseException e) {
+            return getDueDate();
         }
     }
-    
-    /**
-     * Check if this task has high priority.
-     * 
-     * @return true if priority is "High"
-     */
+
     public boolean isHighPriority() {
-        return "High".equals(getPriority());
+        return "High".equalsIgnoreCase(getPriority());
     }
-    
-    /**
-     * Get a summary string representation of the task.
-     * 
-     * @return formatted task summary
-     */
+
+    public Task copy() {
+        Task t = new Task(getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
+        t.setTaskID(getTaskID());
+        t.setWorkspaceID(getWorkspaceID());
+        return t;
+    }
+
     @Override
     public String toString() {
         return String.format("Task{task='%s', owner='%s', status='%s', dueDate='%s', priority='%s', completed=%s}",
                 getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
     }
     
-    /**
-     * Create a copy of this task.
-     * 
-     * @return new Task instance with same values
-     */
-    public Task copy() {
-        return new Task(getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
+    // === Compatibility Setters for UI/DAO integration ===
+
+    public void setTaskTitle(String title) {
+        setTask(title);
+    }
+
+    public void setUserOwner(String owner) {
+        setOwner(owner);
+    }
+
+    public void setTaskStatus(String status) {
+        setStatus(status);
+    }
+
+    public void setTaskPriority(String priority) {
+        setPriority(priority);
+    }
+
+    public void setDueDateFormatted(String date) {
+        setDueDate(date);
     }
     
-    /**
-     * Validate if the task has all required fields filled.
-     * 
-     * @return true if task is valid
-     */
-    public boolean isValid() {
-        return !getTask().trim().isEmpty() && !getOwner().trim().isEmpty();
-    }
 }

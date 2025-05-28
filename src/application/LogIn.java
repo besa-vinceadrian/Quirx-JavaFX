@@ -308,7 +308,7 @@ public class LogIn implements Initializable {
                 int userId = authService.getUserIdByUsername(username);
                 if (userId != -1) {
                     showAlert(AlertType.INFORMATION, "Success", "Login successful!");
-                    loadMenuScene(event.getSource(), userId);
+                    loadMenuScene(event.getSource(), userId, username);
                 } else {
                     showAlert(AlertType.ERROR, "Error", "User ID not found.");
                 }
@@ -367,13 +367,14 @@ public class LogIn implements Initializable {
         alert.showAndWait();
     }
     
-    private void loadMenuScene(Object source, int userId) {
+    private void loadMenuScene(Object source, int userId, String username) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Menu.fxml"));
             Parent root = loader.load();
             
             MenuController menuController = loader.getController();
             menuController.setUserId(userId);
+            menuController.setUsername(username); // âœ… Fix: Pass username to controller
             
             Stage stage = (Stage) ((javafx.scene.Node) source).getScene().getWindow();
             stage.setScene(new Scene(root));

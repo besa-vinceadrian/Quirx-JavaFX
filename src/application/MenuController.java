@@ -56,6 +56,13 @@ public class MenuController implements Initializable {
         }
     }
     
+    private String username;
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    
     @FXML
     private void myTaskButton(ActionEvent event) {
         loadView("MyTask.fxml");
@@ -63,8 +70,20 @@ public class MenuController implements Initializable {
     
     @FXML
     private void workspaceButton(ActionEvent event) {
-        loadView("Workspace.fxml");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Workspace.fxml"));
+            Pane view = loader.load();
+
+            WorkspaceController controller = loader.getController();
+            controller.setUsername(username);          // Pass username
+
+            windowPane.getChildren().clear();
+            windowPane.getChildren().add(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
     
     @FXML
     private void logOutButton(ActionEvent event) {
@@ -118,6 +137,8 @@ public class MenuController implements Initializable {
         }
     }
     
+    
+    
     private void createWorkspaceButton(String workspaceName) {
         HBox buttonContainer = new HBox();
         buttonContainer.setAlignment(Pos.CENTER_LEFT);
@@ -131,7 +152,7 @@ public class MenuController implements Initializable {
         newWorkspaceBtn.setFont(Font.font("Arial", 12));
         newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 40));
         
-        Button deleteButton = new Button("🗑");
+        Button deleteButton = new Button("ðŸ—‘");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setPrefWidth(40.0);
         deleteButton.setPrefHeight(30.0);
@@ -142,16 +163,18 @@ public class MenuController implements Initializable {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("Workspace.fxml"));
                 Pane view = loader.load();
-                
+
                 WorkspaceController controller = loader.getController();
                 controller.setWorkspaceName(workspaceName);
-                
+                controller.setUsername(username);          // Pass username
+
                 windowPane.getChildren().clear();
                 windowPane.getChildren().add(view);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
+
         
         buttonContainer.getChildren().addAll(newWorkspaceBtn, deleteButton);
         menuVBox.getChildren().add(menuVBox.getChildren().size() - 1, buttonContainer);

@@ -1,207 +1,374 @@
 package TaskManagement;
 
 import java.sql.*;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import application.Task;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.PriorityQueue;
 
 public class TaskDAO {
-    private static final String DB_URL = "jdbc:sqlserver://10.244.202.169:1433;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
-    private static final String DB_USER = "QuirxAdmin";
-    private static final String DB_PASS = "admin";
 
-    public static Connection connect() throws SQLException {
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("SQL Server Driver not found", e);
-        }
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-    }
+    private static final String URL = "jdbc:sqlserver://10.244.202.169:1433;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
+    private static final String USER = "QuirxAdmin";
+    private static final String PASSWORD = "admin";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-    // ✅ Check if workspace exists by name
-    public static Integer getWorkspaceIDByName(String workspaceName) {
-        String sql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ?";
-        try (Connection c = connect(); PreparedStatement st = c.prepareStatement(sql)) {
-            st.setString(1, workspaceName);
-            ResultSet rs = st.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("workspaceID");
-            }
-        } catch (SQLException e) {
-            System.err.println("❌ Error checking workspace by name: " + e.getMessage());
-        }
-        return null;
-    }
-
-    // ✅ Create or return existing workspace ID
-    public static int getOrCreateWorkspace(String workspaceName) {
-        Integer existingID = getWorkspaceIDByName(workspaceName);
-        if (existingID != null) {
-            return existingID;
+    public static boolean addTask(Task t, int workspaceID, String workspaceName, String createdByUser) {
+        // Use real workspaceID (from DB)
+        int actualWorkspaceID = ensureWorkspaceExists(workspaceName, createdByUser);
+        if (actualWorkspaceID == -1) {
+            System.err.println("❌ Failed to ensure workspace. Aborting task insert.");
+            return false;
         }
 
-        String sql = "INSERT INTO WorkspaceTable (workspaceName) VALUES (?)";
-        try (Connection c = connect();
-             PreparedStatement st = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            st.setString(1, workspaceName);
-            st.executeUpdate();
+        String sql = "INSERT INTO TaskTable (taskTitle, userOwner, dueDate, taskStatus, taskPriority, workspaceID) VALUES (?, ?, ?, ?, ?, ?)";
 
-            ResultSet rs = st.getGeneratedKeys();
-            if (rs.next()) {
-                int generatedID = rs.getInt(1);
-                System.out.println("✅ Workspace created with ID: " + generatedID);
-                return generatedID;
-            }
-        } catch (SQLException e) {
-            System.err.println("❌ Error creating workspace: " + e.getMessage());
-        }
-        return -1;
-    }
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    // ✅ Add task after getting/creating a workspace
- // ✅ Add task after getting/creating a workspace
-    public static boolean addTask(UserTask t) {
-        String workspaceName = "Default Workspace " + t.getWorkspaceID(); // Or t.getWorkspaceName() if available
-        int actualWorkspaceID = getOrCreateWorkspace(workspaceName);
-        if (actualWorkspaceID == -1) return false;
-
-        // ✅ Ensure the task has the correct workspace ID before inserting
-        t.setWorkspaceID(actualWorkspaceID);
-
-        String sql = """
-            INSERT INTO TaskTable (taskTitle, taskStatus, dueDate, taskPriority, userOwner, workspaceID, completed)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
-
-        try (Connection c = connect();
-             PreparedStatement st = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            System.out.println("🔍 Inserting Task:");
+            System.out.println("Title: " + t.getTaskTitle());
+            System.out.println("Owner: " + t.getUserOwner());
+            System.out.println("Due Date: " + t.getDueDate());
+            System.out.println("Status: " + t.getTaskStatus());
+            System.out.println("Priority: " + t.getTaskPriority());
+            System.out.println("Workspace ID: " + actualWorkspaceID);
 
             st.setString(1, t.getTaskTitle());
-            st.setString(2, t.getTaskStatus().toDatabaseValue());
-            st.setDate(3, t.getDueDate());
-            st.setString(4, t.getTaskPriority().toDatabaseValue());
-            st.setString(5, t.getUserOwner());
-            st.setInt(6, actualWorkspaceID); // ✅ use the actual ID from DB
-            st.setBoolean(7, t.completedProperty().get());
+            st.setString(2, t.getUserOwner());
 
-            int rowsAffected = st.executeUpdate();
-            if (rowsAffected > 0) {
-                ResultSet rs = st.getGeneratedKeys();
-                if (rs.next()) {
-                    int generatedId = rs.getInt(1);
-                    System.out.println("✅ Task added with ID: " + generatedId);
+            String dueDateStr = t.getDueDate();
+            if (dueDateStr != null && !dueDateStr.trim().isEmpty()) {
+                try {
+                    LocalDate parsedDate = LocalDate.parse(dueDateStr, DATE_FORMATTER);
+                    st.setDate(3, java.sql.Date.valueOf(parsedDate));
+                } catch (DateTimeParseException e) {
+                    System.err.println("❌ Invalid date format: " + dueDateStr);
+                    st.setNull(3, Types.DATE);
                 }
-                return true;
+            } else {
+                System.out.println("ℹ️ Due date is null or empty. Setting to NULL.");
+                st.setNull(3, Types.DATE);
             }
-        } catch (SQLException e) {
-            System.err.println("❌ Error adding task: " + e.getMessage());
+
+            st.setString(4, t.getTaskStatus());
+            st.setString(5, t.getTaskPriority());
+            st.setInt(6, actualWorkspaceID);
+
+            int rows = st.executeUpdate();
+            if (rows > 0) {
+                ResultSet keys = st.getGeneratedKeys();
+                if (keys.next()) {
+                    t.setTaskID(keys.getInt(1));
+                }
+                t.setWorkspaceID(actualWorkspaceID);
+                System.out.println("✅ Task inserted successfully (ID: " + t.getTaskID() + ")");
+                return true;
+            } else {
+                System.err.println("⚠️ Task insert failed: No rows affected.");
+            }
+
+        } catch (SQLIntegrityConstraintViolationException dup) {
+            System.err.println("❌ Duplicate or constraint error: " + dup.getMessage());
+        } catch (SQLException sqlEx) {
+            System.err.println("❌ SQL error: " + sqlEx.getMessage());
+        } catch (Exception e) {
+            System.err.println("❌ Exception during task insert:");
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    public static boolean wasTaskInserted(Task t) {
+        String sql = "SELECT COUNT(*) FROM TaskTable WHERE taskTitle = ? AND userOwner = ? AND workspaceID = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setString(1, t.getTaskTitle());
+            st.setString(2, t.getUserOwner());
+            st.setInt(3, t.getWorkspaceID());
+
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error checking if task was inserted:");
+            e.printStackTrace();
         }
         return false;
     }
 
-    public static List<UserTask> getAllTasks(String userOwner) {
-        List<UserTask> list = new ArrayList<>();
-        String sql = """
-            SELECT taskID, taskTitle, taskStatus, dueDate, taskPriority, userOwner, workspaceID, completed
-            FROM TaskTable
-            WHERE userOwner = ?
-        """;
-        try (Connection c = connect(); PreparedStatement st = c.prepareStatement(sql)) {
-            st.setString(1, userOwner);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                list.add(new UserTask(
-                    rs.getInt("taskID"),
-                    rs.getString("taskTitle"),
-                    UserTask.Status.fromDatabaseValue(rs.getString("taskStatus")),
-                    rs.getDate("dueDate"),
-                    UserTask.Priority.fromString(rs.getString("taskPriority")),
-                    rs.getString("userOwner"),
-                    rs.getInt("workspaceID"),
-                    rs.getBoolean("completed")
-                ));
+    private static int ensureWorkspaceExists(String workspaceName, String createdByUser) {
+        String selectSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
+        String insertSql = "INSERT INTO WorkspaceTable (workspaceName, createdByUser) VALUES (?, ?)";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement selectStmt = con.prepareStatement(selectSql);
+             PreparedStatement insertStmt = con.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Try to find existing workspace
+            selectStmt.setString(1, workspaceName);
+            selectStmt.setString(2, createdByUser);
+            ResultSet rs = selectStmt.executeQuery();
+
+            if (rs.next()) {
+                int existingID = rs.getInt("workspaceID");
+                System.out.println("ℹ️ Workspace already exists. ID = " + existingID);
+                return existingID;
             }
-        } catch (SQLException e) {
-            System.err.println("❌ Error retrieving tasks: " + e.getMessage());
+
+            // Insert new workspace
+            insertStmt.setString(1, workspaceName);
+            insertStmt.setString(2, createdByUser);
+            insertStmt.executeUpdate();
+
+            ResultSet keys = insertStmt.getGeneratedKeys();
+            if (keys.next()) {
+                int newID = keys.getInt(1);
+                System.out.println("✅ Workspace inserted: " + workspaceName + " (ID: " + newID + ")");
+                return newID;
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error ensuring workspace exists:");
+            e.printStackTrace();
         }
-        return list;
+
+        return -1;
     }
 
-    public static List<UserTask> getTasksByWorkspace(String userOwner, int workspaceID) {
-        List<UserTask> list = new ArrayList<>();
-        String sql = """
-        	    SELECT taskID, taskTitle, taskStatus, dueDate, taskPriority, userOwner, workspaceID, completed
-        	    FROM TaskTable
-        	    WHERE userOwner = ? AND workspaceID = ?
-        	    ORDER BY 
-        	        CASE taskPriority
-        	            WHEN 'HIGH' THEN 1
-        	            WHEN 'MEDIUM' THEN 2
-        	            WHEN 'LOW' THEN 3
-        	            ELSE 4
-        	        END
-        	""";
 
-        System.out.println("➡️ Querying tasks for user: " + userOwner + ", workspaceID: " + workspaceID);
+    public static void deleteTask(int taskID) {
+        String sql = "DELETE FROM TaskTable WHERE taskID = ?";
 
-        try (Connection c = connect(); PreparedStatement st = c.prepareStatement(sql)) {
-            st.setString(1, userOwner);
-            st.setInt(2, workspaceID);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                UserTask task = new UserTask(
-                    rs.getInt("taskID"),
-                    rs.getString("taskTitle"),
-                    UserTask.Status.fromDatabaseValue(rs.getString("taskStatus")),
-                    rs.getDate("dueDate"),
-                    UserTask.Priority.fromString(rs.getString("taskPriority")),
-                    rs.getString("userOwner"),
-                    rs.getInt("workspaceID"),
-                    rs.getBoolean("completed")
-                );
-                System.out.println("✅ Found task: " + task.getTaskTitle());
-                list.add(task);
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setInt(1, taskID);
+            int rows = st.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("🗑️ Task deleted: ID = " + taskID);
+            } else {
+                System.out.println("⚠️ No task found with ID: " + taskID);
             }
-        } catch (SQLException e) {
-            System.err.println("❌ Error retrieving tasks by workspace: " + e.getMessage());
+
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting task with ID " + taskID);
+            e.printStackTrace();
         }
-        return list;
     }
 
-    public static void updateTask(UserTask t) {
-        String sql = """
-            UPDATE TaskTable
-            SET taskTitle=?, taskStatus=?, dueDate=?, taskPriority=?, workspaceID=?, completed=?
-            WHERE taskID=? AND userOwner=?
-        """;
-        try (Connection c = connect(); PreparedStatement st = c.prepareStatement(sql)) {
+    public static void updateTask(Task t) {
+        String sql = "UPDATE TaskTable SET taskTitle = ?, userOwner = ?, dueDate = ?, taskStatus = ?, taskPriority = ? WHERE taskID = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
             st.setString(1, t.getTaskTitle());
-            st.setString(2, t.getTaskStatus().toDatabaseValue());
-            st.setDate(3, t.getDueDate());
-            st.setString(4, t.getTaskPriority().toDatabaseValue());
-            st.setInt(5, t.getWorkspaceID());
-            st.setBoolean(6, t.completedProperty().get());
-            st.setInt(7, t.getTaskID());
-            st.setString(8, t.getUserOwner());
+            st.setString(2, t.getUserOwner());
 
-            int updated = st.executeUpdate();
-            if (updated > 0) System.out.println("✅ Task updated!");
-            else System.out.println("⚠️ Task not found or unauthorized.");
-        } catch (SQLException e) {
-            System.err.println("❌ Error updating task: " + e.getMessage());
+            try {
+                LocalDate parsedDate = LocalDate.parse(t.getDueDate(), DATE_FORMATTER);
+                st.setDate(3, java.sql.Date.valueOf(parsedDate));
+            } catch (DateTimeParseException e) {
+                System.err.println("⚠️ Invalid date format during update: " + t.getDueDate());
+                st.setNull(3, Types.DATE);
+            }
+
+            st.setString(4, t.getTaskStatus());
+            st.setString(5, t.getTaskPriority());
+            st.setInt(6, t.getTaskID());
+
+            int rows = st.executeUpdate();
+            if (rows > 0) {
+                System.out.println("✏️ Task updated: ID = " + t.getTaskID());
+            } else {
+                System.out.println("⚠️ Update failed. Task not found: ID = " + t.getTaskID());
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error updating task with ID " + t.getTaskID());
+            e.printStackTrace();
         }
     }
 
-    public static void deleteTask(int id, String userOwner) {
-        try (Connection c = connect();
-             PreparedStatement st = c.prepareStatement("DELETE FROM TaskTable WHERE taskID=? AND userOwner=?")) {
-            st.setInt(1, id);
-            st.setString(2, userOwner);
-            int deleted = st.executeUpdate();
-            if (deleted > 0) System.out.println("✅ Task deleted!");
-            else System.out.println("⚠️ Task not found or unauthorized.");
-        } catch (SQLException e) {
-            System.err.println("❌ Error deleting task: " + e.getMessage());
+    public static List<Task> getTasksByWorkspace(int workspaceID) {
+        List<Task> tasks = new ArrayList<>();
+        String sql = "SELECT * FROM TaskTable WHERE workspaceID = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setInt(1, workspaceID);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                String formattedDate = "";
+                Date sqlDate = rs.getDate("dueDate");
+                if (sqlDate != null) {
+                    formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
+                }
+
+                Task task = new Task(
+                    rs.getString("taskTitle"),
+                    rs.getString("userOwner"),
+                    rs.getString("taskStatus"),
+                    formattedDate,
+                    rs.getString("taskPriority")
+                    // 👈 no 'completed' argument
+                );
+
+                task.setTaskID(rs.getInt("taskID"));
+                task.setWorkspaceID(rs.getInt("workspaceID")); // safer to get from DB
+
+                tasks.add(task);
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching tasks for workspace ID " + workspaceID);
+            e.printStackTrace();
+        }
+
+        return tasks;
+    }
+
+
+    public static Task getTaskByID(int taskID) {
+        String sql = "SELECT * FROM TaskTable WHERE taskID = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setInt(1, taskID);
+            ResultSet rs = st.executeQuery();
+
+            if (rs.next()) {
+                String formattedDate = "";
+                Date sqlDate = rs.getDate("dueDate");
+                if (sqlDate != null) {
+                    formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
+                }
+
+                Task t = new Task(
+                        rs.getString("taskTitle"),
+                        rs.getString("userOwner"),
+                        rs.getString("taskStatus"),
+                        formattedDate,
+                        rs.getString("taskPriority")
+                );
+
+                t.setTaskID(rs.getInt("taskID"));
+                t.setWorkspaceID(rs.getInt("workspaceID"));
+                return t;
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching task by ID: " + taskID);
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    // === Static Utilities for Task Comparison ===
+
+    public static int mapPriority(String priority) {
+        if (priority == null) return 0;
+        switch (priority.toLowerCase()) {
+            case "high": return 3;
+            case "medium": return 2;
+            case "low": return 1;
+            default:
+                System.out.println("⚠️ Unknown priority: " + priority);
+                return 0;
         }
     }
+
+    public static LocalDate parseDate(String dateStr) {
+        try {
+            return LocalDate.parse(dateStr, DATE_FORMATTER);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    
+    public static List<Task> getTasksByUserOrWorkspace(String username, int workspaceID) {
+        List<Task> taskList = new ArrayList<>();
+
+        String sql = "SELECT * FROM TaskTable WHERE userOwner = ? " +
+                     "UNION " +
+                     "SELECT * FROM TaskTable WHERE workspaceID = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setString(1, username);
+            st.setInt(2, workspaceID);
+
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                String formattedDate = "";
+                Date sqlDate = rs.getDate("dueDate");
+                if (sqlDate != null) {
+                    formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
+                }
+
+                Task task = new Task(
+                    rs.getString("taskTitle"),
+                    rs.getString("userOwner"),
+                    rs.getString("taskStatus"),
+                    formattedDate,
+                    rs.getString("taskPriority")
+                );
+
+                task.setTaskID(rs.getInt("taskID"));
+                task.setWorkspaceID(rs.getInt("workspaceID"));
+
+                taskList.add(task);
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching tasks for user or workspace");
+            e.printStackTrace();
+        }
+
+        taskList.sort((t1, t2) -> {
+            int p1 = mapPriority(t1.getPriority());
+            int p2 = mapPriority(t2.getPriority());
+
+            if (p1 != p2) {
+                return Integer.compare(p2, p1); // High > Medium > Low
+            }
+
+            // Same priority → sort by due date ASC (soonest first)
+            LocalDate d1 = parseDate(t1.getDueDate());
+            LocalDate d2 = parseDate(t2.getDueDate());
+
+            if (d1 != null && d2 != null) return d1.compareTo(d2);
+            if (d1 != null) return -1;
+            if (d2 != null) return 1;
+            return 0;
+        });
+
+
+        // 🔍 Confirm final sort
+        System.out.println("✅ Sorted Tasks by Priority:");
+        for (Task t : taskList) {
+            System.out.println(t.getPriority() + " - " + t.getDueDate());
+        }
+
+        return taskList;
+    }
+
 }
