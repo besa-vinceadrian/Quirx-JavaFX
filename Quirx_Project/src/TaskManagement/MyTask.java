@@ -12,19 +12,22 @@ public class MyTask {
     private LocalDate dueDate;
     private String taskPriority;
     private int workspaceID;
+    private String workspaceName;  // New field
 
     private static final String DB_URL = "jdbc:sqlserver://10.244.202.169:1433;databaseName=QUIRX;encrypt=true;trustServerCertificate=true";
     private static final String DB_USER = "QuirxAdmin";
     private static final String DB_PASS = "admin";
 
-    // Constructor
-    public MyTask(int taskID, String taskTitle, String taskStatus, LocalDate dueDate, String taskPriority, int workspaceID) {
+    // Constructor updated to include workspaceName
+    public MyTask(int taskID, String taskTitle, String taskStatus, LocalDate dueDate,
+                  String taskPriority, int workspaceID, String workspaceName) {
         this.taskID = taskID;
         this.taskTitle = taskTitle;
         this.taskStatus = taskStatus;
         this.dueDate = dueDate;
         this.taskPriority = taskPriority;
         this.workspaceID = workspaceID;
+        this.workspaceName = workspaceName;
     }
 
     // Getters
@@ -34,12 +37,16 @@ public class MyTask {
     public LocalDate getDueDate() { return dueDate; }
     public String getTaskPriority() { return taskPriority; }
     public int getWorkspaceID() { return workspaceID; }
+    public String getWorkspaceName() { return workspaceName; }
 
-    // Static method to fetch tasks for a user from DB
+    // Static method to fetch tasks with workspace name
     public static List<MyTask> getTasksByUser(String userName) {
         List<MyTask> tasks = new ArrayList<>();
-        String sql = "SELECT taskID, taskTitle, taskStatus, dueDate, taskPriority, workspaceID " +
-                     "FROM TaskTable WHERE userOwner = ? ORDER BY dueDate ASC";
+        String sql = "SELECT t.taskID, t.taskTitle, t.taskStatus, t.dueDate, t.taskPriority, t.workspaceID, w.workspaceName " +
+                     "FROM TaskTable t " +
+                     "LEFT JOIN WorkspaceTable w ON t.workspaceID = w.workspaceID " +
+                     "WHERE t.userOwner = ? " +
+                     "ORDER BY t.dueDate ASC";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -51,16 +58,18 @@ public class MyTask {
                 int taskID = rs.getInt("taskID");
                 String title = rs.getString("taskTitle");
                 String status = rs.getString("taskStatus");
-                LocalDate dueDate = rs.getDate("dueDate").toLocalDate();
+                Date date = rs.getDate("dueDate");
+                LocalDate dueDate = (date != null) ? date.toLocalDate() : null;
                 String priority = rs.getString("taskPriority");
                 int workspaceID = rs.getInt("workspaceID");
+                String workspaceName = rs.getString("workspaceName");
 
-                tasks.add(new MyTask(taskID, title, status, dueDate, priority, workspaceID));
+                tasks.add(new MyTask(taskID, title, status, dueDate, priority, workspaceID, workspaceName));
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            // You can handle or rethrow exceptions as needed
+            // Handle exceptions as needed
         }
 
         return tasks;
