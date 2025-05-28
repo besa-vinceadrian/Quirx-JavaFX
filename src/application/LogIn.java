@@ -230,7 +230,6 @@ public class LogIn implements Initializable {
             showAlert(AlertType.ERROR, "Error", "Invalid OTP. Please try again.");
             return;
         }
-        
         showPage(pageResetPassword);
     }
     
