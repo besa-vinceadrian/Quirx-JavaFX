@@ -17,10 +17,10 @@
             </Label>
             <TableView fx:id="ongoingTableView" layoutX="19.0" layoutY="43.0" prefHeight="156.0" prefWidth="665.0" style="-fx-background-color: #d3d3d3; -fx-border-color: #d3d3d3;">
               <columns>
-                <TableColumn fx:id="ongoingTaskColumn" maxWidth="244.0" minWidth="244.0" prefWidth="244.0" resizable="false" text="Task" />
-                <TableColumn fx:id="ongoingDueDateColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Due Date" />
-                <TableColumn fx:id="ongoingPriorityColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Priority" />
-                <TableColumn fx:id="ongoingWorkspaceColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Workspace" />
+                <TableColumn fx:id="ongoingTaskColumn" editable="false" maxWidth="244.0" minWidth="244.0" prefWidth="244.0" resizable="false" sortable="false" text="Task" />
+                <TableColumn fx:id="ongoingDueDateColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Due Date" />
+                <TableColumn fx:id="ongoingPriorityColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Priority" />
+                <TableColumn fx:id="ongoingWorkspaceColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Workspace" />
               </columns>
             </TableView>
          </children>
@@ -35,10 +35,10 @@
             </Label>
             <TableView fx:id="notStartedTableView" layoutX="19.0" layoutY="43.0" prefHeight="156.0" prefWidth="665.0" style="-fx-background-color: #d3d3d3; -fx-border-color: #d3d3d3;">
                <columns>
-                  <TableColumn fx:id="notStartedTaskColumn" maxWidth="244.0" minWidth="244.0" prefWidth="244.0" resizable="false" text="Task" />
-                  <TableColumn fx:id="notStartedDueDateColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Due Date" />
-                  <TableColumn fx:id="notStartedPriorityColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Priority" />
-                  <TableColumn fx:id="notStartedWorkspaceColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Workspace" />
+                  <TableColumn fx:id="notStartedTaskColumn" editable="false" maxWidth="244.0" minWidth="244.0" prefWidth="244.0" resizable="false" sortable="false" text="Task" />
+                  <TableColumn fx:id="notStartedDueDateColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Due Date" />
+                  <TableColumn fx:id="notStartedPriorityColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Priority" />
+                  <TableColumn fx:id="notStartedWorkspaceColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Workspace" />
                </columns>
             </TableView>
          </children>
@@ -53,10 +53,10 @@
             </Label>
             <TableView fx:id="completedTableView" layoutX="19.0" layoutY="44.0" prefHeight="156.0" prefWidth="665.0" style="-fx-background-color: #d3d3d3; -fx-border-color: #d3d3d3;">
                <columns>
-                  <TableColumn fx:id="completedTaskColumn" maxWidth="244.0" minWidth="244.0" prefWidth="244.0" resizable="false" text="Task" />
-                  <TableColumn fx:id="completedDueDateColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Due Date" />
-                  <TableColumn fx:id="completedPriorityColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Priority" />
-                  <TableColumn fx:id="completedWorkspaceColumn" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" text="Workspace" />
+                  <TableColumn fx:id="completedTaskColumn" editable="false" maxWidth="244.0" minWidth="244.0" prefWidth="244.0" resizable="false" sortable="false" text="Task" />
+                  <TableColumn fx:id="completedDueDateColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Due Date" />
+                  <TableColumn fx:id="completedPriorityColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Priority" />
+                  <TableColumn fx:id="completedWorkspaceColumn" editable="false" maxWidth="140.0" minWidth="140.0" prefWidth="140.0" resizable="false" sortable="false" text="Workspace" />
                </columns>
             </TableView>
          </children>
