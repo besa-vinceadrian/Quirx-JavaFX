@@ -43,6 +43,19 @@
     -fx-border-color: #d3d3d3;
 }
 
+/* === Scrollbar Styling === */
+.table-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
+.table-view .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
 .todo-table .table-cell {
     -fx-font-size: 11px;
     -fx-alignment: CENTER-LEFT;
