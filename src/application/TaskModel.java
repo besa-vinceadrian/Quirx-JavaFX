@@ -172,6 +172,11 @@ public class TaskModel {
             return false;
         }
     }
+    
+    private String workspaceName;
+    public void setWorkspaceName(String name) { this.workspaceName = name; }
+    public String getWorkspaceName() { return this.workspaceName; }
+
 
     public String getFormattedDueDate() {
         if (getDueDate().isEmpty()) return "No due date";

@@ -1,7 +1,7 @@
-
 package application;
 
 import javafx.application.Platform;
+import TaskManagement.TaskDAO;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,6 +19,7 @@ import java.util.Optional;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.List;
+import TaskManagement.WorkspaceGroup;
 
 public class MenuController implements Initializable {
 	
@@ -187,6 +188,112 @@ public class MenuController implements Initializable {
         groupWorkspaceContainer.setVisible(isGroupWorkspaceExpanded);
         groupWorkspaceContainer.setManaged(isGroupWorkspaceExpanded);
         updateGroupWorkspaceButtonText();
+
+        if (isGroupWorkspaceExpanded) {
+            groupWorkspaceContainer.getChildren().clear();
+            createdWorkspaces.clear(); // Clear the tracking list
+
+            List<String> workspaces = TaskDAO.getUserGroupWorkspaces(username);
+            for (String workspaceName : workspaces) {
+                // Use the existing createWorkspaceButton method to maintain consistent layout
+                createWorkspaceButtonFromDB(workspaceName);
+            }
+        }
+    }
+
+    // New helper method to create workspace buttons from database without auto-expanding
+    private void createWorkspaceButtonFromDB(String workspaceName) {
+        // Create a container for the workspace button and delete button
+        HBox buttonContainer = new HBox();
+        buttonContainer.setAlignment(Pos.CENTER_LEFT);
+        buttonContainer.setSpacing(0);
+        buttonContainer.setPrefWidth(274.0); // Total width to match the main menu items
+        
+        // Workspace button (smaller and indented)
+        Button newWorkspaceBtn = new Button("  " + workspaceName); // Added spaces for visual indentation
+        newWorkspaceBtn.getStyleClass().add("menu-button");
+        newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
+        newWorkspaceBtn.setPrefHeight(30.0); // Slightly smaller than main buttons
+        newWorkspaceBtn.setPrefWidth(234.0); // Increased to accommodate smaller spacer
+        newWorkspaceBtn.setFont(Font.font("Arial", 12)); // Slightly smaller font
+        newWorkspaceBtn.setPadding(new Insets(0, 10, 0, 40)); // Less padding since it's already indented
+        
+        // Spacer to push delete button to the center position of add button
+        Region spacer = new Region();
+        spacer.setPrefWidth(5.0); // Reduced to move delete button more to the left
+        
+        // Delete button 
+        Button deleteButton = new Button("🗑");
+        deleteButton.getStyleClass().add("delete-button");
+        deleteButton.setPrefWidth(40.0); // Match add button width
+        deleteButton.setPrefHeight(30.0);
+        deleteButton.setFont(Font.font("Arial", 16));
+        newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 10)); 
+        deleteButton.setOnAction(e -> confirmAndDeleteWorkspaceFromDB(buttonContainer, workspaceName));
+        
+        // Set action to load workspace
+        newWorkspaceBtn.setOnAction(e -> {
+            try {
+                WorkspaceGroup workspace = TaskDAO.getCurrentWorkspace(username, workspaceName);
+                if (workspace == null) {
+                    System.out.println("❌ Could not load workspace.");
+                    return;
+                }
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupWorkspace.fxml"));
+                Pane view = loader.load();
+
+                GroupWorkspaceController controller = loader.getController();
+                controller.setUsername(username);
+                controller.setWorkspaceData(workspace.getId(), workspace.getName());
+
+                windowPane.getChildren().clear();
+                windowPane.getChildren().add(view);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+
+        
+        // Add the container to the group workspace container
+        buttonContainer.getChildren().addAll(newWorkspaceBtn, spacer, deleteButton);
+        groupWorkspaceContainer.getChildren().add(buttonContainer);
+        createdWorkspaces.add(buttonContainer);
+    }
+
+    // Updated delete method that also removes from database
+    private void confirmAndDeleteWorkspaceFromDB(HBox buttonContainer, String workspaceName) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Workspace");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure you want to delete '" + workspaceName + "'?");
+        
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Delete from database - you'll need to implement this method in TaskDAO
+            boolean deleted = TaskDAO.deleteWorkspace(workspaceName, username);
+            
+            if (deleted) {
+                groupWorkspaceContainer.getChildren().remove(buttonContainer);
+                createdWorkspaces.remove(buttonContainer);
+                
+                // If no workspaces left, collapse the dropdown
+                if (createdWorkspaces.isEmpty() && isGroupWorkspaceExpanded) {
+                    toggleGroupWorkspaceDropdown();
+                }
+            } else {
+                // Show error message if deletion failed
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Delete Failed");
+                errorAlert.setHeaderText(null);
+                errorAlert.setContentText("Failed to delete workspace from database.");
+                errorAlert.showAndWait();
+            }
+        }
     }
     
     @FXML
@@ -226,7 +333,12 @@ public class MenuController implements Initializable {
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(workspaceName -> {
             if (!workspaceName.trim().isEmpty()) {
-                createWorkspaceButton(workspaceName);
+                int workspaceId = TaskDAO.createWorkspaceForUser(workspaceName, username);
+                if (workspaceId != -1) {
+                    createWorkspaceButton(workspaceName); // Or refresh your UI
+                } else {
+                    System.err.println("❌ Failed to create workspace.");
+                }
             }
         });
     }

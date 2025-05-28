@@ -47,7 +47,7 @@ public class Crud_updated {
 
         @Override
         public int compareTo(Task o) {
-            return priorityVal(this.taskPriority) - priorityVal(o.taskPriority);
+            return Integer.compare(priorityVal(this.taskPriority), priorityVal(o.taskPriority));
         }
 
         private int priorityVal(String p) {
@@ -66,31 +66,42 @@ public class Crud_updated {
         private static final String DB_PASS = "admin";
 
         public static Connection connect() throws SQLException {
-            try { Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver"); }
-            catch (ClassNotFoundException e) { e.printStackTrace(); }
+            try {
+                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("SQL Server Driver not found", e);
+            }
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
         }
 
-        public static void addTask(Task t) {
+        public static boolean addTask(Task t) {
             String sql = """
                 INSERT INTO TaskTable (taskTitle, taskStatus, dueDate, taskPriority, userOwner)
                 VALUES (?,?,?,?,?)
             """;
-            try (Connection c = connect(); PreparedStatement st = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            try (Connection c = connect();
+                 PreparedStatement st = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                
                 st.setString(1, t.getTaskTitle());
                 st.setString(2, t.getTaskStatus());
                 st.setDate(3, t.getDueDate());
                 st.setString(4, t.getTaskPriority());
                 st.setString(5, t.getUserOwner());
-
-                st.executeUpdate();
-                ResultSet rs = st.getGeneratedKeys();
-                if (rs.next()) {
-                    System.out.println("✅ Task added with ID: " + rs.getInt(1));
+                
+                int rowsAffected = st.executeUpdate();
+                if (rowsAffected > 0) {
+                    ResultSet rs = st.getGeneratedKeys();
+                    if (rs.next()) {
+                        int generatedId = rs.getInt(1);
+                        System.out.println("✅ Task added with ID: " + generatedId);
+                        // If needed: t.setTaskID(generatedId);
+                    }
+                    return true;
                 }
             } catch (SQLException e) {
-                System.err.println("❌ Error: " + e.getMessage());
+                System.err.println("❌ Error adding task: " + e.getMessage());
             }
+            return false;
         }
 
         public static List<Task> getAllTasks(String userOwner) {
@@ -114,7 +125,7 @@ public class Crud_updated {
                     ));
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.err.println("❌ Error retrieving tasks: " + e.getMessage());
             }
             return list;
         }
@@ -132,10 +143,11 @@ public class Crud_updated {
                 st.setString(4, t.getTaskPriority());
                 st.setInt(5, t.getTaskID());
                 st.setString(6, t.getUserOwner());
-                st.executeUpdate();
-                System.out.println("✅ Task updated!");
+                int updated = st.executeUpdate();
+                if (updated > 0) System.out.println("✅ Task updated!");
+                else System.out.println("⚠️ Task not found or unauthorized.");
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.err.println("❌ Error updating task: " + e.getMessage());
             }
         }
 
@@ -144,19 +156,21 @@ public class Crud_updated {
                  PreparedStatement st = c.prepareStatement("DELETE FROM TaskTable WHERE taskID=? AND userOwner=?")) {
                 st.setInt(1, id);
                 st.setString(2, userOwner);
-                st.executeUpdate();
-                System.out.println("✅ Task deleted!");
+                int deleted = st.executeUpdate();
+                if (deleted > 0) System.out.println("✅ Task deleted!");
+                else System.out.println("⚠️ Task not found or unauthorized.");
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.err.println("❌ Error deleting task: " + e.getMessage());
             }
         }
     }
 
-    public static void main(String[] args, String userEmail) {
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        boolean run = true;
+        System.out.print("Enter your email to log in: ");
+        String userEmail = sc.nextLine().trim();
 
-        System.out.println("Logged in as: " + userEmail);
+        boolean run = true;
 
         while (run) {
             System.out.println("""
@@ -170,7 +184,7 @@ public class Crud_updated {
 
             System.out.print("Choose option: ");
             int ch = sc.hasNextInt() ? sc.nextInt() : -1;
-            sc.nextLine();
+            sc.nextLine(); // consume newline
 
             switch (ch) {
                 case 1 -> {
@@ -178,15 +192,19 @@ public class Crud_updated {
                     String title = sc.nextLine().trim();
 
                     System.out.print("Status (DONE / IN PROGRESS / NOT STARTED): ");
-                    String status = sc.nextLine().toUpperCase().trim();
+                    String status = sc.nextLine().trim().toUpperCase();
 
                     System.out.print("Due Date (yyyy-mm-dd): ");
-                    java.sql.Date due = java.sql.Date.valueOf(sc.nextLine().trim());
+                    java.sql.Date due = parseDate(sc.nextLine().trim());
 
                     System.out.print("Priority (HIGH / MEDIUM / LOW): ");
-                    String priority = sc.nextLine().toUpperCase().trim();
+                    String priority = sc.nextLine().trim().toUpperCase();
 
-                    DatabaseManager.addTask(new Task(title, status, due, priority, userEmail));
+                    if (due != null) {
+                        DatabaseManager.addTask(new Task(title, status, due, priority, userEmail));
+                    } else {
+                        System.out.println("❌ Invalid date format!");
+                    }
                 }
                 case 2 -> {
                     List<Task> tasks = DatabaseManager.getAllTasks(userEmail);
@@ -212,15 +230,19 @@ public class Crud_updated {
                     String title = sc.nextLine().trim();
 
                     System.out.print("New Status (DONE / IN PROGRESS / NOT STARTED): ");
-                    String status = sc.nextLine().toUpperCase().trim();
+                    String status = sc.nextLine().trim().toUpperCase();
 
                     System.out.print("New Due Date (yyyy-mm-dd): ");
-                    java.sql.Date due = java.sql.Date.valueOf(sc.nextLine().trim());
+                    java.sql.Date due = parseDate(sc.nextLine().trim());
 
                     System.out.print("New Priority (HIGH / MEDIUM / LOW): ");
-                    String priority = sc.nextLine().toUpperCase().trim();
+                    String priority = sc.nextLine().trim().toUpperCase();
 
-                    DatabaseManager.updateTask(new Task(id, title, status, due, priority, userEmail));
+                    if (due != null) {
+                        DatabaseManager.updateTask(new Task(id, title, status, due, priority, userEmail));
+                    } else {
+                        System.out.println("❌ Invalid date format!");
+                    }
                 }
                 case 4 -> {
                     System.out.print("Task ID to delete: ");
@@ -233,5 +255,13 @@ public class Crud_updated {
         }
         sc.close();
         System.out.println("👋 Bye! Program exited.");
+    }
+
+    private static java.sql.Date parseDate(String input) {
+        try {
+            return java.sql.Date.valueOf(input);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package application;
 
 import javafx.collections.FXCollections;
+
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -66,20 +67,27 @@ public class GroupWorkspaceController implements Initializable {
     @FXML private AnchorPane mainAnchorPane;
     @FXML private AnchorPane invitePane;
     @FXML private AnchorPane notifiedPane;
-    @FXML private TextField emailField;
+    @FXML private TextField usernameField;
     
     // Data Lists
     private ObservableList<TaskModel> todoTasks;
     private ObservableList<TaskModel> completedTasks;
     
-    private int currentWorkspaceID = 11; // Example workspace ID, replace with actual logic to get current workspace
-    private String currentWorkspaceName = "Personal Workspace"; // Example workspace name, replace with actual logic
-    
+    private int currentWorkspaceIDG; // Example workspace ID, replace with actual logic to get current workspace
+    private String currentWorkspaceName; // Example workspace name, replace with actual logic
     private String username;
+
+    // Must be called after username is se
+
+    public void setWorkspaceData(int workspaceId, String workspaceName) {
+        this.currentWorkspaceIDG = workspaceId;
+        this.currentWorkspaceName = workspaceName;
+        System.out.println("🌐 Loaded workspace: ID = " + workspaceId + ", Name = " + workspaceName);
+        loadTasks(); // Load tasks for this workspace
+    }
 
     public void setUsername(String username) {
         this.username = username;
-        loadTasks();                 // fetch & display tasks for this user
     }
     
     @Override
@@ -95,13 +103,13 @@ public class GroupWorkspaceController implements Initializable {
     }
 
     private void loadTasks() {
-        System.out.println("Fetching tasks for user: " + username + " or workspaceID: " + currentWorkspaceID);
+        System.out.println("Fetching tasks for user: " + username + " or workspaceID: " + currentWorkspaceIDG);
         if (username == null || username.isBlank()) {
             System.out.println("⚠️ Username not set – no tasks loaded.");
             return;
         }
 
-        if (currentWorkspaceID <= 0) {
+        if (currentWorkspaceIDG <= 0) {
             System.out.println("⚠️ Invalid workspace ID – no tasks loaded.");
             return;
         }
@@ -109,7 +117,7 @@ public class GroupWorkspaceController implements Initializable {
         todoTasks.clear();
         completedTasks.clear();
 
-        List<TaskModel> relevantTasks = TaskDAO.getTasksByUserOrWorkspace(username, currentWorkspaceID);
+        List<TaskModel> relevantTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceIDG);
         System.out.println("✅ Tasks fetched: " + relevantTasks.size());
         
 
@@ -411,7 +419,7 @@ public class GroupWorkspaceController implements Initializable {
         taskField.setPromptText("Task description");
 
         ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.getItems().addAll(getOwnerOptions());
+        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username));
         ownerCombo.setValue(taskToEdit.getOwner());
         ownerCombo.setEditable(true);
 
@@ -504,7 +512,7 @@ public class GroupWorkspaceController implements Initializable {
 
         // Changed from TextField to ComboBox for owner
         ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.getItems().addAll(getOwnerOptions());
+        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username));
         ownerCombo.setPromptText("Select owner");
         ownerCombo.setEditable(false); // Allow custom input if needed
 
@@ -608,7 +616,7 @@ public class GroupWorkspaceController implements Initializable {
 
                     TaskModel newTask = new TaskModel(taskTitle, owner, status, dueDate, priority);
                     newTask.setCompleted(false);
-                    newTask.setWorkspaceID(currentWorkspaceID);
+                    newTask.setWorkspaceID(currentWorkspaceIDG);
                     return newTask;
                 } catch (Exception e) {
                     showAlertWithType(Alert.AlertType.ERROR, "Error", "An unexpected error occurred while creating the task: " + e.getMessage());
@@ -631,7 +639,7 @@ public class GroupWorkspaceController implements Initializable {
         // Show dialog and handle result
         Optional<TaskModel> result = dialog.showAndWait();
         result.ifPresent(task -> {
-            boolean inserted = TaskDAO.addTask(task, currentWorkspaceID, currentWorkspaceName, username);
+            boolean inserted = TaskDAO.addTask(task, currentWorkspaceIDG, currentWorkspaceName, username);
             if (inserted) {
                 loadTasks();
             } else {
@@ -651,25 +659,13 @@ public class GroupWorkspaceController implements Initializable {
         });
     }
 
-    private ObservableList<String> getOwnerOptions() {
-        ObservableList<String> owners = FXCollections.observableArrayList(
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Eve"
-        );
+    @FXML
+    private ComboBox<String> ownerComboBox;
 
-        // Add current user with "(me)" label if not already in list
-        if (!owners.contains(username)) {
-            owners.add(username + " (me)");
-        } else {
-            // Replace the name with "name (me)"
-            int index = owners.indexOf(username);
-            owners.set(index, username + " (me)");
-        }
-
-        return owners;
+    public void getOwnerOptions() {
+        // assuming 'username' is set somewhere before initialize or passed in
+        ObservableList<String> options = TaskDAO.getAllWorkspaceMembers(username);
+        ownerComboBox.setItems(options);
     }
     
     @FXML
@@ -763,22 +759,32 @@ public class GroupWorkspaceController implements Initializable {
     
     @FXML
     private void handleInviteFriend() {
-        String email = emailField.getText().trim();
-        if (email.isEmpty()) {
-            showAlertWithType(Alert.AlertType.WARNING, "Invalid Email", "Please enter an email address.");
+        String username = usernameField.getText().trim();
+        if (username.isEmpty()) {
+            showAlertWithType(Alert.AlertType.WARNING, "Invalid Input", "Please enter a username.");
             return;
         }
-        
-        if (!isValidEmail(email)) {
-            showAlertWithType(Alert.AlertType.ERROR, "Invalid Email", "Please enter a valid email address.");
+
+        // Optional: check if the username exists in your system (optional but recommended)
+        if (!TaskDAO.doesUserExist(username)) {
+            showAlertWithType(Alert.AlertType.ERROR, "User Not Found", "The specified username does not exist.");
             return;
         }
-        
-        // Simulate sending invitation
-        invitePane.setVisible(false);
-        notifiedPane.setVisible(true);
-        emailField.clear();
+
+        int currentWorkspaceID = currentWorkspaceIDG; // You already have this field
+
+        // Call DAO method to add member
+        boolean success = TaskDAO.addMemberToWorkspace(currentWorkspaceID, username);
+
+        if (success) {
+            invitePane.setVisible(false);
+            notifiedPane.setVisible(true);
+            usernameField.clear();
+        } else {
+            showAlertWithType(Alert.AlertType.ERROR, "Failed", "User is already in the workspace or an error occurred.");
+        }
     }
+
     
     @FXML
     private void handleContinue() {
@@ -862,7 +868,7 @@ public class GroupWorkspaceController implements Initializable {
     }
     
 
-    public String getWorkspaceName() {
-        return workspaceTitle.getText();
+    public String getWorkspaceName(String workspaceName) {
+        return workspaceName != null ? workspaceName.trim() : "";
     }
 }
