@@ -92,12 +92,30 @@ public class MyProfileController implements Initializable {
     void handleSaveChanges(ActionEvent event) {
         String newPassword = newPasswordField.getText().trim();
         String confirmPassword = confirmNewPasswordField.getText().trim();
+        String firstName = firstNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
+        String email = emailField.getText().trim();
         
+        if (firstName.isEmpty() && lastName.isEmpty() && email.isEmpty()) {
+            showAlert(AlertType.ERROR, "Error", "All fields cannot be empty.");
+            return;
+        }
+        if (firstName.isEmpty()) {
+        	showAlert(AlertType.ERROR, "Error", "First name cannot be empty.");
+			return;
+        }
+        if (lastName.isEmpty()) {
+			showAlert(AlertType.ERROR, "Error", "Last name cannot be empty.");
+			return;
+        }
+        if (email.isEmpty()) {
+			showAlert(AlertType.ERROR, "Error", "Email address cannot be empty.");
+			return;
+		}
         if (!newPassword.isEmpty() && (newPassword.length() < 8 || newPassword.length() > 64)) {
         	showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
         	return;
         }
-        
         if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
         	showAlert(AlertType.ERROR, "Error", "New password and confirm password do not match.");
             return;
