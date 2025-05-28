@@ -9,7 +9,7 @@ import java.time.format.DateTimeParseException;
  * Task model class representing a task in the workspace application.
  * Uses JavaFX properties for data binding with UI components.
  */
-public class Task {
+public class TaskController {
 
     private final IntegerProperty taskID = new SimpleIntegerProperty(); // For database
     private final IntegerProperty workspaceID = new SimpleIntegerProperty(); // For workspace grouping
@@ -24,7 +24,7 @@ public class Task {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     /** Constructor for a new Task (default: not completed). */
-    public Task(String title, String owner, String status, String dueDate, String priority) {
+    public TaskController(String title, String owner, String status, String dueDate, String priority) {
         this.taskTitle.set(title != null ? title : "");
         this.userOwner.set(owner != null ? owner : "");
         this.taskStatus.set(status != null ? status : "Not Started");
@@ -33,7 +33,7 @@ public class Task {
     }
 
     /** Constructor including completion state. */
-    public Task(String title, String owner, String status, String dueDate, String priority, boolean completed) {
+    public TaskController(String title, String owner, String status, String dueDate, String priority, boolean completed) {
         this(title, owner, status, dueDate, priority);
         this.completed.set(completed);
     }
@@ -188,8 +188,8 @@ public class Task {
         return "High".equalsIgnoreCase(getPriority());
     }
 
-    public Task copy() {
-        Task t = new Task(getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
+    public TaskController copy() {
+        TaskController t = new TaskController(getTask(), getOwner(), getStatus(), getDueDate(), getPriority(), isCompleted());
         t.setTaskID(getTaskID());
         t.setWorkspaceID(getWorkspaceID());
         return t;

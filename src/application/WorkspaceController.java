@@ -35,23 +35,23 @@ import TaskManagement.TaskDAO;
 public class WorkspaceController implements Initializable {
 
 	@FXML private Label workspaceTitle;
-    @FXML private TableView<Task> tableView;
-    @FXML private TableView<Task> completedTable;
+    @FXML private TableView<TaskController> tableView;
+    @FXML private TableView<TaskController> completedTable;
     
     // TO-DO Table Columns
-    @FXML private TableColumn<Task, Boolean> completedColumn;
-    @FXML private TableColumn<Task, String> taskColumn;
-    @FXML private TableColumn<Task, String> ownerColumn;
-    @FXML private TableColumn<Task, String> statusColumn;
-    @FXML private TableColumn<Task, String> dueDateColumn;
-    @FXML private TableColumn<Task, String> priorityColumn;
+    @FXML private TableColumn<TaskController, Boolean> completedColumn;
+    @FXML private TableColumn<TaskController, String> taskColumn;
+    @FXML private TableColumn<TaskController, String> ownerColumn;
+    @FXML private TableColumn<TaskController, String> statusColumn;
+    @FXML private TableColumn<TaskController, String> dueDateColumn;
+    @FXML private TableColumn<TaskController, String> priorityColumn;
     
     // COMPLETED Table Columns
-    @FXML private TableColumn<Task, String> taskColumnCompleted;
-    @FXML private TableColumn<Task, String> ownerColumnCompleted;
-    @FXML private TableColumn<Task, String> statusColumnCompleted;
-    @FXML private TableColumn<Task, String> dueDateColumnCompleted;
-    @FXML private TableColumn<Task, String> priorityColumnCompleted;
+    @FXML private TableColumn<TaskController, String> taskColumnCompleted;
+    @FXML private TableColumn<TaskController, String> ownerColumnCompleted;
+    @FXML private TableColumn<TaskController, String> statusColumnCompleted;
+    @FXML private TableColumn<TaskController, String> dueDateColumnCompleted;
+    @FXML private TableColumn<TaskController, String> priorityColumnCompleted;
     
     // Buttons
     @FXML private Button addTaskButton;
@@ -69,8 +69,8 @@ public class WorkspaceController implements Initializable {
     @FXML private TextField emailField;
     
     // Data Lists
-    private ObservableList<Task> todoTasks;
-    private ObservableList<Task> completedTasks;
+    private ObservableList<TaskController> todoTasks;
+    private ObservableList<TaskController> completedTasks;
     
     private int currentWorkspaceID = 11; // Example workspace ID, replace with actual logic to get current workspace
     private String currentWorkspaceName = "Personal Workspace"; // Example workspace name, replace with actual logic
@@ -109,11 +109,11 @@ public class WorkspaceController implements Initializable {
         todoTasks.clear();
         completedTasks.clear();
 
-        List<Task> relevantTasks = TaskDAO.getTasksByUserOrWorkspace(username, currentWorkspaceID);
+        List<TaskController> relevantTasks = TaskDAO.getTasksByUserOrWorkspace(username, currentWorkspaceID);
         System.out.println("✅ Tasks fetched: " + relevantTasks.size());
         
 
-        for (Task task : relevantTasks) {
+        for (TaskController task : relevantTasks) {
             String status = task.getStatus();
             System.out.println(task.getPriority() + " - " + task.getDueDate());
             if ("Done".equalsIgnoreCase(status)) {
@@ -131,7 +131,7 @@ public class WorkspaceController implements Initializable {
         // Set up columns for TO-DO table (non-editable except for completion checkbox)
         completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
         completedColumn.setCellFactory(column -> {
-            CheckBoxTableCell<Task, Boolean> cell = new CheckBoxTableCell<>();
+            CheckBoxTableCell<TaskController, Boolean> cell = new CheckBoxTableCell<>();
             return cell;
         });
         completedColumn.setEditable(true);
@@ -142,7 +142,7 @@ public class WorkspaceController implements Initializable {
         // OWNER COLUMN WITH CENTER ALIGNMENT
         ownerColumn.setCellValueFactory(new PropertyValueFactory<>("owner"));
         ownerColumn.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String owner, boolean empty) {
                     super.updateItem(owner, empty);
@@ -161,7 +161,7 @@ public class WorkspaceController implements Initializable {
         // STATUS COLUMN WITH COLORS
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         statusColumn.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String status, boolean empty) {
                     super.updateItem(status, empty);
@@ -195,7 +195,7 @@ public class WorkspaceController implements Initializable {
         // DUE DATE COLUMN WITH CENTER ALIGNMENT
         dueDateColumn.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
         dueDateColumn.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String dueDate, boolean empty) {
                     super.updateItem(dueDate, empty);
@@ -214,7 +214,7 @@ public class WorkspaceController implements Initializable {
         // PRIORITY COLUMN WITH UPDATED COLORS
         priorityColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
         priorityColumn.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String priority, boolean empty) {
                     super.updateItem(priority, empty);
@@ -249,10 +249,10 @@ public class WorkspaceController implements Initializable {
         tableView.setEditable(true); // Only needed for the checkbox column
         
         // Add listener to each task's completed property
-        todoTasks.addListener((javafx.collections.ListChangeListener<Task>) change -> {
+        todoTasks.addListener((javafx.collections.ListChangeListener<TaskController>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
-                    for (Task task : change.getAddedSubList()) {
+                    for (TaskController task : change.getAddedSubList()) {
                         task.completedProperty().addListener((obs, oldVal, newVal) -> {
                             handleTaskCompletion(task, newVal);
 
@@ -277,7 +277,7 @@ public class WorkspaceController implements Initializable {
         // OWNER COLUMN WITH CENTER ALIGNMENT (COMPLETED TABLE)
         ownerColumnCompleted.setCellValueFactory(new PropertyValueFactory<>("owner"));
         ownerColumnCompleted.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String owner, boolean empty) {
                     super.updateItem(owner, empty);
@@ -296,7 +296,7 @@ public class WorkspaceController implements Initializable {
         // STATUS COLUMN WITH COLORS (COMPLETED TABLE)
         statusColumnCompleted.setCellValueFactory(new PropertyValueFactory<>("status"));
         statusColumnCompleted.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String status, boolean empty) {
                     super.updateItem(status, empty);
@@ -330,7 +330,7 @@ public class WorkspaceController implements Initializable {
         // DUE DATE COLUMN WITH CENTER ALIGNMENT (COMPLETED TABLE)
         dueDateColumnCompleted.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
         dueDateColumnCompleted.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String dueDate, boolean empty) {
                     super.updateItem(dueDate, empty);
@@ -349,7 +349,7 @@ public class WorkspaceController implements Initializable {
         // PRIORITY COLUMN WITH UPDATED COLORS (COMPLETED TABLE)
         priorityColumnCompleted.setCellValueFactory(new PropertyValueFactory<>("priority"));
         priorityColumnCompleted.setCellFactory(column -> {
-            return new TableCell<Task, String>() {
+            return new TableCell<TaskController, String>() {
                 @Override
                 protected void updateItem(String priority, boolean empty) {
                     super.updateItem(priority, empty);
@@ -384,9 +384,9 @@ public class WorkspaceController implements Initializable {
     // FXML Components
     @FXML
     private void handleEditTask() {
-        Task selectedTask = tableView.getSelectionModel().getSelectedItem();
+        TaskController selectedTask = tableView.getSelectionModel().getSelectedItem();
         if (selectedTask != null) {
-            Optional<Task> result = showEditTaskDialog(selectedTask);
+            Optional<TaskController> result = showEditTaskDialog(selectedTask);
             result.ifPresent(editedTask -> {
                 try {
                     TaskDAO.updateTask(editedTask);
@@ -402,8 +402,8 @@ public class WorkspaceController implements Initializable {
 
 
     
-    private Optional<Task> showEditTaskDialog(Task taskToEdit) {
-        Dialog<Task> dialog = new Dialog<>();
+    private Optional<TaskController> showEditTaskDialog(TaskController taskToEdit) {
+        Dialog<TaskController> dialog = new Dialog<>();
         dialog.setTitle("Edit Task");
         dialog.setHeaderText("Edit task details:");
 
@@ -494,7 +494,7 @@ public class WorkspaceController implements Initializable {
     @FXML
     private void handleAddTask() {
         // Create a new task dialog
-        Dialog<Task> dialog = new Dialog<>();
+        Dialog<TaskController> dialog = new Dialog<>();
         dialog.setTitle("Add New Task");
         dialog.setHeaderText("Enter task details:");
 
@@ -606,7 +606,7 @@ public class WorkspaceController implements Initializable {
                 	    return null;
                 	}
 
-                    Task newTask = new Task(taskTitle, owner, status, dueDate, priority);
+                    TaskController newTask = new TaskController(taskTitle, owner, status, dueDate, priority);
                     newTask.setCompleted(false);
                     newTask.setWorkspaceID(currentWorkspaceID);
                     return newTask;
@@ -629,7 +629,7 @@ public class WorkspaceController implements Initializable {
         }
 
         // Show dialog and handle result
-        Optional<Task> result = dialog.showAndWait();
+        Optional<TaskController> result = dialog.showAndWait();
         result.ifPresent(task -> {
             boolean inserted = TaskDAO.addTask(task, currentWorkspaceID, currentWorkspaceName, username);
             if (inserted) {
@@ -674,7 +674,7 @@ public class WorkspaceController implements Initializable {
     
     @FXML
     private void handleDeleteTask() {
-        Task selectedTask = tableView.getSelectionModel().getSelectedItem();
+        TaskController selectedTask = tableView.getSelectionModel().getSelectedItem();
         if (selectedTask != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Delete Task");
@@ -709,7 +709,7 @@ public class WorkspaceController implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK) {
 
                 // Delete each task from the database
-                for (Task task : completedTasks) {
+                for (TaskController task : completedTasks) {
                     TaskDAO.deleteTask(task.getTaskID());
                 }
                 loadTasks();
@@ -721,7 +721,7 @@ public class WorkspaceController implements Initializable {
         }
     }
     
-    private void handleTaskCompletion(Task task, boolean isCompleted) {
+    private void handleTaskCompletion(TaskController task, boolean isCompleted) {
         if (isCompleted) {
             // Show confirmation dialog
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -744,7 +744,7 @@ public class WorkspaceController implements Initializable {
     }
     
     // Method to move completed tasks from todo to completed table
-    public void moveTaskToCompleted(Task task) {
+    public void moveTaskToCompleted(TaskController task) {
         if (todoTasks.contains(task)) {
             task.setStatus("Done");
             task.setCompleted(true);
