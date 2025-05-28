@@ -3,7 +3,7 @@ package TaskManagement;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import application.TaskController;
+import application.TaskModel;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -16,7 +16,7 @@ public class TaskDAO {
     private static final String PASSWORD = "admin";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
-    public static boolean addTask(TaskController t, int workspaceID, String workspaceName, String createdByUser) {
+    public static boolean addTask(TaskModel t, int workspaceID, String workspaceName, String createdByUser) {
         // Use real workspaceID (from DB)
         int actualWorkspaceID = ensureWorkspaceExists(workspaceName, createdByUser);
         if (actualWorkspaceID == -1) {
@@ -84,7 +84,7 @@ public class TaskDAO {
     }
 
 
-    public static boolean wasTaskInserted(TaskController t) {
+    public static boolean wasTaskInserted(TaskModel t) {
         String sql = "SELECT COUNT(*) FROM TaskTable WHERE taskTitle = ? AND userOwner = ? AND workspaceID = ?";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -167,7 +167,7 @@ public class TaskDAO {
         }
     }
 
-    public static void updateTask(TaskController t) {
+    public static void updateTask(TaskModel t) {
         String sql = "UPDATE TaskTable SET taskTitle = ?, userOwner = ?, dueDate = ?, taskStatus = ?, taskPriority = ? WHERE taskID = ?";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -201,8 +201,8 @@ public class TaskDAO {
         }
     }
 
-    public static List<TaskController> getTasksByWorkspace(int workspaceID) {
-        List<TaskController> tasks = new ArrayList<>();
+    public static List<TaskModel> getTasksByWorkspace(int workspaceID) {
+        List<TaskModel> tasks = new ArrayList<>();
         String sql = "SELECT * FROM TaskTable WHERE workspaceID = ?";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -218,7 +218,7 @@ public class TaskDAO {
                     formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
                 }
 
-                TaskController task = new TaskController(
+                TaskModel task = new TaskModel(
                     rs.getString("taskTitle"),
                     rs.getString("userOwner"),
                     rs.getString("taskStatus"),
@@ -242,7 +242,7 @@ public class TaskDAO {
     }
 
 
-    public static TaskController getTaskByID(int taskID) {
+    public static TaskModel getTaskByID(int taskID) {
         String sql = "SELECT * FROM TaskTable WHERE taskID = ?";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -258,7 +258,7 @@ public class TaskDAO {
                     formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
                 }
 
-                TaskController t = new TaskController(
+                TaskModel t = new TaskModel(
                         rs.getString("taskTitle"),
                         rs.getString("userOwner"),
                         rs.getString("taskStatus"),
@@ -302,8 +302,8 @@ public class TaskDAO {
     }
 
     
-    public static List<TaskController> getTasksByUserOrWorkspace(String username, int workspaceID) {
-        List<TaskController> taskList = new ArrayList<>();
+    public static List<TaskModel> getTasksByUserOrWorkspace(String username, int workspaceID) {
+        List<TaskModel> taskList = new ArrayList<>();
 
         String sql = "SELECT * FROM TaskTable WHERE userOwner = ? " +
                      "UNION " +
@@ -324,7 +324,7 @@ public class TaskDAO {
                     formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
                 }
 
-                TaskController task = new TaskController(
+                TaskModel task = new TaskModel(
                     rs.getString("taskTitle"),
                     rs.getString("userOwner"),
                     rs.getString("taskStatus"),
@@ -364,7 +364,7 @@ public class TaskDAO {
 
         // 🔍 Confirm final sort
         System.out.println("✅ Sorted Tasks by Priority:");
-        for (TaskController t : taskList) {
+        for (TaskModel t : taskList) {
             System.out.println(t.getPriority() + " - " + t.getDueDate());
         }
 
