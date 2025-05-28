@@ -72,15 +72,20 @@ public class PersonalWorkspaceController implements Initializable {
     private ObservableList<TaskModel> todoTasks;
     private ObservableList<TaskModel> completedTasks;
     
-    private int currentWorkspaceID = 11; // Example workspace ID, replace with actual logic to get current workspace
-    private String currentWorkspaceName = "Personal Workspace"; // Example workspace name, replace with actual logic
-    
+    private int currentWorkspaceID; // Example workspace ID, replace with actual logic to get current workspace
+    private String currentWorkspaceName; // Example workspace name, replace with actual logic
     private String username;
 
+    public void setWorkspaceData(int currentWorkspaceID, String currentWorkspaceName) {
+        this.currentWorkspaceID = currentWorkspaceID;
+        this.currentWorkspaceName = currentWorkspaceName;
+        loadTasks(); // Load tasks for the current workspace
+    }
+    
     public void setUsername(String username) {
         this.username = username;
-        loadTasks();                 // fetch & display tasks for this user
     }
+    
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -109,7 +114,7 @@ public class PersonalWorkspaceController implements Initializable {
         todoTasks.clear();
         completedTasks.clear();
 
-        List<TaskModel> relevantTasks = TaskDAO.getTasksByUserOrWorkspace(username, currentWorkspaceID);
+        List<TaskModel> relevantTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceID);
         System.out.println("✅ Tasks fetched: " + relevantTasks.size());
         
 
@@ -653,22 +658,8 @@ public class PersonalWorkspaceController implements Initializable {
 
     private ObservableList<String> getOwnerOptions() {
         ObservableList<String> owners = FXCollections.observableArrayList(
-            "Alice",
-            "Bob",
-            "Charlie",
-            "David",
-            "Eve"
+            username + " (me)"
         );
-
-        // Add current user with "(me)" label if not already in list
-        if (!owners.contains(username)) {
-            owners.add(username + " (me)");
-        } else {
-            // Replace the name with "name (me)"
-            int index = owners.indexOf(username);
-            owners.set(index, username + " (me)");
-        }
-
         return owners;
     }
     

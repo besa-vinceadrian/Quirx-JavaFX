@@ -29,6 +29,40 @@ public class Authentication {
         }
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
     }
+    
+    public WorkspaceInfo getOrCreateWorkspaceForUser(String username) {
+        String workspaceName = "Personal Workspace";
+        int workspaceId = -1;
+
+        String checkQuery = "SELECT workspaceID, workspaceName FROM WorkspaceTable WHERE createdByUser = ?";
+        // For SQL Server, you can retrieve inserted ID like this:
+        String insertQuery = "INSERT INTO WorkspaceTable (workspaceName, createdByUser) OUTPUT INSERTED.workspaceID VALUES (?, ?)";
+
+        try (Connection con = connect();
+             PreparedStatement checkStmt = con.prepareStatement(checkQuery)) {
+
+            checkStmt.setString(1, username);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                workspaceId = rs.getInt("workspaceID");
+                workspaceName = rs.getString("workspaceName");
+            } else {
+                try (PreparedStatement insertStmt = con.prepareStatement(insertQuery)) {
+                    insertStmt.setString(1, workspaceName);
+                    insertStmt.setString(2, username);
+                    ResultSet generatedKeys = insertStmt.executeQuery();
+                    if (generatedKeys.next()) {
+                        workspaceId = generatedKeys.getInt(1);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new WorkspaceInfo(workspaceId, workspaceName);
+    }
 
     public int getUserIdByUsername(String username) throws SQLException {
         try (Connection con = connect()) {
