@@ -16,7 +16,7 @@
    <left>
       <AnchorPane fx:id="anchorPaneId" prefHeight="700.0" prefWidth="300.0" BorderPane.alignment="CENTER">
          <children>
-            <VBox fx:id="menuVBox" layoutX="15.0" layoutY="15.0" prefHeight="518.0" prefWidth="279.0" spacing="5.0">
+            <VBox fx:id="menuVBox" layoutX="15.0" layoutY="15.0" prefHeight="619.0" prefWidth="279.0" spacing="5.0">
                <children>
                   <Button fx:id="dashboardButton" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#dashboardButton" prefHeight="40.0" prefWidth="292.0" styleClass="menu-button" text="My Profile">
                      <font>
@@ -34,7 +34,7 @@
                         <Insets left="40.0" />
                      </padding>
                   </Button>
-                  <Button fx:id="personalWorkspaceButton" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#personalWorkspaceButton" prefHeight="40.0" prefWidth="234.0" styleClass="menu-button" text="Personal Workspace">
+                  <Button fx:id="personalWorkspaceButton" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#personalWorkspaceButton" prefHeight="40.0" prefWidth="297.0" styleClass="menu-button" text="Personal Workspace">
                      <font>
                         <Font name="Arial" size="12.0" />
                      </font>
