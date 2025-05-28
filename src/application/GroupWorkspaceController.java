@@ -84,7 +84,12 @@ public class GroupWorkspaceController implements Initializable {
         this.currentWorkspaceIDG = workspaceId;
         this.currentWorkspaceName = workspaceName;
         System.out.println("🌐 Loaded workspace: ID = " + workspaceId + ", Name = " + workspaceName);
+        
+        // Update the workspace title label
+        updateWorkspaceTitle(workspaceName);
+        
         loadTasks(); // Load tasks for this workspace
+
     }
 
     public void setUsername(String username) {
@@ -859,6 +864,13 @@ public class GroupWorkspaceController implements Initializable {
         } catch (Exception e) {
             // If setting up icon fails, continue without icon
             System.err.println("Warning: Could not set up dialog icon: " + e.getMessage());
+        }
+    }
+    
+    // Add this new method to update the title
+    public void updateWorkspaceTitle(String workspaceName) {
+        if (workspaceTitle != null && workspaceName != null && !workspaceName.trim().isEmpty()) {
+            workspaceTitle.setText(workspaceName.trim());
         }
     }
 
