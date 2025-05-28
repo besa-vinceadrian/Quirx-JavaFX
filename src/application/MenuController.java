@@ -65,8 +65,20 @@ public class MenuController implements Initializable {
     
     @FXML
     private void myTaskButton(ActionEvent event) {
-        loadView("MyTask.fxml");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MyTask.fxml"));
+            Pane view = loader.load();
+
+            MyTaskController controller = loader.getController();
+            controller.setUsername(username); // Pass username here
+
+            windowPane.getChildren().clear();
+            windowPane.getChildren().add(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
     
     @FXML
     private void workspaceButton(ActionEvent event) {
