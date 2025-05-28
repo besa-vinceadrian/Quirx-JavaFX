@@ -1,3 +1,4 @@
+
 package application;
 
 import javafx.application.Platform;
@@ -61,6 +62,21 @@ public class MenuController implements Initializable {
     private VBox groupWorkspaceContainer;
     private boolean isGroupWorkspaceExpanded = false;
     private List<HBox> createdWorkspaces = new ArrayList<>();
+    
+    private int workspaceId;
+    private String workspaceName;
+
+    // Add a method to receive these parameters from the previous scene (the login scene)
+    public void initData(int userId, String username, int workspaceId, String workspaceName) {
+        this.userId = userId;
+        this.username = username;
+        this.workspaceId = workspaceId;
+        this.workspaceName = workspaceName;
+
+        // Optionally, initialize UI elements here based on workspaceName, etc.
+        System.out.println("User logged in: " + username);
+        System.out.println("Workspace: " + workspaceName + " (ID: " + workspaceId + ")");
+    }
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -152,8 +168,8 @@ public class MenuController implements Initializable {
             Pane view = loader.load();
 
             PersonalWorkspaceController controller = loader.getController();
-            controller.setUsername(username);          // Pass username
-
+            controller.setUsername(username);      
+            controller.setWorkspaceData(workspaceId, workspaceName);
             windowPane.getChildren().clear();
             windowPane.getChildren().add(view);
         } catch (Exception e) {

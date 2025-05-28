@@ -1,6 +1,8 @@
 package application;
 
 import TaskManagement.Authentication;
+import TaskManagement.WorkspaceInfo;
+import javafx.scene.Node;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,7 +22,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.AnchorPane;
-
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
@@ -451,33 +453,50 @@ public class LogIn implements Initializable {
      * @param event Action event.
      */
 	@FXML
-    void handleLogInClick(ActionEvent event) {
-        String username = usernameField.getText().trim();
-        String password = passwordFieldLI.getText().trim();
-        
-        if (username.isEmpty() || password.isEmpty()) {
-            showAlert(AlertType.ERROR, "Error", "Username and Password are required.");
-            return;
-        }
+	void handleLogInClick(ActionEvent event) {
+	    String username = usernameField.getText().trim();
+	    String password = passwordFieldLI.getText().trim();
 
-        try {
-            boolean isAuthenticated = authService.loginUserByUsername(username, password);
-            if (isAuthenticated) {
-                int userId = authService.getUserIdByUsername(username);
-                if (userId != -1) {
-                    showAlert(AlertType.INFORMATION, "Success", "Login successful!");
-                    loadMenuScene(event.getSource(), userId, username);
-                } else {
-                    showAlert(AlertType.ERROR, "Error", "User ID not found.");
-                }
-            } else {
-                showAlert(AlertType.ERROR, "Error", "Incorrect username or password.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(AlertType.ERROR, "Error", "An error occurred. Please try again.");
-        }
-    }
+	    if (username.isEmpty() || password.isEmpty()) {
+	        showAlert(Alert.AlertType.ERROR, "Error", "Username and Password are required.");
+	        return;
+	    }
+
+	    try {
+	        // Authenticate user by username and password
+	        boolean isAuthenticated = authService.loginUserByUsername(username, password);
+	        if (isAuthenticated) {
+	            // Get user ID by username
+	            int userId = authService.getUserIdByUsername(username);
+	            if (userId != -1) {
+	                // Get or create workspace for this user using your authService method
+	                WorkspaceInfo workspaceInfo = authService.getOrCreateWorkspaceForUser(username);
+
+	                if (workspaceInfo == null || workspaceInfo.getWorkspaceId() == -1) {
+	                    showAlert(Alert.AlertType.ERROR, "Error", "Workspace info not found or could not be created for user.");
+	                    return;
+	                }
+
+	                showAlert(Alert.AlertType.INFORMATION, "Success", "Login successful!");
+
+	                // Get the Stage from the event source (button, etc)
+	                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+	                // Load your next scene, passing user and workspace info
+	                loadMenuScene(stage, userId, username, workspaceInfo.getWorkspaceId(), workspaceInfo.getWorkspaceName());
+
+	            } else {
+	                showAlert(Alert.AlertType.ERROR, "Error", "User ID not found.");
+	            }
+	        } else {
+	            showAlert(Alert.AlertType.ERROR, "Error", "Incorrect username or password.");
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        showAlert(Alert.AlertType.ERROR, "Error", "An error occurred. Please try again.");
+	    }
+	}
+
     
 	/**
      * Handles saving a new password after reset.
@@ -547,19 +566,23 @@ public class LogIn implements Initializable {
 	 * @param userId The ID of the logged-in user.
 	 * @param username The username of the logged-in user.
 	 */
-	private void loadMenuScene(Object source, int userId, String username) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Menu.fxml"));
-            Parent root = loader.load();
-            
-            MenuController menuController = loader.getController();
-            menuController.setUserId(userId);
-            menuController.setUsername(username);
-            
-            Stage stage = (Stage) ((javafx.scene.Node) source).getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	public void loadMenuScene(Stage stage, int userId, String username, int workspaceId, String workspaceName) {
+	    try {
+	        FXMLLoader loader = new FXMLLoader(getClass().getResource("Menu.fxml"));
+	        Parent root = loader.load();
+
+	        // Get the controller of Menu.fxml
+	        MenuController menuController = loader.getController();
+	        menuController.initData(userId, username, workspaceId, workspaceName);
+
+	        // Set scene and show
+	        stage.setScene(new Scene(root));
+	        stage.show();
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+
 }

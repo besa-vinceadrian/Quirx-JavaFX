@@ -1,6 +1,7 @@
 package TaskManagement;
 
 import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import application.TaskModel;
@@ -201,47 +202,6 @@ public class TaskDAO {
         }
     }
 
-    public static List<TaskModel> getTasksByWorkspace(int workspaceID) {
-        List<TaskModel> tasks = new ArrayList<>();
-        String sql = "SELECT * FROM TaskTable WHERE workspaceID = ?";
-
-        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement st = con.prepareStatement(sql)) {
-
-            st.setInt(1, workspaceID);
-            ResultSet rs = st.executeQuery();
-
-            while (rs.next()) {
-                String formattedDate = "";
-                Date sqlDate = rs.getDate("dueDate");
-                if (sqlDate != null) {
-                    formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
-                }
-
-                TaskModel task = new TaskModel(
-                    rs.getString("taskTitle"),
-                    rs.getString("userOwner"),
-                    rs.getString("taskStatus"),
-                    formattedDate,
-                    rs.getString("taskPriority")
-                    // 👈 no 'completed' argument
-                );
-
-                task.setTaskID(rs.getInt("taskID"));
-                task.setWorkspaceID(rs.getInt("workspaceID")); // safer to get from DB
-
-                tasks.add(task);
-            }
-
-        } catch (Exception e) {
-            System.err.println("❌ Error fetching tasks for workspace ID " + workspaceID);
-            e.printStackTrace();
-        }
-
-        return tasks;
-    }
-
-
     public static TaskModel getTaskByID(int taskID) {
         String sql = "SELECT * FROM TaskTable WHERE taskID = ?";
 
@@ -301,6 +261,79 @@ public class TaskDAO {
         }
     }
 
+    public static List<TaskModel> getTasksByWorkspace(String username, int workspaceID) {
+        List<TaskModel> taskList = new ArrayList<>();
+
+        // Only fetch tasks from the given workspace
+        String sql = "SELECT * FROM TaskTable WHERE workspaceID = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setInt(1, workspaceID);
+
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                String formattedDate = "";
+                Date sqlDate = rs.getDate("dueDate");
+                if (sqlDate != null) {
+                    formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
+                }
+
+                TaskModel task = new TaskModel(
+                    rs.getString("taskTitle"),
+                    rs.getString("userOwner"),
+                    rs.getString("taskStatus"),
+                    formattedDate,
+                    rs.getString("taskPriority")
+                );
+
+                task.setTaskID(rs.getInt("taskID"));
+                task.setWorkspaceID(rs.getInt("workspaceID"));
+
+                taskList.add(task);
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching tasks for workspace");
+            e.printStackTrace();
+        }
+
+        // ✅ Now use PriorityQueue to sort
+        PriorityQueue<TaskModel> pq = new PriorityQueue<>((t1, t2) -> {
+            int p1 = mapPriority(t1.getPriority());
+            int p2 = mapPriority(t2.getPriority());
+
+            if (p1 != p2) {
+                return Integer.compare(p2, p1); // Higher priority first
+            }
+
+            LocalDate d1 = parseDate(t1.getDueDate());
+            LocalDate d2 = parseDate(t2.getDueDate());
+
+            if (d1 != null && d2 != null) return d1.compareTo(d2);
+            if (d1 != null) return -1;
+            if (d2 != null) return 1;
+            return 0;
+        });
+
+        pq.addAll(taskList);
+
+        List<TaskModel> sortedTasks = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            sortedTasks.add(pq.poll());
+        }
+
+        // Debug print
+        System.out.println("✅ Sorted Tasks by Priority using PriorityQueue:");
+        for (TaskModel t : sortedTasks) {
+            System.out.println(t.getPriority() + " - " + t.getDueDate());
+        }
+
+        return sortedTasks;
+    }
+
     
     public static List<TaskModel> getTasksByUserOrWorkspace(String username, int workspaceID) {
         List<TaskModel> taskList = new ArrayList<>();
@@ -343,15 +376,15 @@ public class TaskDAO {
             e.printStackTrace();
         }
 
-        taskList.sort((t1, t2) -> {
+        // ✅ Now use PriorityQueue to sort
+        PriorityQueue<TaskModel> pq = new PriorityQueue<>((t1, t2) -> {
             int p1 = mapPriority(t1.getPriority());
             int p2 = mapPriority(t2.getPriority());
 
             if (p1 != p2) {
-                return Integer.compare(p2, p1); // High > Medium > Low
+                return Integer.compare(p2, p1); // Higher priority first
             }
 
-            // Same priority → sort by due date ASC (soonest first)
             LocalDate d1 = parseDate(t1.getDueDate());
             LocalDate d2 = parseDate(t2.getDueDate());
 
@@ -361,14 +394,20 @@ public class TaskDAO {
             return 0;
         });
 
+        pq.addAll(taskList);
 
-        // 🔍 Confirm final sort
-        System.out.println("✅ Sorted Tasks by Priority:");
-        for (TaskModel t : taskList) {
+        List<TaskModel> sortedTasks = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            sortedTasks.add(pq.poll());
+        }
+
+        // Debug print
+        System.out.println("✅ Sorted Tasks by Priority using PriorityQueue:");
+        for (TaskModel t : sortedTasks) {
             System.out.println(t.getPriority() + " - " + t.getDueDate());
         }
 
-        return taskList;
+        return sortedTasks;
     }
 
 }
