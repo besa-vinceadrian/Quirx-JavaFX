@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-
-
->>>>>>> branch 'main' of git@github.com:besa-vinceadrian/Quirx-JavaFX.git
 package application;
 
 import javafx.application.Platform;
