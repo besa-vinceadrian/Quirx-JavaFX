@@ -184,6 +184,10 @@ public class SignUp implements Initializable {
         String password = passwordFieldSU.getText().trim();
         String confirmPassword = confirmPasswordFieldSU.getText().trim();
         
+        if (password.length() < 8 || password.length() > 64) {
+            showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
+            return;
+        }
         if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showAlert(AlertType.ERROR, "Error", "All fields are required.");
             return;

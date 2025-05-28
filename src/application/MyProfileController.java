@@ -93,6 +93,11 @@ public class MyProfileController implements Initializable {
         String newPassword = newPasswordField.getText().trim();
         String confirmPassword = confirmNewPasswordField.getText().trim();
         
+        if (!newPassword.isEmpty() && (newPassword.length() < 8 || newPassword.length() > 64)) {
+        	showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
+        	return;
+        }
+        
         if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
         	showAlert(AlertType.ERROR, "Error", "New password and confirm password do not match.");
             return;
@@ -104,10 +109,6 @@ public class MyProfileController implements Initializable {
             userProfile.setEmail(emailField.getText());
             if (!newPassword.isEmpty()) {
                 userProfile.setPassword(newPassword);
-                showAlert(AlertType.INFORMATION, "Success", "Password updated successfully.");
-            }
-            else {
-            	showAlert(AlertType.INFORMATION, "Info", "Personal information updated successfully.");
             }
             userProfile.updateUser();
             showAlert(AlertType.INFORMATION, "Success", "Profile updated successfully.");
