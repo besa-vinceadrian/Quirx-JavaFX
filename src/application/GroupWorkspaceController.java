@@ -426,7 +426,7 @@ public class GroupWorkspaceController implements Initializable {
         taskField.setPromptText("Task description");
 
         ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username));
+        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG));
         ownerCombo.setValue(taskToEdit.getOwner());
         ownerCombo.setEditable(true);
 
@@ -519,7 +519,7 @@ public class GroupWorkspaceController implements Initializable {
 
         // Changed from TextField to ComboBox for owner
         ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username));
+        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG));
         ownerCombo.setPromptText("Select owner");
         ownerCombo.setEditable(false); // Allow custom input if needed
 
@@ -671,7 +671,7 @@ public class GroupWorkspaceController implements Initializable {
 
     public void getOwnerOptions() {
         // assuming 'username' is set somewhere before initialize or passed in
-        ObservableList<String> options = TaskDAO.getAllWorkspaceMembers(username);
+        ObservableList<String> options = TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG);
         ownerComboBox.setItems(options);
     }
     

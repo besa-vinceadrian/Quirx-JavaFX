@@ -508,24 +508,27 @@ public class TaskDAO {
             SELECT DISTINCT w.workspaceID, w.workspaceName
             FROM WorkspaceTable w
             LEFT JOIN WorkspaceMembersTable wm ON w.workspaceID = wm.workspaceID
-            WHERE w.workspaceName = ? AND (w.createdByUser = ? OR wm.memberUserName = ?)
+            WHERE w.workspaceName = ?
+              AND (w.createdByUser = ? OR wm.memberUserName = ?)
             """;
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement st = con.prepareStatement(sql)) {
 
             st.setString(1, workspaceName); // workspace name
-            st.setString(2, username);      // creator
-            st.setString(3, username);      // member
+            st.setString(2, username);      // created by user
+            st.setString(3, username);      // invited as member
 
             ResultSet rs = st.executeQuery();
+
             if (rs.next()) {
                 int workspaceID = rs.getInt("workspaceID");
                 String actualName = rs.getString("workspaceName");
+
                 System.out.println("✅ Found workspace: ID = " + workspaceID + ", name = " + actualName);
                 return new WorkspaceGroup(workspaceID, actualName);
             } else {
-                System.out.println("⚠️ Workspace not found or not accessible by user: " + username + ", name: " + workspaceName);
+                System.out.println("⚠️ No accessible workspace found for user: " + username + ", workspace name: " + workspaceName);
             }
 
         } catch (SQLException e) {
@@ -537,29 +540,29 @@ public class TaskDAO {
     }
 
 
-    public static ObservableList<String> getAllWorkspaceMembers(String currentUsername) {
-        String sql = "SELECT DISTINCT memberUserName FROM WorkspaceMembersTable";
+
+    public static ObservableList<String> getAllWorkspaceMembers(String currentUsername, int currentWorkspaceID) {
+        String sql = "SELECT DISTINCT memberUserName FROM WorkspaceMembersTable WHERE workspaceID = ?";
         ObservableList<String> members = FXCollections.observableArrayList();
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement st = con.prepareStatement(sql);
-             ResultSet rs = st.executeQuery()) {
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setInt(1, currentWorkspaceID);
+            ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
                 String name = rs.getString("memberUserName");
-                members.add(name);
-            }
-
-            // Tag current user with "(me)"
-            if (!members.contains(currentUsername)) {
-                members.add(currentUsername + " (me)");
-            } else {
-                int index = members.indexOf(currentUsername);
-                members.set(index, currentUsername + " (me)");
+                if (name.equals(currentUsername)) {
+                    if (!members.contains(currentUsername + " (me)")) {
+                        members.add(currentUsername + " (me)");
+                    }
+                } else if (!members.contains(name)) {
+                    members.add(name);
+                }
             }
 
             System.out.println("✅ Fetched workspace members: " + members);
-
             return members;
 
         } catch (SQLException e) {
@@ -569,6 +572,7 @@ public class TaskDAO {
 
         return null; // On error
     }
+
 
     public static boolean addMemberToWorkspace(int workspaceID, String memberUsername) {
         String sql = "INSERT INTO WorkspaceMembersTable (workspaceID, memberUserName) VALUES (?, ?)";
