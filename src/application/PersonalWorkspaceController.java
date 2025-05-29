@@ -410,8 +410,6 @@ public class PersonalWorkspaceController implements Initializable {
         }
     }
 
-
-    
     private Optional<TaskModel> showEditTaskDialog(TaskModel taskToEdit) {
         Dialog<TaskModel> dialog = new Dialog<>();
         dialog.setTitle("Edit Task");

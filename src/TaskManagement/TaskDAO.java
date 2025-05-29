@@ -465,7 +465,6 @@ public class TaskDAO {
         return workspaces;
     }
 
-
     public static boolean deleteWorkspace(String workspaceName, String username) {
         String getWorkspaceIDSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
         String deleteTasksSql = "DELETE FROM TaskTable WHERE workspaceID = ?";
