@@ -758,6 +758,7 @@ public class GroupWorkspaceController implements Initializable {
     
     @FXML
     private void inviteButton() {
+    	setWorkspaceData(currentWorkspaceIDG, currentWorkspaceName);
         inviteStackPane.setVisible(true);
         mainAnchorPane.setVisible(true);
         invitePane.setVisible(true);
@@ -766,7 +767,8 @@ public class GroupWorkspaceController implements Initializable {
     
     @FXML
     private void handleInviteFriend() {
-        String username = usernameField.getText().trim();
+        setWorkspaceData(currentWorkspaceIDG, currentWorkspaceName);
+    	String username = usernameField.getText().trim();
         if (username.isEmpty()) {
             showAlertWithType(Alert.AlertType.WARNING, "Invalid Input", "Please enter a username.");
             return;
