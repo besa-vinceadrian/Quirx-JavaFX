@@ -384,10 +384,12 @@ public class TaskDAO {
     public static int createWorkspaceForUser(String workspaceName, String createdByUser) {
         String checkSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
         String insertSql = "INSERT INTO WorkspaceTable (workspaceName, createdByUser) VALUES (?, ?)";
+        String addMemberSql = "INSERT INTO WorkspaceMembersTable (workspaceID, memberUserName) VALUES (?, ?)";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement checkStmt = con.prepareStatement(checkSql);
-             PreparedStatement insertStmt = con.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement insertStmt = con.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement addMemberStmt = con.prepareStatement(addMemberSql)) {
 
             // Check if workspace already exists
             checkStmt.setString(1, workspaceName);
@@ -409,6 +411,12 @@ public class TaskDAO {
                 ResultSet keys = insertStmt.getGeneratedKeys();
                 if (keys.next()) {
                     int newID = keys.getInt(1);
+                    
+                    // Add creator as member
+                    addMemberStmt.setInt(1, newID);
+                    addMemberStmt.setString(2, createdByUser);
+                    addMemberStmt.executeUpdate();
+                    
                     System.out.println("✅ New workspace created: " + workspaceName + " (ID: " + newID + ")");
                     return newID;
                 }
