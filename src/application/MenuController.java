@@ -279,22 +279,30 @@ public class MenuController implements Initializable {
         
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
-        
+
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Delete from database - you'll need to implement this method in TaskDAO
-            boolean deleted = TaskDAO.deleteWorkspace(workspaceName, username);
-            
+            Integer workspaceId = TaskDAO.fetchWorkspaceIdForUser(workspaceName, username);
+
+            if (workspaceId == null) {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                errorAlert.setTitle("Workspace Not Found");
+                errorAlert.setHeaderText(null);
+                errorAlert.setContentText("Could not find workspace '" + workspaceName + "' associated with your account.");
+                errorAlert.showAndWait();
+                return;
+            }
+
+            boolean deleted = TaskDAO.deleteWorkspace(workspaceId, username);
+
             if (deleted) {
                 groupWorkspaceContainer.getChildren().remove(buttonContainer);
                 createdWorkspaces.remove(buttonContainer);
-                
-                // If no workspaces left, collapse the dropdown
+
                 if (createdWorkspaces.isEmpty() && isGroupWorkspaceExpanded) {
                     toggleGroupWorkspaceDropdown();
                 }
             } else {
-                // Show error message if deletion failed
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Delete Failed");
                 errorAlert.setHeaderText(null);
@@ -303,6 +311,7 @@ public class MenuController implements Initializable {
             }
         }
     }
+
     
     @FXML
     private void logOutButton(ActionEvent event) {

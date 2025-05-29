@@ -465,51 +465,65 @@ public class TaskDAO {
         return workspaces;
     }
 
-    public static boolean deleteWorkspace(String workspaceName, String username) {
-        String getWorkspaceIDSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
+    public static boolean deleteWorkspace(int workspaceID, String username) {
+        String getWorkspaceSql = "SELECT createdByUser FROM WorkspaceTable WHERE workspaceID = ?";
         String deleteTasksSql = "DELETE FROM TaskTable WHERE workspaceID = ?";
         String deleteMembersSql = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ?";
         String deleteWorkspaceSql = "DELETE FROM WorkspaceTable WHERE workspaceID = ?";
+        String removeUserFromMembersSql = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ? AND memberUserName = ?";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement getIDStmt = con.prepareStatement(getWorkspaceIDSql);
+             PreparedStatement getWorkspaceStmt = con.prepareStatement(getWorkspaceSql);
              PreparedStatement deleteTasksStmt = con.prepareStatement(deleteTasksSql);
              PreparedStatement deleteMembersStmt = con.prepareStatement(deleteMembersSql);
-             PreparedStatement deleteWorkspaceStmt = con.prepareStatement(deleteWorkspaceSql)) {
+             PreparedStatement deleteWorkspaceStmt = con.prepareStatement(deleteWorkspaceSql);
+             PreparedStatement removeUserStmt = con.prepareStatement(removeUserFromMembersSql)) {
 
-            // Get the workspace ID for a workspace created by the specified user
-            getIDStmt.setString(1, workspaceName);
-            getIDStmt.setString(2, username);
-            ResultSet rs = getIDStmt.executeQuery();
+            // Get the workspace creator
+            getWorkspaceStmt.setInt(1, workspaceID);
+            ResultSet rs = getWorkspaceStmt.executeQuery();
 
             if (!rs.next()) {
-                System.out.println("⚠️ Workspace not found or not owned by user: " + workspaceName);
+                System.out.println("⚠️ Workspace not found with ID: " + workspaceID);
                 return false;
             }
 
-            int workspaceID = rs.getInt("workspaceID");
+            String creator = rs.getString("createdByUser");
 
-            // Delete tasks linked to this workspace
-            deleteTasksStmt.setInt(1, workspaceID);
-            deleteTasksStmt.executeUpdate();
+            if (creator.equalsIgnoreCase(username)) {
+                // User is the creator: delete entire workspace and all related data
+                deleteTasksStmt.setInt(1, workspaceID);
+                deleteTasksStmt.executeUpdate();
 
-            // Delete all member entries linked to this workspace
-            deleteMembersStmt.setInt(1, workspaceID);
-            deleteMembersStmt.executeUpdate();
+                deleteMembersStmt.setInt(1, workspaceID);
+                deleteMembersStmt.executeUpdate();
 
-            // Delete the workspace itself
-            deleteWorkspaceStmt.setInt(1, workspaceID);
-            int rowsAffected = deleteWorkspaceStmt.executeUpdate();
+                deleteWorkspaceStmt.setInt(1, workspaceID);
+                int rowsAffected = deleteWorkspaceStmt.executeUpdate();
 
-            if (rowsAffected > 0) {
-                System.out.println("🗑️ Workspace deleted: " + workspaceName);
-                return true;
+                if (rowsAffected > 0) {
+                    System.out.println("🗑️ Entire workspace deleted by creator (ID: " + workspaceID + ")");
+                    return true;
+                } else {
+                    System.err.println("❌ Failed to delete the workspace.");
+                }
+
             } else {
-                System.err.println("❌ Failed to delete workspace from database.");
+                // User is a member: only remove them from the workspace
+                removeUserStmt.setInt(1, workspaceID);
+                removeUserStmt.setString(2, username);
+                int memberRows = removeUserStmt.executeUpdate();
+
+                if (memberRows > 0) {
+                    System.out.println("👤 Member '" + username + "' removed from workspace (ID: " + workspaceID + ")");
+                    return true;
+                } else {
+                    System.out.println("⚠️ User '" + username + "' was not a member of workspace (ID: " + workspaceID + ")");
+                }
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ SQL Exception while deleting workspace: " + e.getMessage());
+            System.err.println("❌ SQL Exception while deleting workspace/member: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -648,4 +662,39 @@ public class TaskDAO {
         return null;
     }
 
+    public static Integer fetchWorkspaceIdForUser(String workspaceName, String username) {
+        String findOwnedSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
+        String findMemberSql = "SELECT wm.workspaceID FROM WorkspaceMembersTable wm " +
+                               "JOIN WorkspaceTable wt ON wm.workspaceID = wt.workspaceID " +
+                               "WHERE wt.workspaceName = ? AND wm.memberUserName = ?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmtOwner = con.prepareStatement(findOwnedSql);
+             PreparedStatement stmtMember = con.prepareStatement(findMemberSql)) {
+
+            // Check if user is the creator
+            stmtOwner.setString(1, workspaceName);
+            stmtOwner.setString(2, username);
+            ResultSet rsOwner = stmtOwner.executeQuery();
+            if (rsOwner.next()) {
+                return rsOwner.getInt("workspaceID");
+            }
+
+            // If not the creator, check if user is a member
+            stmtMember.setString(1, workspaceName);
+            stmtMember.setString(2, username);
+            ResultSet rsMember = stmtMember.executeQuery();
+            if (rsMember.next()) {
+                return rsMember.getInt("workspaceID");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error fetching workspace ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null; // Not found
+    }
+
+    
 }
