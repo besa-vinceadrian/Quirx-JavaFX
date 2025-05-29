@@ -421,9 +421,19 @@ public class PersonalWorkspaceController implements Initializable {
         taskField.setPromptText("Task description");
 
         ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.getItems().addAll(getOwnerOptions());
-        ownerCombo.setValue(taskToEdit.getOwner());
-        ownerCombo.setEditable(true);
+        String currentUser = username; // your logged-in username
+        String workspaceName = taskToEdit.getWorkspaceName(); // this must exist in TaskModel
+
+        if (workspaceName.equalsIgnoreCase("Personal Workspace")) {
+            ownerCombo.getItems().add(currentUser + " (me)");
+            ownerCombo.setValue(currentUser + " (me)");
+            ownerCombo.setDisable(true); // prevent selection
+        } else {
+            ownerCombo.getItems().addAll(getOwnerOptions());
+            ownerCombo.setValue(taskToEdit.getOwner());
+            ownerCombo.setEditable(true);
+        }
+
 
         ComboBox<String> statusCombo = new ComboBox<>();
         statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
@@ -512,11 +522,19 @@ public class PersonalWorkspaceController implements Initializable {
         TextField taskField = new TextField();
         taskField.setPromptText("Task description");
 
-        // Changed from TextField to ComboBox for owner
         ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.getItems().addAll(getOwnerOptions());
-        ownerCombo.setPromptText("Select owner");
-        ownerCombo.setEditable(false); // Allow custom input if needed
+        String currentUser = username; // your logged-in user
+        String workspaceName = currentWorkspaceName; // You must provide this method or value
+
+        if (workspaceName.equalsIgnoreCase("Personal Workspace")) {
+            ownerCombo.getItems().add(currentUser + " (me)");
+            ownerCombo.setValue(currentUser + " (me)");
+            ownerCombo.setDisable(true); // lock the field
+        } else {
+            ownerCombo.getItems().addAll(getOwnerOptions());
+            ownerCombo.setPromptText("Select owner");
+            ownerCombo.setEditable(false);
+        }
 
         ComboBox<String> statusCombo = new ComboBox<>();
         statusCombo.getItems().addAll("Not Started", "In Progress", "Done");

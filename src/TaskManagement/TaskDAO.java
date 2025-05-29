@@ -461,14 +461,16 @@ public class TaskDAO {
     public static boolean deleteWorkspace(String workspaceName, String username) {
         String getWorkspaceIDSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
         String deleteTasksSql = "DELETE FROM TaskTable WHERE workspaceID = ?";
+        String deleteMembersSql = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ?";
         String deleteWorkspaceSql = "DELETE FROM WorkspaceTable WHERE workspaceID = ?";
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement getIDStmt = con.prepareStatement(getWorkspaceIDSql);
              PreparedStatement deleteTasksStmt = con.prepareStatement(deleteTasksSql);
+             PreparedStatement deleteMembersStmt = con.prepareStatement(deleteMembersSql);
              PreparedStatement deleteWorkspaceStmt = con.prepareStatement(deleteWorkspaceSql)) {
 
-            // Get the workspace ID
+            // Get the workspace ID for a workspace created by the specified user
             getIDStmt.setString(1, workspaceName);
             getIDStmt.setString(2, username);
             ResultSet rs = getIDStmt.executeQuery();
@@ -484,7 +486,11 @@ public class TaskDAO {
             deleteTasksStmt.setInt(1, workspaceID);
             deleteTasksStmt.executeUpdate();
 
-            // Delete the workspace
+            // Delete all member entries linked to this workspace
+            deleteMembersStmt.setInt(1, workspaceID);
+            deleteMembersStmt.executeUpdate();
+
+            // Delete the workspace itself
             deleteWorkspaceStmt.setInt(1, workspaceID);
             int rowsAffected = deleteWorkspaceStmt.executeUpdate();
 
@@ -502,6 +508,7 @@ public class TaskDAO {
 
         return false;
     }
+
     
     public static WorkspaceGroup getCurrentWorkspace(String username, String workspaceName) {
         String sql = """
