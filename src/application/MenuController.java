@@ -196,6 +196,7 @@ public class MenuController implements Initializable {
         groupWorkspaceContainer.setVisible(isGroupWorkspaceExpanded);
         groupWorkspaceContainer.setManaged(isGroupWorkspaceExpanded);
         updateGroupWorkspaceButtonText();
+        refreshWorkspaceList();
 
         if (isGroupWorkspaceExpanded) {
             groupWorkspaceContainer.getChildren().clear();
@@ -296,9 +297,13 @@ public class MenuController implements Initializable {
             boolean deleted = TaskDAO.deleteWorkspace(workspaceId, username);
 
             if (deleted) {
+                // Remove from UI
                 groupWorkspaceContainer.getChildren().remove(buttonContainer);
                 createdWorkspaces.remove(buttonContainer);
 
+                // Force refresh the workspace list
+                refreshWorkspaceList();
+                
                 if (createdWorkspaces.isEmpty() && isGroupWorkspaceExpanded) {
                     toggleGroupWorkspaceDropdown();
                 }
@@ -311,8 +316,20 @@ public class MenuController implements Initializable {
             }
         }
     }
-
     
+ // Add this new method to refresh the workspace list
+    private void refreshWorkspaceList() {
+        if (isGroupWorkspaceExpanded) {
+            groupWorkspaceContainer.getChildren().clear();
+            createdWorkspaces.clear();
+            
+            List<String> workspaces = TaskDAO.getUserGroupWorkspaces(username);
+            for (String workspaceName : workspaces) {
+                createWorkspaceButtonFromDB(workspaceName);
+            }
+        }
+    }
+ 
     @FXML
     private void logOutButton(ActionEvent event) {
     	Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -347,9 +364,29 @@ public class MenuController implements Initializable {
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
         
+        // Add validation
+        dialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.trim().isEmpty()) {
+                dialog.getEditor().setStyle("-fx-text-fill: red;");
+            } else {
+                dialog.getEditor().setStyle("-fx-text-fill: black;");
+            }
+        });
+
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(workspaceName -> {
             if (!workspaceName.trim().isEmpty()) {
+                // Check if workspace already exists
+                List<String> existingWorkspaces = TaskDAO.getUserGroupWorkspaces(username);
+                if (existingWorkspaces.contains(workspaceName.trim())) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Duplicate Workspace");
+                    alert.setHeaderText(null);
+                    alert.setContentText("A workspace with this name already exists. Please choose a different name.");
+                    alert.showAndWait();
+                    return;
+                }
+
                 // Create workspace
                 int workspaceId = TaskDAO.createWorkspaceForUser(workspaceName, username);
                 if (workspaceId != -1) {

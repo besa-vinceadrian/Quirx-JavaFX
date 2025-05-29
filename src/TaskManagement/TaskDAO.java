@@ -695,6 +695,28 @@ public class TaskDAO {
 
         return null; // Not found
     }
-
     
+    public static boolean workspaceNameExists(String workspaceName, String username) {
+        String sql = "SELECT COUNT(*) FROM WorkspaceTable WHERE workspaceName = ? AND " +
+                     "(createdByUser = ? OR workspaceID IN " +
+                     "(SELECT workspaceID FROM WorkspaceMembersTable WHERE memberUserName = ?))";
+        
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+            
+            st.setString(1, workspaceName);
+            st.setString(2, username);
+            st.setString(3, username);
+            
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error checking workspace name existence:");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
