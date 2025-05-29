@@ -140,7 +140,20 @@ public class Authentication {
             message.setFrom(new InternetAddress(from));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject("Email Verification OTP");
-            message.setText("Your OTP is: " + otp + "\n\nThis OTP is valid for 5 minutes.");
+            
+            String htmlContent = "<html>" +
+            	    "<body style='font-family: Arial, sans-serif;'>" +
+            	    "<h1 style='color: #2E86C1;'>Email Verification</h1>" +
+            	    "<p>Dear user,</p>" +
+            	    "<p>To complete your email verification, please use the following One-Time Password (OTP):</p>" +
+            	    "<h1 style='color: #28a745; letter-spacing: 8px;'>" + otp + "</h1>" +
+            	    "<p>This OTP is valid for <strong>5 minutes</strong>. Please do not share it with anyone.</p>" +
+            	    "<p>If you did not request this verification, please ignore this email.</p>" +
+            	    "<br><p>Thank you,<br>The Quirx Team</p>" +
+            	    "</body>" +
+            	    "</html>";
+
+            message.setContent(htmlContent, "text/html");
 
             Transport.send(message);
             lastOTPSentTime = System.currentTimeMillis();
