@@ -96,18 +96,74 @@ public class MyProfile {
      * @return true if deletion was successful, false otherwise
      */
     public boolean deleteAccount() {
-        String query = "DELETE FROM UserTable WHERE userID = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setInt(1, this.userId);
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-            
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            // Step 1: Get all workspaceIDs created by this user
+            String getWorkspacesSQL = "SELECT workspaceID FROM WorkspaceTable WHERE createdByUser = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(getWorkspacesSQL)) {
+                stmt.setString(1, this.userName);
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    int workspaceId = rs.getInt("workspaceID");
+
+                    // Step 2: Delete from WorkspaceMembersTable where workspaceID = ?
+                    String deleteWorkspaceMembersSQL = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ?";
+                    try (PreparedStatement deleteStmt = conn.prepareStatement(deleteWorkspaceMembersSQL)) {
+                        deleteStmt.setInt(1, workspaceId);
+                        deleteStmt.executeUpdate();
+                    }
+                }
+            }
+
+            // Step 3: Delete tasks assigned to this user
+            String deleteTasksSQL = "DELETE FROM TaskTable WHERE userOwner = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteTasksSQL)) {
+                stmt.setString(1, this.userName);
+                stmt.executeUpdate();
+            }
+
+            // Step 4: Delete workspaces owned by this user
+            String deleteWorkspacesSQL = "DELETE FROM WorkspaceTable WHERE createdByUser = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteWorkspacesSQL)) {
+                stmt.setString(1, this.userName);
+                stmt.executeUpdate();
+            }
+
+            // Step 2.5: Delete all memberships where user is a member of any workspace
+            String deleteUserMembershipSQL = "DELETE FROM WorkspaceMembersTable WHERE memberUserName = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteUserMembershipSQL)) {
+                stmt.setString(1, this.userName);
+                stmt.executeUpdate();
+            }
+
+            // Step 5: Delete user
+            String deleteUserSQL = "DELETE FROM UserTable WHERE userID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteUserSQL)) {
+                stmt.setInt(1, this.userId);
+                int rowsAffected = stmt.executeUpdate();
+                conn.commit(); // Commit transaction
+                return rowsAffected > 0;
+            }
+
         } catch (SQLException e) {
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                if (conn != null) conn.setAutoCommit(true);
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

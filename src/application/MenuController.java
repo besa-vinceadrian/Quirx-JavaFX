@@ -341,9 +341,30 @@ public class MenuController implements Initializable {
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(workspaceName -> {
             if (!workspaceName.trim().isEmpty()) {
+                // Create workspace
                 int workspaceId = TaskDAO.createWorkspaceForUser(workspaceName, username);
                 if (workspaceId != -1) {
-                    createWorkspaceButton(workspaceName); // Or refresh your UI
+                    createWorkspaceButton(workspaceName);
+                    
+                    // Immediately open the workspace
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupWorkspace.fxml"));
+                        Pane view = loader.load();
+
+                        GroupWorkspaceController controller = loader.getController();
+                        controller.setUsername(username);
+                        
+                        // Get the newly created workspace details
+                        WorkspaceGroup workspace = TaskDAO.getCurrentWorkspace(username, workspaceName);
+                        if (workspace != null) {
+                            controller.setWorkspaceData(workspace.getId(), workspace.getName());
+                        }
+
+                        windowPane.getChildren().clear();
+                        windowPane.getChildren().add(view);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } else {
                     System.err.println("❌ Failed to create workspace.");
                 }
