@@ -629,7 +629,7 @@ public class TaskDAO {
     }
 
     public static boolean doesUserExist(String username) {
-        String sql = "SELECT COUNT(*) FROM UserTable WHERE username = ?";
+        String sql = "SELECT COUNT(*) FROM UserTable WHERE userName = ?";
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement st = con.prepareStatement(sql)) {
 
@@ -719,4 +719,65 @@ public class TaskDAO {
         return false;
     }
 
+    public static boolean addTaskSimple(TaskModel t, int workspaceID) {
+        String sql = "INSERT INTO TaskTable (taskTitle, userOwner, dueDate, taskStatus, taskPriority, workspaceID) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            System.out.println("🔍 Inserting Task:");
+            System.out.println("Title: " + t.getTaskTitle());
+            System.out.println("Owner: " + t.getUserOwner());
+            System.out.println("Due Date: " + t.getDueDate());
+            System.out.println("Status: " + t.getTaskStatus());
+            System.out.println("Priority: " + t.getTaskPriority());
+            System.out.println("Workspace ID: " + workspaceID);
+
+            st.setString(1, t.getTaskTitle());
+            st.setString(2, t.getUserOwner());
+
+            String dueDateStr = t.getDueDate();
+            if (dueDateStr != null && !dueDateStr.trim().isEmpty()) {
+                try {
+                    LocalDate parsedDate = LocalDate.parse(dueDateStr, DATE_FORMATTER);
+                    st.setDate(3, java.sql.Date.valueOf(parsedDate));
+                } catch (DateTimeParseException e) {
+                    System.err.println("❌ Invalid date format: " + dueDateStr);
+                    st.setNull(3, Types.DATE);
+                }
+            } else {
+                System.out.println("ℹ️ Due date is null or empty. Setting to NULL.");
+                st.setNull(3, Types.DATE);
+            }
+
+            st.setString(4, t.getTaskStatus());
+            st.setString(5, t.getTaskPriority());
+            st.setInt(6, workspaceID);
+
+            int rows = st.executeUpdate();
+            if (rows > 0) {
+                ResultSet keys = st.getGeneratedKeys();
+                if (keys.next()) {
+                    t.setTaskID(keys.getInt(1));
+                }
+                t.setWorkspaceID(workspaceID);
+                System.out.println("✅ Task inserted successfully (ID: " + t.getTaskID() + ")");
+                return true;
+            } else {
+                System.err.println("⚠️ Task insert failed: No rows affected.");
+            }
+
+        } catch (SQLIntegrityConstraintViolationException dup) {
+            System.err.println("❌ Duplicate or constraint error: " + dup.getMessage());
+        } catch (SQLException sqlEx) {
+            System.err.println("❌ SQL error: " + sqlEx.getMessage());
+        } catch (Exception e) {
+            System.err.println("❌ Exception during task insert:");
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    
 }

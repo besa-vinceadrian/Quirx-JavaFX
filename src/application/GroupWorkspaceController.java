@@ -646,7 +646,7 @@ public class GroupWorkspaceController implements Initializable {
         // Show dialog and handle result
         Optional<TaskModel> result = dialog.showAndWait();
         result.ifPresent(task -> {
-            boolean inserted = TaskDAO.addTask(task, currentWorkspaceIDG, currentWorkspaceName, username);
+        	boolean inserted = TaskDAO.addTaskSimple(task, currentWorkspaceIDG);
             if (inserted) {
                 loadTasks();
             } else {

@@ -423,13 +423,13 @@ public class PersonalWorkspaceController implements Initializable {
         String workspaceName = taskToEdit.getWorkspaceName(); // this must exist in TaskModel
 
         if (workspaceName.equalsIgnoreCase("Personal Workspace")) {
-            ownerCombo.getItems().add(currentUser + " (me)");
-            ownerCombo.setValue(currentUser + " (me)");
+            ownerCombo.getItems().add(currentUser);
+            ownerCombo.setValue(currentUser);
             ownerCombo.setDisable(true); // prevent selection
         } else {
             ownerCombo.getItems().addAll(getOwnerOptions());
             ownerCombo.setValue(taskToEdit.getOwner());
-            ownerCombo.setEditable(true);
+            ownerCombo.setEditable(false); // only allow valid usernames
         }
 
 
@@ -678,11 +678,11 @@ public class PersonalWorkspaceController implements Initializable {
     }
 
     private ObservableList<String> getOwnerOptions() {
-        ObservableList<String> owners = FXCollections.observableArrayList(
-            username + " (me)"
-        );
+        // Ideally fetch from DB, but here’s a placeholder
+        ObservableList<String> owners = FXCollections.observableArrayList(username);
         return owners;
     }
+
     
     @FXML
     private void handleDeleteTask() {
