@@ -11,6 +11,8 @@ import java.time.format.DateTimeParseException;
 import java.util.PriorityQueue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import java.util.Set;
+import java.util.HashSet;
 
 
 public class TaskDAO {
@@ -303,83 +305,6 @@ public class TaskDAO {
 
         return sortedTasks;
     }
-
-
-    
-    public static List<TaskModel> getTasksByUserOrWorkspace(String username, int workspaceID) {
-        List<TaskModel> taskList = new ArrayList<>();
-
-        String sql = "SELECT * FROM TaskTable WHERE userOwner = ? " +
-                     "UNION " +
-                     "SELECT * FROM TaskTable WHERE workspaceID = ?";
-
-        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement st = con.prepareStatement(sql)) {
-
-            st.setString(1, username);
-            st.setInt(2, workspaceID);
-
-            ResultSet rs = st.executeQuery();
-
-            while (rs.next()) {
-                String formattedDate = "";
-                Date sqlDate = rs.getDate("dueDate");
-                if (sqlDate != null) {
-                    formattedDate = sqlDate.toLocalDate().format(DATE_FORMATTER);
-                }
-
-                TaskModel task = new TaskModel(
-                    rs.getString("taskTitle"),
-                    rs.getString("userOwner"),
-                    rs.getString("taskStatus"),
-                    formattedDate,
-                    rs.getString("taskPriority")
-                );
-
-                task.setTaskID(rs.getInt("taskID"));
-                task.setWorkspaceID(rs.getInt("workspaceID"));
-
-                taskList.add(task);
-            }
-
-        } catch (Exception e) {
-            System.err.println("❌ Error fetching tasks for user or workspace");
-            e.printStackTrace();
-        }
-
-        // ✅ Now use PriorityQueue to sort
-        PriorityQueue<TaskModel> pq = new PriorityQueue<>((t1, t2) -> {
-            int p1 = mapPriority(t1.getPriority());
-            int p2 = mapPriority(t2.getPriority());
-
-            if (p1 != p2) {
-                return Integer.compare(p2, p1); // Higher priority first
-            }
-
-            LocalDate d1 = parseDate(t1.getDueDate());
-            LocalDate d2 = parseDate(t2.getDueDate());
-
-            if (d1 != null && d2 != null) return d1.compareTo(d2);
-            if (d1 != null) return -1;
-            if (d2 != null) return 1;
-            return 0;
-        });
-
-        pq.addAll(taskList);
-
-        List<TaskModel> sortedTasks = new ArrayList<>();
-        while (!pq.isEmpty()) {
-            sortedTasks.add(pq.poll());
-        }
-
-        // Debug print
-        System.out.println("✅ Sorted Tasks by Priority using PriorityQueue:");
-        for (TaskModel t : sortedTasks) {
-            System.out.println(t.getPriority() + " - " + t.getDueDate());
-        }
-
-        return sortedTasks;
-    }
     
     public static int createWorkspaceForUser(String workspaceName, String createdByUser) {
         String checkSql = "SELECT workspaceID FROM WorkspaceTable WHERE workspaceName = ? AND createdByUser = ?";
@@ -432,15 +357,16 @@ public class TaskDAO {
 
     public static List<String> getUserGroupWorkspaces(String username) {
         List<String> workspaces = new ArrayList<>();
-        
+        Set<Integer> seenWorkspaceIDs = new HashSet<>();  // To prevent duplicates
+
         String sql = """
-            SELECT DISTINCT w.workspaceName
+            SELECT w.workspaceID, w.workspaceName
             FROM WorkspaceTable w
             WHERE w.createdByUser = ? AND w.workspaceName != 'Personal Workspace'
-            
-            UNION
-            
-            SELECT DISTINCT w.workspaceName
+
+            UNION ALL
+
+            SELECT w.workspaceID, w.workspaceName
             FROM WorkspaceTable w
             JOIN WorkspaceMembersTable wm ON w.workspaceID = wm.workspaceID
             WHERE wm.memberUserName = ? AND w.workspaceName != 'Personal Workspace'
@@ -449,12 +375,18 @@ public class TaskDAO {
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement st = con.prepareStatement(sql)) {
 
-            st.setString(1, username); // for creator
-            st.setString(2, username); // for member
+            st.setString(1, username);
+            st.setString(2, username);
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                workspaces.add(rs.getString("workspaceName"));
+                int workspaceID = rs.getInt("workspaceID");
+                String workspaceName = rs.getString("workspaceName");
+
+                if (!seenWorkspaceIDs.contains(workspaceID)) {
+                    seenWorkspaceIDs.add(workspaceID);
+                    workspaces.add(workspaceName + " (ID: " + workspaceID + ")");
+                }
             }
 
         } catch (SQLException e) {
@@ -465,8 +397,10 @@ public class TaskDAO {
         return workspaces;
     }
 
+
     public static boolean deleteWorkspace(int workspaceID, String username) {
         String getWorkspaceSql = "SELECT createdByUser FROM WorkspaceTable WHERE workspaceID = ?";
+        String checkMemberSql = "SELECT 1 FROM WorkspaceMembersTable WHERE workspaceID = ? AND memberUserName = ?";
         String deleteTasksSql = "DELETE FROM TaskTable WHERE workspaceID = ?";
         String deleteMembersSql = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ?";
         String deleteWorkspaceSql = "DELETE FROM WorkspaceTable WHERE workspaceID = ?";
@@ -474,12 +408,13 @@ public class TaskDAO {
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement getWorkspaceStmt = con.prepareStatement(getWorkspaceSql);
+             PreparedStatement checkMemberStmt = con.prepareStatement(checkMemberSql);
              PreparedStatement deleteTasksStmt = con.prepareStatement(deleteTasksSql);
              PreparedStatement deleteMembersStmt = con.prepareStatement(deleteMembersSql);
              PreparedStatement deleteWorkspaceStmt = con.prepareStatement(deleteWorkspaceSql);
              PreparedStatement removeUserStmt = con.prepareStatement(removeUserFromMembersSql)) {
 
-            // Get the workspace creator
+            // 🧪 Check if workspace exists
             getWorkspaceStmt.setInt(1, workspaceID);
             ResultSet rs = getWorkspaceStmt.executeQuery();
 
@@ -491,7 +426,7 @@ public class TaskDAO {
             String creator = rs.getString("createdByUser");
 
             if (creator.equalsIgnoreCase(username)) {
-                // User is the creator: delete entire workspace and all related data
+                // 👤 User is the creator — delete the entire workspace
                 deleteTasksStmt.setInt(1, workspaceID);
                 deleteTasksStmt.executeUpdate();
 
@@ -502,61 +437,79 @@ public class TaskDAO {
                 int rowsAffected = deleteWorkspaceStmt.executeUpdate();
 
                 if (rowsAffected > 0) {
-                    System.out.println("🗑️ Entire workspace deleted by creator (ID: " + workspaceID + ")");
+                    System.out.println("🗑️ Workspace deleted by creator (ID: " + workspaceID + ")");
                     return true;
                 } else {
                     System.err.println("❌ Failed to delete the workspace.");
+                    return false;
                 }
-
             } else {
-                // User is a member: only remove them from the workspace
-                removeUserStmt.setInt(1, workspaceID);
-                removeUserStmt.setString(2, username);
-                int memberRows = removeUserStmt.executeUpdate();
+                // 🧪 Check if user is a member
+                checkMemberStmt.setInt(1, workspaceID);
+                checkMemberStmt.setString(2, username);
+                ResultSet memberCheck = checkMemberStmt.executeQuery();
 
-                if (memberRows > 0) {
-                    System.out.println("👤 Member '" + username + "' removed from workspace (ID: " + workspaceID + ")");
-                    return true;
+                if (memberCheck.next()) {
+                    // 👤 User is a member — just remove them from the workspace
+                    removeUserStmt.setInt(1, workspaceID);
+                    removeUserStmt.setString(2, username);
+                    int memberRows = removeUserStmt.executeUpdate();
+
+                    if (memberRows > 0) {
+                        System.out.println("👤 Member '" + username + "' removed from workspace (ID: " + workspaceID + ")");
+                        return true;
+                    } else {
+                        System.out.println("⚠️ Could not remove user '" + username + "' from workspace (ID: " + workspaceID + ")");
+                        return false;
+                    }
                 } else {
-                    System.out.println("⚠️ User '" + username + "' was not a member of workspace (ID: " + workspaceID + ")");
+                    // ❌ User is not associated at all
+                    System.out.println("⚠️ User '" + username + "' is not associated with workspace (ID: " + workspaceID + ")");
+                    return false;
                 }
             }
 
         } catch (SQLException e) {
             System.err.println("❌ SQL Exception while deleting workspace/member: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
+
     
-    public static WorkspaceGroup getCurrentWorkspace(String username, String workspaceName) {
+    public static WorkspaceGroup getCurrentWorkspace(String username, String workspaceNameWithID) {
+        int workspaceID = extractID(workspaceNameWithID);
+        if (workspaceID == -1) {
+            System.err.println("⚠️ Invalid workspace name format: " + workspaceNameWithID);
+            return null;
+        }
+
         String sql = """
             SELECT DISTINCT w.workspaceID, w.workspaceName
             FROM WorkspaceTable w
             LEFT JOIN WorkspaceMembersTable wm ON w.workspaceID = wm.workspaceID
-            WHERE w.workspaceName = ?
+            WHERE w.workspaceID = ?
               AND (w.createdByUser = ? OR wm.memberUserName = ?)
             """;
 
         try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement st = con.prepareStatement(sql)) {
 
-            st.setString(1, workspaceName); // workspace name
-            st.setString(2, username);      // created by user
-            st.setString(3, username);      // invited as member
+            st.setInt(1, workspaceID);       // query by ID now
+            st.setString(2, username);
+            st.setString(3, username);
 
             ResultSet rs = st.executeQuery();
 
             if (rs.next()) {
-                int workspaceID = rs.getInt("workspaceID");
+                int id = rs.getInt("workspaceID");
                 String actualName = rs.getString("workspaceName");
 
-                System.out.println("✅ Found workspace: ID = " + workspaceID + ", name = " + actualName);
-                return new WorkspaceGroup(workspaceID, actualName);
+                System.out.println("✅ Found workspace: ID = " + id + ", name = " + actualName);
+                return new WorkspaceGroup(id, actualName);
             } else {
-                System.out.println("⚠️ No accessible workspace found for user: " + username + ", workspace name: " + workspaceName);
+                System.out.println("⚠️ No accessible workspace found for user: " + username + ", workspace ID: " + workspaceID);
             }
 
         } catch (SQLException e) {
@@ -566,6 +519,22 @@ public class TaskDAO {
 
         return null; // Not found or error
     }
+
+    // Helper method to extract ID from string like "same (ID: 197)"
+    private static int extractID(String workspaceNameWithID) {
+        try {
+            int start = workspaceNameWithID.indexOf("(ID: ");
+            int end = workspaceNameWithID.indexOf(")", start);
+            if (start != -1 && end != -1) {
+                String idStr = workspaceNameWithID.substring(start + 5, end).trim();
+                return Integer.parseInt(idStr);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1; // invalid format
+    }
+
 
 
 
@@ -777,6 +746,38 @@ public class TaskDAO {
         }
 
         return false;
+    }
+
+    public static WorkspaceGroup getWorkspaceByIdAndUser(int workspaceID, String username) {
+        String sql = """
+            SELECT DISTINCT w.workspaceID, w.workspaceName
+            FROM WorkspaceTable w
+            LEFT JOIN WorkspaceMembersTable wm ON w.workspaceID = wm.workspaceID
+            WHERE w.workspaceID = ?
+              AND (w.createdByUser = ? OR wm.memberUserName = ?)
+        """;
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement st = con.prepareStatement(sql)) {
+
+            st.setInt(1, workspaceID);
+            st.setString(2, username);
+            st.setString(3, username);
+
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return new WorkspaceGroup(
+                    rs.getInt("workspaceID"),
+                    rs.getString("workspaceName")
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error fetching workspace by ID:");
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     

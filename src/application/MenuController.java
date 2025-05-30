@@ -79,6 +79,15 @@ public class MenuController implements Initializable {
         System.out.println("Workspace: " + workspaceName + " (ID: " + workspaceId + ")");
     }
     
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> anchorPaneId.requestFocus());
@@ -272,7 +281,10 @@ public class MenuController implements Initializable {
     }
 
     // Updated delete method that also removes from database
-    private void confirmAndDeleteWorkspaceFromDB(HBox buttonContainer, String workspaceName) {
+    private void confirmAndDeleteWorkspaceFromDB(HBox buttonContainer, String fullWorkspaceDisplayName) {
+        // Extract the actual workspace name before " (ID:"
+        String workspaceName = fullWorkspaceDisplayName.split(" \\(ID:")[0];
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Workspace");
         alert.setHeaderText(null);
@@ -316,6 +328,7 @@ public class MenuController implements Initializable {
             }
         }
     }
+
     
  // Add this new method to refresh the workspace list
     private void refreshWorkspaceList() {
@@ -360,13 +373,12 @@ public class MenuController implements Initializable {
         dialog.setTitle("New Workspace");
         dialog.setHeaderText(null);
         dialog.setContentText("Enter workspace name:");
-        
+
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
-        
-        // Add validation
-        dialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.trim().isEmpty()) {
+
+        dialog.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.trim().isEmpty()) {
                 dialog.getEditor().setStyle("-fx-text-fill: red;");
             } else {
                 dialog.getEditor().setStyle("-fx-text-fill: black;");
@@ -376,47 +388,40 @@ public class MenuController implements Initializable {
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(workspaceName -> {
             if (!workspaceName.trim().isEmpty()) {
-                // Check if workspace already exists
                 List<String> existingWorkspaces = TaskDAO.getUserGroupWorkspaces(username);
                 if (existingWorkspaces.contains(workspaceName.trim())) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Duplicate Workspace");
-                    alert.setHeaderText(null);
-                    alert.setContentText("A workspace with this name already exists. Please choose a different name.");
-                    alert.showAndWait();
+                    showAlert("Duplicate Workspace", "A workspace with this name already exists. Please choose a different name.");
                     return;
                 }
 
-                // Create workspace
-                int workspaceId = TaskDAO.createWorkspaceForUser(workspaceName, username);
+                int workspaceId = TaskDAO.createWorkspaceForUser(workspaceName.trim(), username);
                 if (workspaceId != -1) {
-                    createWorkspaceButton(workspaceName);
-                    
-                    // Immediately open the workspace
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupWorkspace.fxml"));
-                        Pane view = loader.load();
+                    // ✅ Now we fetch the workspace directly by ID and user
+                    WorkspaceGroup workspace = TaskDAO.getWorkspaceByIdAndUser(workspaceId, username);
+                    if (workspace != null) {
+                        createWorkspaceButton(workspace.getName() + " (ID: " + workspace.getId() + ")");
 
-                        GroupWorkspaceController controller = loader.getController();
-                        controller.setUsername(username);
-                        
-                        // Get the newly created workspace details
-                        WorkspaceGroup workspace = TaskDAO.getCurrentWorkspace(username, workspaceName);
-                        if (workspace != null) {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("GroupWorkspace.fxml"));
+                            Pane view = loader.load();
+
+                            GroupWorkspaceController controller = loader.getController();
+                            controller.setUsername(username);
                             controller.setWorkspaceData(workspace.getId(), workspace.getName());
-                        }
 
-                        windowPane.getChildren().clear();
-                        windowPane.getChildren().add(view);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                            windowPane.getChildren().clear();
+                            windowPane.getChildren().add(view);
+
+                            refreshWorkspaceList(); // ✅ REFRESH UI right away
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                     }
-                } else {
-                    System.err.println("❌ Failed to create workspace.");
                 }
             }
         });
     }
+
     
     private void loadView(String fxmlFile) {
         try {
