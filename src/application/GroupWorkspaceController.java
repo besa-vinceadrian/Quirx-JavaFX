@@ -731,21 +731,37 @@ public class GroupWorkspaceController implements Initializable {
             confirmAlert.setTitle("Complete Task");
             confirmAlert.setHeaderText("Mark task as completed?");
             confirmAlert.setContentText("Are you sure you want to mark \"" + task.getTask() + "\" as completed?\n\nThis will move the task to the completed section.");
-            
+
             // Set icon for alert
             setAlertIcon(confirmAlert);
-            
+
             Optional<ButtonType> result = confirmAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                // User confirmed - move task to completed
-                moveTaskToCompleted(task);
+                // ✅ Update task status in the database
+                boolean success = TaskDAO.updateTaskStatus(task.getTaskID(), "Done");
+                if (success) {
+                    task.setStatus("Done"); // Update the local object if needed
+                    moveTaskToCompleted(task); // Move it to the UI completed section
+                } else {
+                    showError("Failed to update task status in database.");
+                    task.setCompleted(false); // Revert checkbox
+                }
             } else {
                 // User cancelled - uncheck the checkbox
                 task.setCompleted(false);
             }
         }
     }
-    
+
+    private void showError(String message) {
+        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+        errorAlert.setTitle("Error");
+        errorAlert.setHeaderText("An error occurred");
+        errorAlert.setContentText(message);
+        setAlertIcon(errorAlert);
+        errorAlert.showAndWait();
+    }
+
     // Method to move completed tasks from todo to completed table
     public void moveTaskToCompleted(TaskModel task) {
         if (todoTasks.contains(task)) {

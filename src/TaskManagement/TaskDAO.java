@@ -789,5 +789,24 @@ public class TaskDAO {
         return null;
     }
 
+    public static boolean updateTaskStatus(int taskID, String newStatus) {
+        String sql = "UPDATE TaskTable SET taskStatus = ? WHERE taskID = ?";
+        
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, taskID);
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to update task status: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     
 }
