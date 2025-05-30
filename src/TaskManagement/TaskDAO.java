@@ -402,6 +402,7 @@ public class TaskDAO {
         String getWorkspaceSql = "SELECT createdByUser FROM WorkspaceTable WHERE workspaceID = ?";
         String checkMemberSql = "SELECT 1 FROM WorkspaceMembersTable WHERE workspaceID = ? AND memberUserName = ?";
         String deleteTasksSql = "DELETE FROM TaskTable WHERE workspaceID = ?";
+        String deleteUserTasksSql = "DELETE FROM TaskTable WHERE workspaceID = ? AND userOwner = ?";
         String deleteMembersSql = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ?";
         String deleteWorkspaceSql = "DELETE FROM WorkspaceTable WHERE workspaceID = ?";
         String removeUserFromMembersSql = "DELETE FROM WorkspaceMembersTable WHERE workspaceID = ? AND memberUserName = ?";
@@ -410,11 +411,12 @@ public class TaskDAO {
              PreparedStatement getWorkspaceStmt = con.prepareStatement(getWorkspaceSql);
              PreparedStatement checkMemberStmt = con.prepareStatement(checkMemberSql);
              PreparedStatement deleteTasksStmt = con.prepareStatement(deleteTasksSql);
+             PreparedStatement deleteUserTasksStmt = con.prepareStatement(deleteUserTasksSql);
              PreparedStatement deleteMembersStmt = con.prepareStatement(deleteMembersSql);
              PreparedStatement deleteWorkspaceStmt = con.prepareStatement(deleteWorkspaceSql);
              PreparedStatement removeUserStmt = con.prepareStatement(removeUserFromMembersSql)) {
 
-            // 🧪 Check if workspace exists
+            // 🧪 Check if workspace exists and get the creator
             getWorkspaceStmt.setInt(1, workspaceID);
             ResultSet rs = getWorkspaceStmt.executeQuery();
 
@@ -426,7 +428,7 @@ public class TaskDAO {
             String creator = rs.getString("createdByUser");
 
             if (creator.equalsIgnoreCase(username)) {
-                // 👤 User is the creator — delete the entire workspace
+                // 👤 User is the creator — delete the entire workspace and all its data
                 deleteTasksStmt.setInt(1, workspaceID);
                 deleteTasksStmt.executeUpdate();
 
@@ -450,20 +452,25 @@ public class TaskDAO {
                 ResultSet memberCheck = checkMemberStmt.executeQuery();
 
                 if (memberCheck.next()) {
-                    // 👤 User is a member — just remove them from the workspace
+                    // ✅ Delete user's tasks in that workspace
+                    deleteUserTasksStmt.setInt(1, workspaceID);
+                    deleteUserTasksStmt.setString(2, username);
+                    deleteUserTasksStmt.executeUpdate();
+
+                    // ✅ Remove user from member list
                     removeUserStmt.setInt(1, workspaceID);
                     removeUserStmt.setString(2, username);
                     int memberRows = removeUserStmt.executeUpdate();
 
                     if (memberRows > 0) {
-                        System.out.println("👤 Member '" + username + "' removed from workspace (ID: " + workspaceID + ")");
+                        System.out.println("👤 Member '" + username + "' left workspace (ID: " + workspaceID + ") and their tasks were deleted.");
                         return true;
                     } else {
                         System.out.println("⚠️ Could not remove user '" + username + "' from workspace (ID: " + workspaceID + ")");
                         return false;
                     }
                 } else {
-                    // ❌ User is not associated at all
+                    // ❌ User is not a member
                     System.out.println("⚠️ User '" + username + "' is not associated with workspace (ID: " + workspaceID + ")");
                     return false;
                 }
@@ -475,6 +482,8 @@ public class TaskDAO {
             return false;
         }
     }
+
+
 
 
     
