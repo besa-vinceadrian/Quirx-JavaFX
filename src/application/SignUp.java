@@ -1,4 +1,3 @@
-
 package application;
 
 import javafx.application.Platform;
@@ -15,6 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.AnchorPane;
@@ -183,12 +183,12 @@ public class SignUp implements Initializable {
         String password = passwordFieldSU.getText().trim();
         String confirmPassword = confirmPasswordFieldSU.getText().trim();
         
-        if (password.length() < 8 || password.length() > 64) {
-            showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
-            return;
-        }
         if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showAlert(AlertType.ERROR, "Error", "All fields are required.");
+            return;
+        }
+        if (password.length() < 8 || password.length() > 64) {
+            showAlert(AlertType.ERROR, "Error", "Password must be 8 characters long and above.");
             return;
         }
         if (!password.equals(confirmPassword)) {
@@ -234,6 +234,11 @@ public class SignUp implements Initializable {
     	Alert alert = new Alert(alertType);
     	alert.setTitle(title);
     	alert.setContentText(message);
+    	
+    	// Add icon to the alert
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+        
     	alert.showAndWait();
     }
 
