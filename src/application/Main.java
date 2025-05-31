@@ -50,6 +50,11 @@ public class Main extends Application {
 				alert.setTitle("Close Quirx");
 				alert.setHeaderText(null);
 				alert.setContentText("Are you sure you want to exit?");
+				
+				// Set custom icon
+		        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+		        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+		        
 				Optional<ButtonType> result = alert.showAndWait();
 				
 				if (result.isPresent() && result.get() == ButtonType.OK) {

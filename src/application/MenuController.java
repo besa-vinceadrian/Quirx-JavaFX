@@ -355,6 +355,10 @@ public class MenuController implements Initializable {
         
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
+        		
+        		// Reset the urgent task alert everytime the user logged out
+                PersonalWorkspaceController.resetSession();
+
             try {
                 BorderPane root = (BorderPane) FXMLLoader.load(getClass().getResource("LogIn.fxml"));
                 Scene scene = new Scene(root, 1024, 700);
@@ -365,6 +369,7 @@ public class MenuController implements Initializable {
                 e.printStackTrace();
             }
         }
+        
     }
     
     @FXML

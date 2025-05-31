@@ -22,6 +22,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.event.ActionEvent;
 import java.util.ArrayList;
@@ -68,11 +69,13 @@ public class PersonalWorkspaceController implements Initializable {
     // Data Lists
     private ObservableList<TaskModel> todoTasks;
     private ObservableList<TaskModel> completedTasks;
-    
+    private static boolean urgentTasksAlertShown = false; // Flag to track if alert has been shown
     private int currentWorkspaceID; // Example workspace ID, replace with actual logic to get current workspace
     private String currentWorkspaceName; // Example workspace name, replace with actual logic
     private String username;
-
+    
+    
+    
     public void setWorkspaceData(int currentWorkspaceID, String currentWorkspaceName) {
         this.currentWorkspaceID = currentWorkspaceID;
         this.currentWorkspaceName = currentWorkspaceName;
@@ -857,6 +860,11 @@ public class PersonalWorkspaceController implements Initializable {
             return;
         }
         
+        // Don't show alert if it has already been shown in this session
+        if (urgentTasksAlertShown) {
+            return;
+        }
+        
         List<TaskModel> allTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceID);
         List<TaskModel> urgentTasks = new ArrayList<>();
         
@@ -888,15 +896,20 @@ public class PersonalWorkspaceController implements Initializable {
         
         if (!urgentTasks.isEmpty()) {
             showUrgentTasksAlert(urgentTasks);
+            urgentTasksAlertShown = true; // Mark that the alert has been shown
         }
     }
-
+    
     private void showUrgentTasksAlert(List<TaskModel> urgentTasks) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Urgent Tasks Alert");
+        alert.setTitle("Urgent Tasks Reminder");
         alert.setHeaderText("You have tasks due soon!");
         
-        StringBuilder content = new StringBuilder();
+        // Create main container with better spacing
+        VBox mainContainer = new VBox(15);
+        mainContainer.setPadding(new Insets(20));
+        mainContainer.setStyle("-fx-background-color: white;");
+        
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         
@@ -917,40 +930,100 @@ public class PersonalWorkspaceController implements Initializable {
             }
         }
         
-        // Add today's tasks
+        // Create section for today's tasks
         if (!todayTasks.isEmpty()) {
-            content.append("📅 DUE TODAY:\n");
-            for (TaskModel task : todayTasks) {
-                content.append("• ").append(task.getTask())
-                       .append(" (").append(task.getPriority()).append(" priority)")
-                       .append("\n");
-            }
-            content.append("\n");
+            VBox todaySection = new VBox(8);
+            
+            Label todayLabel = new Label("📅 Tasks Due Today (" + todayTasks.size() + ")");
+            todayLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #d32f2f;");
+            
+            // Create simple text list instead of table
+            VBox todayTasksList = createSimpleTasksList(todayTasks);
+            
+            todaySection.getChildren().addAll(todayLabel, todayTasksList);
+            mainContainer.getChildren().add(todaySection);
         }
         
-        // Add tomorrow's tasks
+        // Create section for tomorrow's tasks
         if (!tomorrowTasks.isEmpty()) {
-            content.append("⏰ DUE TOMORROW:\n");
-            for (TaskModel task : tomorrowTasks) {
-                content.append("• ").append(task.getTask())
-                       .append(" (").append(task.getPriority()).append(" priority)")
-                       .append("\n");
-            }
+            VBox tomorrowSection = new VBox(8);
+            
+            Label tomorrowLabel = new Label("⏰ Tasks Due Tomorrow (" + tomorrowTasks.size() + ")");
+            tomorrowLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #f57c00;");
+            
+            // Create simple text list instead of table
+            VBox tomorrowTasksList = createSimpleTasksList(tomorrowTasks);
+            
+            tomorrowSection.getChildren().addAll(tomorrowLabel, tomorrowTasksList);
+            mainContainer.getChildren().add(tomorrowSection);
         }
         
-        alert.setContentText(content.toString());
+        // Add a helpful message at the bottom
+        Label reminderText = new Label("💡 Tip: Review and prioritize these tasks to stay on track!");
+        reminderText.setStyle("-fx-font-style: italic; -fx-text-fill: #666666; -fx-font-size: 12px;");
+        reminderText.setWrapText(true);
+        mainContainer.getChildren().add(reminderText);
+        
+        // Wrap in ScrollPane with increased height
+        ScrollPane scrollPane = new ScrollPane(mainContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setPrefViewportHeight(400); // Increased from 300
+        scrollPane.setStyle("-fx-background-color: white;");
+        
+        // Set the custom content
+        alert.getDialogPane().setContent(scrollPane);
         
         // Set icon for alert
         setAlertIcon(alert);
         
-        // Make the alert resizable and larger
+        // Make the alert resizable and set larger size
         alert.setResizable(true);
-        alert.getDialogPane().setPrefWidth(450);
-        alert.getDialogPane().setPrefHeight(300);
+        alert.getDialogPane().setPrefWidth(550); // Increased from 500
+        
+        // Increased height calculation with higher minimums and multipliers
+        int calculatedHeight = Math.min(600, Math.max(400, urgentTasks.size() * 40 + 200));
+        alert.getDialogPane().setPrefHeight(calculatedHeight);
+        
+        // Add custom button with better text
+        ButtonType acknowledgeButton = new ButtonType("I'll Review These Tasks", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(acknowledgeButton);
         
         alert.showAndWait();
     }
 
+    private VBox createSimpleTasksList(List<TaskModel> tasks) {
+        VBox tasksList = new VBox(8); // Increased spacing from 5 to 8
+        tasksList.setStyle("-fx-background-color: #f5f5f5; -fx-padding: 12px; -fx-background-radius: 5px;"); // Increased padding
+        
+        for (TaskModel task : tasks) {
+            // Create a container for each task
+            VBox taskContainer = new VBox(5); // Increased spacing from 3 to 5
+            taskContainer.setStyle("-fx-background-color: white; -fx-padding: 12px; -fx-background-radius: 3px; -fx-border-color: #e0e0e0; -fx-border-radius: 3px;"); // Increased padding
+            
+            // Task name label
+            Label taskNameLabel = new Label("• " + task.getTask());
+            taskNameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
+            taskNameLabel.setWrapText(true);
+            
+            // Priority info only
+            String priorityText = "Priority: " + task.getPriority().toUpperCase();
+            
+            Label infoLabel = new Label(priorityText);
+            infoLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
+            
+            taskContainer.getChildren().addAll(taskNameLabel, infoLabel);
+            tasksList.getChildren().add(taskContainer);
+        }
+        
+        return tasksList;
+    }
+    
+    public static void resetSession() {
+        urgentTasksAlertShown = false;
+    }
+    
     public void setWorkspaceName(String workspaceName) {
         if (workspaceName != null && !workspaceName.trim().isEmpty()) {
             workspaceTitle.setText(workspaceName.trim());
