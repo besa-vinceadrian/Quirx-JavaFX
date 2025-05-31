@@ -771,7 +771,7 @@ public class PersonalWorkspaceController implements Initializable {
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Complete Task");
             confirmAlert.setHeaderText("Mark task as completed?");
-            confirmAlert.setContentText("Are you sure you want to mark \"" + task.getTask() + "\" as completed?\n\nThis will move the task to the completed section.");
+            confirmAlert.setContentText("Are you sure you want to mark \"" + task.getTask() + "\" as done?\n\nThis will move the task to the completed section.");
 
             // Set icon for alert
             setAlertIcon(confirmAlert);

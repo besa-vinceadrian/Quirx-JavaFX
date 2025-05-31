@@ -125,6 +125,19 @@
     -fx-text-fill: black;
 }
 
+/* === Scrollbar Styling === */
+.table-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
+.table-view .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
 /* === Cell Selection === */
 .table-cell:filled:selected {
     -fx-background-color: #d0d0d0;
