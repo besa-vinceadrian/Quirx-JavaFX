@@ -2,14 +2,13 @@
 package application;
 
 import javafx.collections.FXCollections;
+
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.control.DatePicker;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -64,12 +63,7 @@ public class PersonalWorkspaceController implements Initializable {
     @FXML private Button inviteButton;
     @FXML private Button inviteAgain;
     
-    // Invite Components
-    @FXML private StackPane inviteStackPane;
-    @FXML private AnchorPane mainAnchorPane;
-    @FXML private AnchorPane invitePane;
-    @FXML private AnchorPane notifiedPane;
-    @FXML private TextField emailField;
+  
     
     // Data Lists
     private ObservableList<TaskModel> todoTasks;
@@ -412,6 +406,7 @@ public class PersonalWorkspaceController implements Initializable {
 
     //
  // Updated showEditTaskDialog method with validation alerts
+ // Updated showEditTaskDialog method with enhanced due date validation
     private Optional<TaskModel> showEditTaskDialog(TaskModel taskToEdit) {
         Dialog<TaskModel> dialog = new Dialog<>();
         dialog.setTitle("Edit Task");
@@ -479,25 +474,31 @@ public class PersonalWorkspaceController implements Initializable {
                 // Validate required fields
                 String taskDescription = taskField.getText() != null ? taskField.getText().trim() : "";
                 String ownerValue = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+                LocalDate selectedDate = dueDateField.getValue();
 
-                // Check if both Task description and Owner are empty
-                if (taskDescription.isEmpty() && ownerValue.isEmpty()) {
-                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description and owner cannot be empty");
-                    event.consume();
-                    return;
-                } else if (taskDescription.isEmpty()) {
+                // Check if Task description is empty
+                if (taskDescription.isEmpty()) {
                     showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description cannot be empty");
                     event.consume();
                     return;
-                } else if (ownerValue.isEmpty()) {
+                }
+
+                // Check if Owner is empty
+                if (ownerValue.isEmpty()) {
                     showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Owner cannot be empty");
                     event.consume();
                     return;
                 }
 
+                // NEW: Check if due date is empty
+                if (selectedDate == null) {
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Due date cannot be empty. Please select a due date.");
+                    event.consume();
+                    return;
+                }
+
                 // Validate due date is not in the past
-                LocalDate selectedDate = dueDateField.getValue();
-                if (selectedDate != null && selectedDate.isBefore(LocalDate.now())) {
+                if (selectedDate.isBefore(LocalDate.now())) {
                     showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be set to a date before today. Please select today's date or a future date.");
                     event.consume();
                     return;
@@ -512,24 +513,14 @@ public class PersonalWorkspaceController implements Initializable {
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
                 try {
+                    // All validation is already done in the event filter above
+                    // So we can safely update the task here
                     String taskTitle = taskField.getText().trim();
                     String ownerRaw = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
                     String owner = ownerRaw.contains(" (") ? ownerRaw.substring(0, ownerRaw.indexOf(" (")) : ownerRaw;
                     String status = statusCombo.getValue();
                     String priority = priorityCombo.getValue();
-
-                    String dueDate = "";
-                    if (dueDateField.getValue() != null) {
-                        dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-                    } else {
-                        showAlertWithType(Alert.AlertType.WARNING, "Missing Due Date", "Please select a due date.");
-                        return null; // Don't close dialog if due date is empty
-                    }
-
-                    if (taskTitle.isEmpty() || owner.isEmpty()) {
-                        showAlertWithType(Alert.AlertType.WARNING, "Input Error", "All fields must be filled. Please complete all required fields.");
-                        return null;
-                    }
+                    String dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
                     taskToEdit.setTask(taskTitle);
                     taskToEdit.setOwner(owner);
@@ -555,6 +546,7 @@ public class PersonalWorkspaceController implements Initializable {
         return dialog.showAndWait();
     }
 
+ // Updated handleAddTask method with enhanced due date validation
     @FXML
     private void handleAddTask() {
         // Create a new task dialog
@@ -624,25 +616,31 @@ public class PersonalWorkspaceController implements Initializable {
                 // Validate required fields
                 String taskDescription = taskField.getText() != null ? taskField.getText().trim() : "";
                 String ownerValue = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+                LocalDate selectedDate = dueDateField.getValue();
 
-                // Check if both Task description and Owner are empty
-                if (taskDescription.isEmpty() && ownerValue.isEmpty()) {
-                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description and owner cannot be empty");
-                    event.consume();
-                    return;
-                } else if (taskDescription.isEmpty()) {
+                // Check if Task description is empty
+                if (taskDescription.isEmpty()) {
                     showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description cannot be empty");
                     event.consume();
                     return;
-                } else if (ownerValue.isEmpty()) {
+                }
+
+                // Check if Owner is empty
+                if (ownerValue.isEmpty()) {
                     showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Owner cannot be empty");
                     event.consume();
                     return;
                 }
 
-                // NEW: Validate due date is not in the past
-                LocalDate selectedDate = dueDateField.getValue();
-                if (selectedDate != null && selectedDate.isBefore(LocalDate.now())) {
+                // NEW: Check if due date is empty
+                if (selectedDate == null) {
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Due date cannot be empty. Please select a due date.");
+                    event.consume();
+                    return;
+                }
+
+                // Validate due date is not in the past
+                if (selectedDate.isBefore(LocalDate.now())) {
                     showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be set to a date before today. Please select today's date or a future date.");
                     event.consume();
                     return;
@@ -654,29 +652,18 @@ public class PersonalWorkspaceController implements Initializable {
             }
         });
 
-        // Result converter
+        // Result converter - Fixed casting issue
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
                 try {
-                	String taskTitle = taskField.getText().trim();
-                	String ownerRaw = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
-                	String owner = ownerRaw.contains(" (") ? ownerRaw.substring(0, ownerRaw.indexOf(" (")) : ownerRaw;
-                	String status = statusCombo.getValue();
-                	String priority = priorityCombo.getValue();
-
-                	String dueDate = "";
-                	if (dueDateField.getValue() != null) {
-                	    dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-                	}
-
-                	if (taskTitle.isEmpty() || owner.isEmpty()) {
-                	    Alert alert = new Alert(Alert.AlertType.WARNING);
-                	    alert.setTitle("Input Error");
-                	    alert.setHeaderText("All fields must be filled.");
-                	    alert.setContentText("Please complete all required fields.");
-                	    alert.showAndWait();
-                	    return null;
-                	}
+                    // All validation is already done in the event filter above
+                    // So we can safely create the task here
+                    String taskTitle = taskField.getText().trim();
+                    String ownerRaw = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+                    String owner = ownerRaw.contains(" (") ? ownerRaw.substring(0, ownerRaw.indexOf(" (")) : ownerRaw;
+                    String status = statusCombo.getValue();
+                    String priority = priorityCombo.getValue();
+                    String dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
                     TaskModel newTask = new TaskModel(taskTitle, owner, status, dueDate, priority);
                     newTask.setCompleted(false);
@@ -713,11 +700,7 @@ public class PersonalWorkspaceController implements Initializable {
                     todoTasks.add(task);
                 } else {
                     System.err.println("❌ Task truly not inserted.");
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Database Error");
-                    alert.setHeaderText("Task not added");
-                    alert.setContentText("The task could not be inserted into the database. Please try again.");
-                    alert.showAndWait();
+                    showAlertWithType(Alert.AlertType.ERROR, "Database Error", "The task could not be inserted into the database. Please try again.");
                 }
             }
         });
@@ -827,68 +810,6 @@ public class PersonalWorkspaceController implements Initializable {
             todoTasks.remove(task);
             completedTasks.add(task);
         }
-    }
-    
-    @FXML
-    private void inviteButton() {
-        inviteStackPane.setVisible(true);
-        mainAnchorPane.setVisible(true);
-        invitePane.setVisible(true);
-        notifiedPane.setVisible(false);
-    }
-    
-    @FXML
-    private void handleInviteFriend() {
-        String email = emailField.getText().trim();
-        if (email.isEmpty()) {
-            showAlertWithType(Alert.AlertType.WARNING, "Invalid Email", "Please enter an email address.");
-            return;
-        }
-        
-        if (!isValidEmail(email)) {
-            showAlertWithType(Alert.AlertType.ERROR, "Invalid Email", "Please enter a valid email address.");
-            return;
-        }
-        
-        // Simulate sending invitation
-        invitePane.setVisible(false);
-        notifiedPane.setVisible(true);
-        emailField.clear();
-    }
-    
-    @FXML
-    private void handleContinue() {
-        inviteStackPane.setVisible(false);
-        mainAnchorPane.setVisible(false);
-        invitePane.setVisible(false);
-        notifiedPane.setVisible(false);
-    }
-    
-    @FXML
-    private void inviteAgain() {
-        notifiedPane.setVisible(false);
-        invitePane.setVisible(true);
-    }
-    
-    @FXML
-    private void handleReturnClick() {
-        handleContinue();
-    }
-    
-    private boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    }
-    
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        
-        // Set icon for alert
-        setAlertIcon(alert);
-        
-        alert.showAndWait();
     }
     
     private void showAlertWithType(Alert.AlertType alertType, String title, String message) {
