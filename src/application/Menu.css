@@ -55,3 +55,21 @@
 .delete-button .text {
     -fx-fill: black;
 }
+
+.custom-scrollbar .scroll-bar:vertical {
+   -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-min-width: 0;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+.custom-scrollbar .scroll-bar:horizontal {
+   -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-min-width: 0;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}

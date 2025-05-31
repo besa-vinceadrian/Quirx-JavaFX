@@ -59,7 +59,8 @@ public class MenuController implements Initializable {
         this.userId = userId;
     }
     
-    // Container for group workspaces
+    // Container for group workspaces with scroll support
+    private ScrollPane groupWorkspaceScrollPane;
     private VBox groupWorkspaceContainer;
     private boolean isGroupWorkspaceExpanded = false;
     private List<HBox> createdWorkspaces = new ArrayList<>();
@@ -99,11 +100,38 @@ public class MenuController implements Initializable {
         // Create container for group workspaces
         groupWorkspaceContainer = new VBox();
         groupWorkspaceContainer.setSpacing(2);
-        groupWorkspaceContainer.setPadding(new Insets(0, 0, 0, 0)); // Indent the sub-items
-        groupWorkspaceContainer.setVisible(false);
-        groupWorkspaceContainer.setManaged(false);
+        groupWorkspaceContainer.setPadding(new Insets(0, 0, 0, 0));
         
-        // Find the index of group workspace button and add container after it
+        // Create ScrollPane to wrap the VBox container
+        groupWorkspaceScrollPane = new ScrollPane();
+        groupWorkspaceScrollPane.setContent(groupWorkspaceContainer);
+        groupWorkspaceScrollPane.setVisible(false);
+        groupWorkspaceScrollPane.setManaged(false);
+        
+        // Configure ScrollPane properties
+        groupWorkspaceScrollPane.setFitToWidth(true);
+        groupWorkspaceScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Hide horizontal scrollbar
+        groupWorkspaceScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED); // Show vertical scrollbar when needed
+        groupWorkspaceScrollPane.setPrefViewportHeight(400); // Maximum height before scrolling kicks in
+        groupWorkspaceScrollPane.setMaxHeight(400); // Prevent the scroll pane from expanding beyond this height
+        groupWorkspaceScrollPane.getStyleClass().add("edge-to-edge"); // Remove border/padding if needed
+        
+        // Set style to make scrollbar less intrusive
+        groupWorkspaceScrollPane.setStyle(
+        		 "-fx-background-color: transparent;" +
+	            "-fx-background: transparent;" +
+	            "-fx-border-color: transparent;" +
+	            "-fx-focus-color: transparent;" +
+	            "-fx-faint-focus-color: transparent;" +
+	            "-fx-padding: 0;" +
+	            "-fx-background-insets: 0;" +
+	            "-fx-border-insets: 0;"
+        		);
+        
+     // Add CSS class for scrollbar styling
+        groupWorkspaceScrollPane.getStyleClass().add("custom-scrollbar");
+        
+        // Find the index of group workspace button and add scroll pane after it
         int groupWorkspaceIndex = -1;
         for (int i = 0; i < menuVBox.getChildren().size(); i++) {
             if (menuVBox.getChildren().get(i) == groupWorkspaceButton) {
@@ -113,7 +141,7 @@ public class MenuController implements Initializable {
         }
         
         if (groupWorkspaceIndex != -1) {
-            menuVBox.getChildren().add(groupWorkspaceIndex + 1, groupWorkspaceContainer);
+            menuVBox.getChildren().add(groupWorkspaceIndex + 1, groupWorkspaceScrollPane);
         }
         
         // Update group workspace button text to show arrow
@@ -202,8 +230,8 @@ public class MenuController implements Initializable {
     
     private void toggleGroupWorkspaceDropdown() {
         isGroupWorkspaceExpanded = !isGroupWorkspaceExpanded;
-        groupWorkspaceContainer.setVisible(isGroupWorkspaceExpanded);
-        groupWorkspaceContainer.setManaged(isGroupWorkspaceExpanded);
+        groupWorkspaceScrollPane.setVisible(isGroupWorkspaceExpanded);
+        groupWorkspaceScrollPane.setManaged(isGroupWorkspaceExpanded);
         updateGroupWorkspaceButtonText();
         refreshWorkspaceList();
 
@@ -216,6 +244,9 @@ public class MenuController implements Initializable {
                 // Use the existing createWorkspaceButton method to maintain consistent layout
                 createWorkspaceButtonFromDB(workspaceName);
             }
+            
+            // Auto-scroll to top when dropdown expands
+            Platform.runLater(() -> groupWorkspaceScrollPane.setVvalue(0));
         }
     }
 
@@ -271,7 +302,6 @@ public class MenuController implements Initializable {
                 ex.printStackTrace();
             }
         });
-
 
         
         // Add the container to the group workspace container
