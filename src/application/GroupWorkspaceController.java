@@ -1,8 +1,6 @@
-
 package application;
 
 import javafx.collections.FXCollections;
-
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,19 +9,12 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.DatePicker;
+import javafx.scene.layout.GridPane;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.event.ActionEvent;
 
@@ -31,6 +22,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 import TaskManagement.TaskDAO;
 import TaskManagement.WorkspaceGroup;
@@ -74,13 +68,13 @@ public class GroupWorkspaceController implements Initializable {
     // Data Lists
     private ObservableList<TaskModel> todoTasks;
     private ObservableList<TaskModel> completedTasks;
+    private static Set<Integer> workspacesWithAlertShown = new HashSet<>();
     
     private int currentWorkspaceIDG; // Example workspace ID, replace with actual logic to get current workspace
     private String currentWorkspaceName; // Example workspace name, replace with actual logic
     private String username;
 
-    // Must be called after username is se
-
+    // Must be called after username is set
     public void setWorkspaceData(int workspaceId, String workspaceName) {
         this.currentWorkspaceIDG = workspaceId;
         this.currentWorkspaceName = workspaceName;
@@ -90,7 +84,6 @@ public class GroupWorkspaceController implements Initializable {
         updateWorkspaceTitle(workspaceName);
         
         loadTasks(); // Load tasks for this workspace
-
     }
 
     public void setUsername(String username) {
@@ -127,7 +120,9 @@ public class GroupWorkspaceController implements Initializable {
         List<TaskModel> relevantTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceIDG);
         System.out.println("✅ Tasks fetched: " + relevantTasks.size());
         
-
+        // Check for urgent tasks
+        List<TaskModel> urgentTasks = new ArrayList<>();
+        
         for (TaskModel task : relevantTasks) {
             String status = task.getStatus();
             System.out.println(task.getPriority() + " - " + task.getDueDate());
@@ -135,13 +130,160 @@ public class GroupWorkspaceController implements Initializable {
                 completedTasks.add(task);
             } else {
                 todoTasks.add(task);
+                
+                // Check if task is urgent (due today or tomorrow)
+                if (isTaskUrgent(task)) {
+                    urgentTasks.add(task);
+                }
             }
         }
 
-        tableView.setItems(todoTasks); // Items will appear in DAO-sorted order
-        // tableView.sort(); ❌ Removed – we trust the DAO sort
+        tableView.setItems(todoTasks);
+        
+        // Show urgent tasks alert if there are any and it hasn't been shown for this workspace
+        if (!urgentTasks.isEmpty() && !workspacesWithAlertShown.contains(currentWorkspaceIDG)) {
+            showUrgentTasksAlert(urgentTasks);
+            workspacesWithAlertShown.add(currentWorkspaceIDG); // Mark this workspace as alerted
+        }
     }
     
+    // Reset for a specific workspace when needed
+    public static void resetAlertForWorkspace(int workspaceId) {
+        workspacesWithAlertShown.remove(workspaceId);
+    }
+    
+    private boolean isTaskUrgent(TaskModel task) {
+        try {
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            LocalDate dueDate = LocalDate.parse(task.getDueDate(), formatter);
+            
+            return dueDate.isEqual(today) || dueDate.isEqual(today.plusDays(1));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    private void showUrgentTasksAlert(List<TaskModel> urgentTasks) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Urgent Tasks Reminder");
+        alert.setHeaderText("You have tasks due soon!");
+        
+        // Create main container with better spacing
+        VBox mainContainer = new VBox(15);
+        mainContainer.setPadding(new Insets(20));
+        mainContainer.setStyle("-fx-background-color: white;");
+        
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        
+        // Separate tasks due today and tomorrow
+        List<TaskModel> todayTasks = new ArrayList<>();
+        List<TaskModel> tomorrowTasks = new ArrayList<>();
+        
+        for (TaskModel task : urgentTasks) {
+            try {
+                LocalDate dueDate = LocalDate.parse(task.getDueDate(), formatter);
+                if (dueDate.isEqual(today)) {
+                    todayTasks.add(task);
+                } else {
+                    tomorrowTasks.add(task);
+                }
+            } catch (Exception e) {
+                // Skip if date parsing fails
+            }
+        }
+        
+        // Create section for today's tasks
+        if (!todayTasks.isEmpty()) {
+            VBox todaySection = new VBox(8);
+            
+            Label todayLabel = new Label("📅 Tasks Due Today (" + todayTasks.size() + ")");
+            todayLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #d32f2f;");
+            
+            // Create simple text list instead of table
+            VBox todayTasksList = createSimpleTasksList(todayTasks);
+            
+            todaySection.getChildren().addAll(todayLabel, todayTasksList);
+            mainContainer.getChildren().add(todaySection);
+        }
+        
+        // Create section for tomorrow's tasks
+        if (!tomorrowTasks.isEmpty()) {
+            VBox tomorrowSection = new VBox(8);
+            
+            Label tomorrowLabel = new Label("⏰ Tasks Due Tomorrow (" + tomorrowTasks.size() + ")");
+            tomorrowLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #f57c00;");
+            
+            // Create simple text list instead of table
+            VBox tomorrowTasksList = createSimpleTasksList(tomorrowTasks);
+            
+            tomorrowSection.getChildren().addAll(tomorrowLabel, tomorrowTasksList);
+            mainContainer.getChildren().add(tomorrowSection);
+        }
+        
+        // Add a helpful message at the bottom
+        Label reminderText = new Label("💡 Tip: Review and prioritize these tasks to stay on track!");
+        reminderText.setStyle("-fx-font-style: italic; -fx-text-fill: #666666; -fx-font-size: 12px;");
+        reminderText.setWrapText(true);
+        mainContainer.getChildren().add(reminderText);
+        
+        // Wrap in ScrollPane with increased height
+        ScrollPane scrollPane = new ScrollPane(mainContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setPrefViewportHeight(400); // Increased from 300
+        scrollPane.setStyle("-fx-background-color: white;");
+        
+        // Set the custom content
+        alert.getDialogPane().setContent(scrollPane);
+        
+        // Set icon for alert
+        setAlertIcon(alert);
+        
+        // Make the alert resizable and set larger size
+        alert.setResizable(true);
+        alert.getDialogPane().setPrefWidth(550); // Increased from 500
+        
+        // Increased height calculation with higher minimums and multipliers
+        int calculatedHeight = Math.min(600, Math.max(400, urgentTasks.size() * 40 + 200));
+        alert.getDialogPane().setPrefHeight(calculatedHeight);
+        
+        // Add custom button with better text
+        ButtonType acknowledgeButton = new ButtonType("I'll Review These Tasks", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(acknowledgeButton);
+        
+        alert.showAndWait();
+    }
+
+    private VBox createSimpleTasksList(List<TaskModel> tasks) {
+        VBox tasksList = new VBox(8); // Increased spacing from 5 to 8
+        tasksList.setStyle("-fx-background-color: #f5f5f5; -fx-padding: 12px; -fx-background-radius: 5px;"); // Increased padding
+        
+        for (TaskModel task : tasks) {
+            // Create a container for each task
+            VBox taskContainer = new VBox(5); // Increased spacing from 3 to 5
+            taskContainer.setStyle("-fx-background-color: white; -fx-padding: 12px; -fx-background-radius: 3px; -fx-border-color: #e0e0e0; -fx-border-radius: 3px;"); // Increased padding
+            
+            // Task name label
+            Label taskNameLabel = new Label("• " + task.getTask());
+            taskNameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
+            taskNameLabel.setWrapText(true);
+            
+            // Priority info only
+            String priorityText = "Priority: " + task.getPriority().toUpperCase();
+            
+            Label infoLabel = new Label(priorityText);
+            infoLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666666;");
+            
+            taskContainer.getChildren().addAll(taskNameLabel, infoLabel);
+            tasksList.getChildren().add(taskContainer);
+        }
+        
+        return tasksList;
+    }
+        
     private void setupTodoTable() {
         // Set up columns for TO-DO table (non-editable except for completion checkbox)
         completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
@@ -324,15 +466,15 @@ public class GroupWorkspaceController implements Initializable {
                         
                         // Set background color based on status with center alignment
                         switch (status.toLowerCase()) {
-	                        case "not started":
-	                            setStyle("-fx-background-color: #BABABA; -fx-text-fill: #000000; -fx-alignment: CENTER;");
-	                            break;
-	                        case "in progress":
-	                            setStyle("-fx-background-color: #FFC107; -fx-text-fill: #000000; -fx-alignment: CENTER;");
-	                            break;
-	                        case "done":
-	                            setStyle("-fx-background-color: #2DCA7B; -fx-text-fill: #000000; -fx-alignment: CENTER;");
-	                            break;
+                            case "not started":
+                                setStyle("-fx-background-color: #BABABA; -fx-text-fill: #000000; -fx-alignment: CENTER;");
+                                break;
+                            case "in progress":
+                                setStyle("-fx-background-color: #FFC107; -fx-text-fill: #000000; -fx-alignment: CENTER;");
+                                break;
+                            case "done":
+                                setStyle("-fx-background-color: #2DCA7B; -fx-text-fill: #000000; -fx-alignment: CENTER;");
+                                break;
                             default:
                                 setStyle("-fx-alignment: CENTER;");
                                 break;
@@ -395,7 +537,7 @@ public class GroupWorkspaceController implements Initializable {
             };
         });
     }
-	
+    
     // FXML Components
     @FXML
     private void handleEditTask() {
@@ -406,6 +548,7 @@ public class GroupWorkspaceController implements Initializable {
                 try {
                     TaskDAO.updateTask(editedTask);
                     loadTasks(); // ✅ Refresh after update
+                    showAlertWithType(Alert.AlertType.INFORMATION, "Success", "Task edited successfully.");
                 } catch (Exception e) {
                     showAlertWithType(Alert.AlertType.ERROR, "Database Error", "Failed to update the task in the database.");
                 }
@@ -422,248 +565,373 @@ public class GroupWorkspaceController implements Initializable {
         dialog.setTitle("Edit Task");
         dialog.setHeaderText("Edit task details:");
 
-        TextField taskField = new TextField(taskToEdit.getTask());
-        taskField.setPromptText("Task description");
+        try {
+            TextField taskField = new TextField(taskToEdit.getTask());
+            taskField.setPromptText("Task description");
 
-        ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG));
-        ownerCombo.setValue(taskToEdit.getOwner());
-        ownerCombo.setEditable(true);
-
-        ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
-        statusCombo.setValue(taskToEdit.getStatus());
-
-        DatePicker dueDateField = new DatePicker();
-        dueDateField.setPromptText("MM-dd-yy");
-        if (taskToEdit.getDueDate() != null && !taskToEdit.getDueDate().isEmpty()) {
+            ComboBox<String> ownerCombo = new ComboBox<>();
             try {
-            	LocalDate date = LocalDate.parse(taskToEdit.getDueDate(), DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-                dueDateField.setValue(date);
-            } catch (Exception ignored) {}
-        }
-
-        ComboBox<String> priorityCombo = new ComboBox<>();
-        priorityCombo.getItems().addAll("Low", "Medium", "High");
-        priorityCombo.setValue(taskToEdit.getPriority());
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-
-        grid.add(new Label("Task:"), 0, 0);
-        grid.add(taskField, 1, 0);
-        grid.add(new Label("Owner:"), 0, 1);
-        grid.add(ownerCombo, 1, 1);
-        grid.add(new Label("Status:"), 0, 2);
-        grid.add(statusCombo, 1, 2);
-        grid.add(new Label("Due Date:"), 0, 3);
-        grid.add(dueDateField, 1, 3);
-        grid.add(new Label("Priority:"), 0, 4);
-        grid.add(priorityCombo, 1, 4);
-
-        dialog.getDialogPane().setContent(grid);
-
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
-        Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
-        saveButton.addEventFilter(ActionEvent.ACTION, event -> {
-            LocalDate selectedDate = dueDateField.getValue();
-            if (selectedDate != null && selectedDate.isBefore(LocalDate.now())) {
-                showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be in the past.");
-                event.consume();
+                ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG));
+                ownerCombo.setValue(taskToEdit.getOwner());
+                ownerCombo.setEditable(true);
+            } catch (Exception e) {
+                System.err.println("❌ Error loading workspace members: " + e.getMessage());
+                ownerCombo.setEditable(true);
+                ownerCombo.setValue(taskToEdit.getOwner());
             }
-        });
 
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-                if (dueDateField.getValue() == null) {
-                    showAlertWithType(Alert.AlertType.WARNING, "Missing Due Date", "Please select a due date.");
-                    return null; // Don't close dialog if due date is empty
+            ComboBox<String> statusCombo = new ComboBox<>();
+            statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
+            statusCombo.setValue(taskToEdit.getStatus());
+
+            DatePicker dueDateField = new DatePicker();
+            dueDateField.setPromptText("MM-dd-yy");
+            if (taskToEdit.getDueDate() != null && !taskToEdit.getDueDate().isEmpty()) {
+                try {
+                    LocalDate date = LocalDate.parse(taskToEdit.getDueDate(), DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+                    dueDateField.setValue(date);
+                } catch (Exception e) {
+                    System.err.println("⚠️ Could not parse existing due date: " + taskToEdit.getDueDate());
+                    // Leave date picker empty if parsing fails
                 }
-
-                taskToEdit.setTask(taskField.getText().trim());
-                taskToEdit.setOwner(ownerCombo.getValue().trim());
-                taskToEdit.setStatus(statusCombo.getValue());
-                taskToEdit.setDueDate(
-                	    dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
-                	);
-                taskToEdit.setPriority(priorityCombo.getValue());
-                return taskToEdit;
             }
-            return null;
-        });
 
-        dialog.setOnShown(e -> {
+            ComboBox<String> priorityCombo = new ComboBox<>();
+            priorityCombo.getItems().addAll("Low", "Medium", "High");
+            priorityCombo.setValue(taskToEdit.getPriority());
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            grid.add(new Label("Task:"), 0, 0);
+            grid.add(taskField, 1, 0);
+            grid.add(new Label("Owner:"), 0, 1);
+            grid.add(ownerCombo, 1, 1);
+            grid.add(new Label("Status:"), 0, 2);
+            grid.add(statusCombo, 1, 2);
+            grid.add(new Label("Due Date:"), 0, 3);
+            grid.add(dueDateField, 1, 3);
+            grid.add(new Label("Priority:"), 0, 4);
+            grid.add(priorityCombo, 1, 4);
+
+            dialog.getDialogPane().setContent(grid);
+
+            ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+            Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
+            
+            // Add comprehensive validation with event filter
+            saveButton.addEventFilter(ActionEvent.ACTION, event -> {
+                try {
+                    // Validate required fields
+                    String taskDescription = taskField.getText() != null ? taskField.getText().trim() : "";
+                    String ownerValue = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+
+                    // Check if both Task description and Owner are empty
+                    if (taskDescription.isEmpty() && ownerValue.isEmpty()) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description and owner cannot be empty");
+                        event.consume();
+                        return;
+                    } else if (taskDescription.isEmpty()) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description cannot be empty");
+                        event.consume();
+                        return;
+                    } else if (ownerValue.isEmpty()) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Owner cannot be empty");
+                        event.consume();
+                        return;
+                    }
+
+                    // Validate due date is selected first
+                    LocalDate selectedDate = dueDateField.getValue();
+                    if (selectedDate == null) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "The due date field must not be empty. Please select a due date.");
+                        event.consume();
+                        return;
+                    }
+
+                    // Then validate due date is not in the past
+                    if (selectedDate.isBefore(LocalDate.now())) {
+                        showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", 
+                            "Due date cannot be set to a date before today. Please select today's date or a future date.");
+                        event.consume();
+                        return;
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("❌ Error during validation: " + e.getMessage());
+                    e.printStackTrace();
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", 
+                        "An unexpected error occurred while validating the task: " + e.getMessage());
+                    event.consume();
+                }
+            });
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == saveButtonType) {
+                    try {
+                        String taskTitle = taskField.getText() != null ? taskField.getText().trim() : "";
+                        String ownerRaw = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+                        String owner = ownerRaw.contains(" (") ? ownerRaw.substring(0, ownerRaw.indexOf(" (")) : ownerRaw;
+                        String status = statusCombo.getValue();
+                        String priority = priorityCombo.getValue();
+
+                        String dueDate = "";
+                        if (dueDateField.getValue() != null) {
+                            dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+                        }
+
+                        // Final validation check including due date
+                        if (taskTitle.isEmpty() || owner.isEmpty()) {
+                            showAlertWithType(Alert.AlertType.WARNING, "Input Error", 
+                                "All fields must be filled. Please complete all required fields.");
+                            return null;
+                        }
+
+                        if (dueDate.isEmpty()) {
+                            showAlertWithType(Alert.AlertType.ERROR, "Validation Error", 
+                                "The due date field must not be empty. Please select a due date.");
+                            return null;
+                        }
+
+                        // Update the task object
+                        taskToEdit.setTask(taskTitle);
+                        taskToEdit.setOwner(owner);
+                        taskToEdit.setStatus(status);
+                        taskToEdit.setDueDate(dueDate);
+                        taskToEdit.setPriority(priority);
+                        
+                        return taskToEdit;
+                    } catch (Exception e) {
+                        System.err.println("❌ Error creating updated task: " + e.getMessage());
+                        e.printStackTrace();
+                        showAlertWithType(Alert.AlertType.ERROR, "Error", 
+                            "An unexpected error occurred while updating the task: " + e.getMessage());
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            // Set icon for dialog with error handling
             try {
-                Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-                stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
-            } catch (Exception ignored) {}
-        });
+                dialog.setOnShown(e -> {
+                    try {
+                        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+                    } catch (Exception iconError) {
+                        System.err.println("⚠️ Could not set dialog icon: " + iconError.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("⚠️ Could not setup dialog icon handler: " + e.getMessage());
+            }
 
-        return dialog.showAndWait();
+            return dialog.showAndWait();
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error creating edit dialog: " + e.getMessage());
+            e.printStackTrace();
+            showAlertWithType(Alert.AlertType.ERROR, "Dialog Creation Error", 
+                "An unexpected error occurred while creating the edit dialog: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
     @FXML
     private void handleAddTask() {
-        // Create a new task dialog
-        Dialog<TaskModel> dialog = new Dialog<>();
-        dialog.setTitle("Add New Task");
-        dialog.setHeaderText("Enter task details:");
-
-        // Create form fields
-        TextField taskField = new TextField();
-        taskField.setPromptText("Task description");
-
-        // Changed from TextField to ComboBox for owner
-        ComboBox<String> ownerCombo = new ComboBox<>();
-        ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG));
-        ownerCombo.setPromptText("Select owner");
-        ownerCombo.setEditable(false); // Allow custom input if needed
-
-        ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
-        statusCombo.setValue("Not Started");
-
-        // FIXED: Replace TextField with DatePicker
-        DatePicker dueDateField = new DatePicker();
-        dueDateField.setPromptText("MM-DD-YY");
-
-        ComboBox<String> priorityCombo = new ComboBox<>();
-        priorityCombo.getItems().addAll("Low", "Medium", "High");
-        priorityCombo.setValue("Low");
-
-        // Create dialog content
-        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
-
-        grid.add(new Label("Task:"), 0, 0);
-        grid.add(taskField, 1, 0);
-        grid.add(new Label("Owner:"), 0, 1);
-        grid.add(ownerCombo, 1, 1);
-        grid.add(new Label("Status:"), 0, 2);
-        grid.add(statusCombo, 1, 2);
-        grid.add(new Label("Due Date:"), 0, 3);
-        grid.add(dueDateField, 1, 3);
-        grid.add(new Label("Priority:"), 0, 4);
-        grid.add(priorityCombo, 1, 4);
-
-        dialog.getDialogPane().setContent(grid);
-
-        // Add buttons
-        ButtonType okButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
-
-        // Get the Add button and disable it initially if needed
-        Button addButton = (Button) dialog.getDialogPane().lookupButton(okButtonType);
-
-        // Add event filter to the Add button to prevent dialog from closing on validation failure
-        addButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
-            try {
-                // Validate required fields
-                String taskDescription = taskField.getText() != null ? taskField.getText().trim() : "";
-                String ownerValue = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
-
-                // Check if both Task description and Owner are empty
-                if (taskDescription.isEmpty() && ownerValue.isEmpty()) {
-                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description and owner cannot be empty");
-                    event.consume();
-                    return;
-                } else if (taskDescription.isEmpty()) {
-                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description cannot be empty");
-                    event.consume();
-                    return;
-                } else if (ownerValue.isEmpty()) {
-                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Owner cannot be empty");
-                    event.consume();
-                    return;
-                }
-
-                // NEW: Validate due date is not in the past
-                LocalDate selectedDate = dueDateField.getValue();
-                if (selectedDate != null && selectedDate.isBefore(LocalDate.now())) {
-                    showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be set to a date before today. Please select today's date or a future date.");
-                    event.consume();
-                    return;
-                }
-
-            } catch (Exception e) {
-                showAlertWithType(Alert.AlertType.ERROR, "Error", "An unexpected error occurred while validating the task: " + e.getMessage());
-                event.consume();
-            }
-        });
-
-        // Result converter
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == okButtonType) {
-                try {
-                	String taskTitle = taskField.getText().trim();
-                	String ownerRaw = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
-                	String owner = ownerRaw.contains(" (") ? ownerRaw.substring(0, ownerRaw.indexOf(" (")) : ownerRaw;
-                	String status = statusCombo.getValue();
-                	String priority = priorityCombo.getValue();
-
-                	String dueDate = "";
-                	if (dueDateField.getValue() != null) {
-                	    dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-                	}
-
-                	if (taskTitle.isEmpty() || owner.isEmpty()) {
-                	    Alert alert = new Alert(Alert.AlertType.WARNING);
-                	    alert.setTitle("Input Error");
-                	    alert.setHeaderText("All fields must be filled.");
-                	    alert.setContentText("Please complete all required fields.");
-                	    alert.showAndWait();
-                	    return null;
-                	}
-
-                    TaskModel newTask = new TaskModel(taskTitle, owner, status, dueDate, priority);
-                    newTask.setCompleted(false);
-                    newTask.setWorkspaceID(currentWorkspaceIDG);
-                    return newTask;
-                } catch (Exception e) {
-                    showAlertWithType(Alert.AlertType.ERROR, "Error", "An unexpected error occurred while creating the task: " + e.getMessage());
-                    return null;
-                }
-            }
-            return null;
-        });
-
-        // Set icon for dialog
         try {
-            dialog.setOnShown(e -> {
-                Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-                stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
-            });
-        } catch (Exception e) {
-            System.err.println("Could not set dialog icon: " + e.getMessage());
-        }
+            // Create a new task dialog
+            Dialog<TaskModel> dialog = new Dialog<>();
+            dialog.setTitle("Add New Task");
+            dialog.setHeaderText("Enter task details:");
 
-        // Show dialog and handle result
-        Optional<TaskModel> result = dialog.showAndWait();
-        result.ifPresent(task -> {
-        	boolean inserted = TaskDAO.addTaskSimple(task, currentWorkspaceIDG);
-            if (inserted) {
-                loadTasks();
-            } else {
-                System.err.println("❌ Task not inserted. Checking DB manually...");
-                if (TaskDAO.wasTaskInserted(task)) {
-                    System.out.println("⚠️ DB says task *was* inserted, but method returned false.");
-                    todoTasks.add(task);
-                } else {
-                    System.err.println("❌ Task truly not inserted.");
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Database Error");
-                    alert.setHeaderText("Task not added");
-                    alert.setContentText("The task could not be inserted into the database. Please try again.");
-                    alert.showAndWait();
-                }
+            // Create form fields
+            TextField taskField = new TextField();
+            taskField.setPromptText("Task description");
+
+            // Changed from TextField to ComboBox for owner
+            ComboBox<String> ownerCombo = new ComboBox<>();
+            try {
+                ownerCombo.setItems(TaskDAO.getAllWorkspaceMembers(username, currentWorkspaceIDG));
+                ownerCombo.setPromptText("Select owner");
+                ownerCombo.setEditable(false); // Allow custom input if needed
+            } catch (Exception e) {
+                System.err.println("❌ Error loading workspace members: " + e.getMessage());
+                ownerCombo.setEditable(true);
+                ownerCombo.setPromptText("Enter owner username");
             }
-        });
+
+            ComboBox<String> statusCombo = new ComboBox<>();
+            statusCombo.getItems().addAll("Not Started", "In Progress", "Done");
+            statusCombo.setValue("Not Started");
+
+            // FIXED: Replace TextField with DatePicker
+            DatePicker dueDateField = new DatePicker();
+            dueDateField.setPromptText("MM-DD-YY");
+
+            ComboBox<String> priorityCombo = new ComboBox<>();
+            priorityCombo.getItems().addAll("Low", "Medium", "High");
+            priorityCombo.setValue("Low");
+
+            // Create dialog content
+            javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+            grid.add(new Label("Task:"), 0, 0);
+            grid.add(taskField, 1, 0);
+            grid.add(new Label("Owner:"), 0, 1);
+            grid.add(ownerCombo, 1, 1);
+            grid.add(new Label("Status:"), 0, 2);
+            grid.add(statusCombo, 1, 2);
+            grid.add(new Label("Due Date:"), 0, 3);
+            grid.add(dueDateField, 1, 3);
+            grid.add(new Label("Priority:"), 0, 4);
+            grid.add(priorityCombo, 1, 4);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Add buttons
+            ButtonType okButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+            // Get the Add button and disable it initially if needed
+            Button addButton = (Button) dialog.getDialogPane().lookupButton(okButtonType);
+
+            // Add event filter to the Add button to prevent dialog from closing on validation failure
+            addButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+                try {
+                    // Validate required fields
+                    String taskDescription = taskField.getText() != null ? taskField.getText().trim() : "";
+                    String ownerValue = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+
+                    // Check if both Task description and Owner are empty
+                    if (taskDescription.isEmpty() && ownerValue.isEmpty()) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description and owner cannot be empty");
+                        event.consume();
+                        return;
+                    } else if (taskDescription.isEmpty()) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Task description cannot be empty");
+                        event.consume();
+                        return;
+                    } else if (ownerValue.isEmpty()) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "Owner cannot be empty");
+                        event.consume();
+                        return;
+                    }
+
+                    // Validate due date is selected first
+                    LocalDate selectedDate = dueDateField.getValue();
+                    if (selectedDate == null) {
+                        showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "The due date field must not be empty. Please select a due date.");
+                        event.consume();
+                        return;
+                    }
+
+                    // Then validate due date is not in the past
+                    if (selectedDate.isBefore(LocalDate.now())) {
+                        showAlertWithType(Alert.AlertType.WARNING, "Invalid Due Date", "Due date cannot be set to a date before today. Please select today's date or a future date.");
+                        event.consume();
+                        return;
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("❌ Error during validation: " + e.getMessage());
+                    e.printStackTrace();
+                    showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "An unexpected error occurred while validating the task: " + e.getMessage());
+                    event.consume();
+                }
+            });
+
+            // Result converter
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == okButtonType) {
+                    try {
+                        String taskTitle = taskField.getText().trim();
+                        String ownerRaw = ownerCombo.getValue() != null ? ownerCombo.getValue().trim() : "";
+                        String owner = ownerRaw.contains(" (") ? ownerRaw.substring(0, ownerRaw.indexOf(" (")) : ownerRaw;
+                        String status = statusCombo.getValue();
+                        String priority = priorityCombo.getValue();
+
+                        String dueDate = "";
+                        if (dueDateField.getValue() != null) {
+                            dueDate = dueDateField.getValue().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+                        }
+
+                        // Final validation check including due date
+                        if (taskTitle.isEmpty() || owner.isEmpty()) {
+                            showAlertWithType(Alert.AlertType.WARNING, "Input Error", "All fields must be filled. Please complete all required fields.");
+                            return null;
+                        }
+
+                        if (dueDate.isEmpty()) {
+                            showAlertWithType(Alert.AlertType.ERROR, "Validation Error", "The due date field must not be empty. Please select a due date.");
+                            return null;
+                        }
+
+                        TaskModel newTask = new TaskModel(taskTitle, owner, status, dueDate, priority);
+                        newTask.setCompleted(false);
+                        newTask.setWorkspaceID(currentWorkspaceIDG);
+                        return newTask;
+                    } catch (Exception e) {
+                        System.err.println("❌ Error creating new task: " + e.getMessage());
+                        e.printStackTrace();
+                        showAlertWithType(Alert.AlertType.ERROR, "Error", "An unexpected error occurred while creating the task: " + e.getMessage());
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            // Set icon for dialog
+            try {
+                dialog.setOnShown(e -> {
+                    try {
+                        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+                    } catch (Exception iconError) {
+                        System.err.println("⚠️ Could not set dialog icon: " + iconError.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("⚠️ Could not setup dialog icon handler: " + e.getMessage());
+            }
+
+            // Show dialog and handle result
+            Optional<TaskModel> result = dialog.showAndWait();
+            result.ifPresent(task -> {
+                try {
+                    boolean inserted = TaskDAO.addTaskSimple(task, currentWorkspaceIDG);
+                    if (inserted) {
+                        loadTasks();
+                    } else {
+                        System.err.println("❌ Task not inserted. Checking DB manually...");
+                        if (TaskDAO.wasTaskInserted(task)) {
+                            System.out.println("⚠️ DB says task *was* inserted, but method returned false.");
+                            todoTasks.add(task);
+                            showAlertWithType(Alert.AlertType.INFORMATION, "Success", "Task added successfully.");
+                        } else {
+                            System.err.println("❌ Task truly not inserted.");
+                            showAlertWithType(Alert.AlertType.ERROR, "Database Error", "The task could not be inserted into the database. Please try again.");
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ Error adding task to database: " + e.getMessage());
+                    e.printStackTrace();
+                    showAlertWithType(Alert.AlertType.ERROR, "Database Error", "An unexpected error occurred while adding the task: " + e.getMessage());
+                }
+            });
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error in add task dialog: " + e.getMessage());
+            e.printStackTrace();
+            showAlertWithType(Alert.AlertType.ERROR, "Dialog Error", "An unexpected error occurred while opening the add task dialog: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -774,7 +1042,7 @@ public class GroupWorkspaceController implements Initializable {
     
     @FXML
     private void inviteButton() {
-    	setWorkspaceData(currentWorkspaceIDG, currentWorkspaceName);
+        setWorkspaceData(currentWorkspaceIDG, currentWorkspaceName);
         inviteStackPane.setVisible(true);
         mainAnchorPane.setVisible(true);
         invitePane.setVisible(true);
@@ -784,7 +1052,7 @@ public class GroupWorkspaceController implements Initializable {
     @FXML
     private void handleInviteFriend() {
         setWorkspaceData(currentWorkspaceIDG, currentWorkspaceName);
-    	String username = usernameField.getText().trim();
+        String username = usernameField.getText().trim();
         if (username.isEmpty()) {
             showAlertWithType(Alert.AlertType.WARNING, "Invalid Input", "Please enter a username.");
             return;
@@ -906,7 +1174,7 @@ public class GroupWorkspaceController implements Initializable {
         }
     }
     
- // Add this new method to update the title
+    // Add this new method to update the title
     public void updateWorkspaceTitle(String workspaceName) {
         if (workspaceTitle != null && workspaceName != null && !workspaceName.trim().isEmpty()) {
             workspaceTitle.setText(workspaceName.trim());

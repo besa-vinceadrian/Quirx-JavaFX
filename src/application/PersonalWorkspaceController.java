@@ -9,18 +9,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.DatePicker;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
@@ -70,6 +63,7 @@ public class PersonalWorkspaceController implements Initializable {
     private ObservableList<TaskModel> todoTasks;
     private ObservableList<TaskModel> completedTasks;
     private static boolean urgentTasksAlertShown = false; // Flag to track if alert has been shown
+    
     private int currentWorkspaceID; // Example workspace ID, replace with actual logic to get current workspace
     private String currentWorkspaceName; // Example workspace name, replace with actual logic
     private String username;
@@ -398,6 +392,7 @@ public class PersonalWorkspaceController implements Initializable {
                 try {
                     TaskDAO.updateTask(editedTask);
                     loadTasks(); // ✅ Refresh after update
+                    showAlertWithType(Alert.AlertType.INFORMATION, "Success", "Task edited successfully.");
                 } catch (Exception e) {
                     showAlertWithType(Alert.AlertType.ERROR, "Database Error", "Failed to update the task in the database.");
                 }
