@@ -85,6 +85,10 @@ public class MenuController implements Initializable {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("file:QuirxImages/LogoYellow.png"));
+
         alert.showAndWait();
     }
 
@@ -425,8 +429,28 @@ public class MenuController implements Initializable {
             }
         });
 
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(workspaceName -> {
+        // Keep showing dialog until valid input or user cancels
+        String workspaceName = null;
+        while (workspaceName == null) {
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                String input = result.get();
+                if (input == null || input.trim().isEmpty()) {
+                    showAlert("Invalid Input", "Workspace name cannot be empty. Please enter a valid name.");
+                    // Clear the text field and continue loop
+                    dialog.getEditor().clear();
+                } else {
+                    workspaceName = input;
+                }
+            } else {
+                // User clicked Cancel or closed dialog
+                return;
+            }
+        }
+        
+        // Process valid workspace name
+        if (workspaceName != null) {
+            
             String trimmedName = workspaceName.trim();
             if (!trimmedName.isEmpty()) {
                 List<WorkspaceGroup> existingWorkspaces = TaskDAO.getUserGroupWorkspaces(username);
@@ -462,7 +486,7 @@ public class MenuController implements Initializable {
                     }
                 }
             }
-        });
+        }
     }
     
     private void loadView(String fxmlFile) {
