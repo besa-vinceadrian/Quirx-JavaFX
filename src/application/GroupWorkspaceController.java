@@ -117,14 +117,15 @@ public class GroupWorkspaceController implements Initializable {
         
         // Check for urgent tasks
         List<TaskModel> urgentTasks = new ArrayList<>();
-
+        
         for (TaskModel task : relevantTasks) {
             String status = task.getStatus();
+            System.out.println(task.getPriority() + " - " + task.getDueDate());
             if ("Done".equalsIgnoreCase(status)) {
                 completedTasks.add(task);
             } else {
                 todoTasks.add(task);
-
+                
                 // Check if task is urgent (due today or tomorrow)
                 if (isTaskUrgent(task)) {
                     urgentTasks.add(task);
@@ -133,18 +134,18 @@ public class GroupWorkspaceController implements Initializable {
         }
 
         tableView.setItems(todoTasks);
-
-        // Show urgent tasks alert if there are any and it hasn't been shown for this workspace
+        
+        // Show urgent tasks alert if there are any and it hasn't been shown for this workspace in this session
         if (!urgentTasks.isEmpty() && !workspacesWithAlertShown.contains(currentWorkspaceIDG)) {
             showUrgentTasksAlert(urgentTasks);
-            workspacesWithAlertShown.add(currentWorkspaceIDG); // Mark this workspace as alerted
+            workspacesWithAlertShown.add(currentWorkspaceIDG); // Mark this workspace as alerted for this session
         }
     }
 
     
-    // Reset for a specific workspace when needed
-    public static void resetAlertForWorkspace(int workspaceId) {
-        workspacesWithAlertShown.remove(workspaceId);
+    // Reset workspace when needed
+    public static void resetAllWorkspaceAlerts() {
+        workspacesWithAlertShown.clear();
     }
     
     private boolean isTaskUrgent(TaskModel task) {

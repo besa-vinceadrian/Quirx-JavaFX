@@ -391,7 +391,7 @@ public class MenuController implements Initializable {
         		// Reset the urgent task alert everytime the user logged out
                 PersonalWorkspaceController.resetSession();
                 // When switching away from a workspace or logging out:
-                GroupWorkspaceController.resetAlertForWorkspace(workspaceId);
+                GroupWorkspaceController.resetAllWorkspaceAlerts();
 
             try {
                 BorderPane root = (BorderPane) FXMLLoader.load(getClass().getResource("LogIn.fxml"));
