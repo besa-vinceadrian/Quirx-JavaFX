@@ -1,7 +1,7 @@
 package TaskManagement;
 
 import java.sql.*;
-import java.util.Map;
+
 import java.util.ArrayList;
 import java.util.List;
 import application.TaskModel;
@@ -13,7 +13,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 
 public class TaskDAO {
 
