@@ -120,7 +120,6 @@ public class GroupWorkspaceController implements Initializable {
         
         for (TaskModel task : relevantTasks) {
             String status = task.getStatus();
-            System.out.println(task.getPriority() + " - " + task.getDueDate());
             if ("Done".equalsIgnoreCase(status)) {
                 completedTasks.add(task);
             } else {
