@@ -248,10 +248,11 @@ public class MenuController implements Initializable {
             groupWorkspaceContainer.getChildren().clear();
             createdWorkspaces.clear(); // Clear the tracking list
 
-            Map<String, Integer> workspaces = TaskDAO.getUserGroupWorkspaces(username);
-            for (Map.Entry<String, Integer> entry : workspaces.entrySet()) {
-                createWorkspaceButtonFromDB(entry.getKey(), entry.getValue());
+            List<WorkspaceGroup> workspaces = TaskDAO.getUserGroupWorkspaces(username);
+            for (WorkspaceGroup ws : workspaces) {
+                createWorkspaceButtonFromDB(ws.getName(), ws.getId());
             }
+
             // Auto-scroll to top when dropdown expands
             Platform.runLater(() -> groupWorkspaceScrollPane.setVvalue(0));
         }
@@ -368,9 +369,9 @@ public class MenuController implements Initializable {
             groupWorkspaceContainer.getChildren().clear();
             createdWorkspaces.clear();
 
-            Map<String, Integer> workspaces = TaskDAO.getUserGroupWorkspaces(username);
-            for (Map.Entry<String, Integer> entry : workspaces.entrySet()) {
-                createWorkspaceButtonFromDB(entry.getKey(), entry.getValue());
+            List<WorkspaceGroup> workspaces = TaskDAO.getUserGroupWorkspaces(username);
+            for (WorkspaceGroup ws : workspaces) {
+                createWorkspaceButtonFromDB(ws.getName(), ws.getId());
             }
         }
     }
@@ -428,8 +429,11 @@ public class MenuController implements Initializable {
         result.ifPresent(workspaceName -> {
             String trimmedName = workspaceName.trim();
             if (!trimmedName.isEmpty()) {
-                Map<String, Integer> existingWorkspaces = TaskDAO.getUserGroupWorkspaces(username);
-                if (existingWorkspaces.containsKey(trimmedName)) {
+                List<WorkspaceGroup> existingWorkspaces = TaskDAO.getUserGroupWorkspaces(username);
+                boolean nameExists = existingWorkspaces.stream()
+                    .anyMatch(ws -> ws.getName().equalsIgnoreCase(trimmedName));
+
+                if (nameExists) {
                     showAlert("Duplicate Workspace", "A workspace with this name already exists. Please choose a different name.");
                     return;
                 }
@@ -438,7 +442,6 @@ public class MenuController implements Initializable {
                 if (workspaceId != -1) {
                     WorkspaceGroup workspace = TaskDAO.getWorkspaceByIdAndUser(workspaceId, username);
                     if (workspace != null) {
-                        // Use the updated method that accepts name and id separately
                         createWorkspaceButtonFromDB(workspace.getName(), workspace.getId());
 
                         try {

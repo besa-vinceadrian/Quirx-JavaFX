@@ -297,9 +297,8 @@ public class TaskDAO {
         return -1;
     }
 
-    public static Map<String, Integer> getUserGroupWorkspaces(String username) {
-        Map<String, Integer> workspaces = new LinkedHashMap<>();
-        Set<Integer> seenWorkspaceIDs = new HashSet<>();
+    public static List<WorkspaceGroup> getUserGroupWorkspaces(String username) {
+        List<WorkspaceGroup> workspaces = new ArrayList<>();
 
         String sql = """
             SELECT w.workspaceID, w.workspaceName
@@ -321,12 +320,15 @@ public class TaskDAO {
             st.setString(2, username);
             ResultSet rs = st.executeQuery();
 
+            Set<Integer> seenWorkspaceIDs = new HashSet<>();
+
             while (rs.next()) {
                 int workspaceID = rs.getInt("workspaceID");
                 String workspaceName = rs.getString("workspaceName");
 
+                // Prevent duplicate IDs, but allow duplicate names
                 if (seenWorkspaceIDs.add(workspaceID)) {
-                    workspaces.put(workspaceName, workspaceID);
+                    workspaces.add(new WorkspaceGroup(workspaceID, workspaceName));
                 }
             }
 
