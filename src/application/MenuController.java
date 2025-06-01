@@ -111,12 +111,12 @@ public class MenuController implements Initializable {
         // Configure ScrollPane properties
         groupWorkspaceScrollPane.setFitToWidth(true);
         groupWorkspaceScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Hide horizontal scrollbar
-        groupWorkspaceScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED); // Show vertical scrollbar when needed
+        groupWorkspaceScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Hide vertical scrollbar completely
         groupWorkspaceScrollPane.setPrefViewportHeight(400); // Maximum height before scrolling kicks in
         groupWorkspaceScrollPane.setMaxHeight(400); // Prevent the scroll pane from expanding beyond this height
         groupWorkspaceScrollPane.getStyleClass().add("edge-to-edge"); // Remove border/padding if needed
         
-        // Set style to make scrollbar less intrusive
+        // Set style to make scrollbar completely invisible and remove all padding/margins
         groupWorkspaceScrollPane.setStyle(
         		 "-fx-background-color: transparent;" +
 	            "-fx-background: transparent;" +
@@ -125,11 +125,20 @@ public class MenuController implements Initializable {
 	            "-fx-faint-focus-color: transparent;" +
 	            "-fx-padding: 0;" +
 	            "-fx-background-insets: 0;" +
-	            "-fx-border-insets: 0;"
+	            "-fx-border-insets: 0;" +
+	            "-fx-viewport-border-insets: 0;" +
+	            "-fx-viewport-padding: 0;"
         		);
         
-     // Add CSS class for scrollbar styling
+        // Add CSS class for scrollbar styling
         groupWorkspaceScrollPane.getStyleClass().add("custom-scrollbar");
+        
+        // Enable mouse wheel scrolling even without visible scrollbar
+        groupWorkspaceScrollPane.setOnScroll(event -> {
+            double deltaY = event.getDeltaY() * 0.005; // Adjust scroll sensitivity
+            groupWorkspaceScrollPane.setVvalue(groupWorkspaceScrollPane.getVvalue() - deltaY);
+            event.consume();
+        });
         
         // Find the index of group workspace button and add scroll pane after it
         int groupWorkspaceIndex = -1;
@@ -250,7 +259,7 @@ public class MenuController implements Initializable {
         }
     }
 
-    // New helper method to create workspace buttons from database without auto-expanding
+    // Updated helper method to create workspace buttons from database with aligned delete buttons
     private void createWorkspaceButtonFromDB(String workspaceName) {
         // Create a container for the workspace button and delete button
         HBox buttonContainer = new HBox();
@@ -263,21 +272,22 @@ public class MenuController implements Initializable {
         newWorkspaceBtn.getStyleClass().add("menu-button");
         newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
         newWorkspaceBtn.setPrefHeight(30.0); // Slightly smaller than main buttons
-        newWorkspaceBtn.setPrefWidth(234.0); // Increased to accommodate smaller spacer
+        newWorkspaceBtn.setPrefWidth(234.0); // Reduced width to make room for proper alignment
         newWorkspaceBtn.setFont(Font.font("Arial", 12)); // Slightly smaller font
         newWorkspaceBtn.setPadding(new Insets(0, 10, 0, 40)); // Less padding since it's already indented
         
-        // Spacer to push delete button to the center position of add button
+        // Spacer to push delete button to align with add button
         Region spacer = new Region();
-        spacer.setPrefWidth(5.0); // Reduced to move delete button more to the left
+        HBox.setHgrow(spacer, Priority.ALWAYS); // This will push the delete button to the right
+        spacer.setMinWidth(0); // Allow it to shrink
+        spacer.setPrefWidth(5.0); // Set preferred width to align with add button position
         
-        // Delete button 
+        // Delete button - positioned to align with the add button
         Button deleteButton = new Button("🗑");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setPrefWidth(40.0); // Match add button width
         deleteButton.setPrefHeight(30.0);
         deleteButton.setFont(Font.font("Arial", 16));
-        newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 10)); 
         deleteButton.setOnAction(e -> confirmAndDeleteWorkspaceFromDB(buttonContainer, workspaceName));
         
         // Set action to load workspace
@@ -470,6 +480,7 @@ public class MenuController implements Initializable {
         }
     }
     
+    // Updated createWorkspaceButton method with aligned delete buttons
     private void createWorkspaceButton(String workspaceName) {
         // Create a container for the workspace button and delete button
         HBox buttonContainer = new HBox();
@@ -482,21 +493,22 @@ public class MenuController implements Initializable {
         newWorkspaceBtn.getStyleClass().add("menu-button");
         newWorkspaceBtn.setAlignment(Pos.BASELINE_LEFT);
         newWorkspaceBtn.setPrefHeight(30.0); // Slightly smaller than main buttons
-        newWorkspaceBtn.setPrefWidth(234.0); // Increased to accommodate smaller spacer
+        newWorkspaceBtn.setPrefWidth(194.0); // Reduced width to make room for proper alignment
         newWorkspaceBtn.setFont(Font.font("Arial", 12)); // Slightly smaller font
         newWorkspaceBtn.setPadding(new Insets(0, 10, 0, 40)); // Less padding since it's already indented
         
-        // Spacer to push delete button to the center position of add button
+        // Spacer to push delete button to align with add button
         Region spacer = new Region();
-        spacer.setPrefWidth(5.0); // Reduced to move delete button more to the left
+        HBox.setHgrow(spacer, Priority.ALWAYS); // This will push the delete button to the right
+        spacer.setMinWidth(0); // Allow it to shrink
+        spacer.setPrefWidth(40.0); // Set preferred width to align with add button position
         
-        // Delete button 
+        // Delete button - positioned to align with the add button
         Button deleteButton = new Button("🗑");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setPrefWidth(40.0); // Match add button width
         deleteButton.setPrefHeight(30.0);
         deleteButton.setFont(Font.font("Arial", 16));
-        newWorkspaceBtn.setPadding(new Insets(0, 0, 0, 10)); 
         deleteButton.setOnAction(e -> confirmAndDeleteWorkspace(buttonContainer, workspaceName));
         
         // Set action to load workspace
