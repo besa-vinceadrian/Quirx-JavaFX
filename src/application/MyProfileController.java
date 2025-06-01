@@ -217,9 +217,7 @@ public class MyProfileController implements Initializable {
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> centerPane.requestFocus());
-        
+    public void initialize(URL location, ResourceBundle resources) {        
         showNewPasswordField.textProperty().bindBidirectional(newPasswordField.textProperty());
         showConfirmNewPasswordField.textProperty().bindBidirectional(confirmNewPasswordField.textProperty());
 

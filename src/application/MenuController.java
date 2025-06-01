@@ -32,7 +32,7 @@ public class MenuController implements Initializable {
     private Pane windowPane;
     
     @FXML
-    private Button dashboardButton;
+    private Button profileButton;
     
     @FXML
     private Button myTaskButton;
@@ -169,7 +169,7 @@ public class MenuController implements Initializable {
     }
     
     @FXML
-    private void dashboardButton(ActionEvent event) {
+    private void profileButton(ActionEvent event) {
     	try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MyProfile.fxml"));
             Pane view = loader.load();
