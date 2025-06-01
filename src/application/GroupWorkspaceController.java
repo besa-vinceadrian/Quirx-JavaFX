@@ -78,7 +78,6 @@ public class GroupWorkspaceController implements Initializable {
     public void setWorkspaceData(int workspaceId, String workspaceName) {
         this.currentWorkspaceIDG = workspaceId;
         this.currentWorkspaceName = workspaceName;
-        System.out.println("🌐 Loaded workspace: ID = " + workspaceId + ", Name = " + workspaceName);
         
         // Update the workspace title label
         updateWorkspaceTitle(workspaceName);
@@ -89,7 +88,7 @@ public class GroupWorkspaceController implements Initializable {
     public void setUsername(String username) {
         this.username = username;
     }
-    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         todoTasks      = FXCollections.observableArrayList();
@@ -103,14 +102,11 @@ public class GroupWorkspaceController implements Initializable {
     }
 
     private void loadTasks() {
-        System.out.println("Fetching tasks for user: " + username + " or workspaceID: " + currentWorkspaceIDG);
         if (username == null || username.isBlank()) {
-            System.out.println("⚠️ Username not set – no tasks loaded.");
             return;
         }
 
         if (currentWorkspaceIDG <= 0) {
-            System.out.println("⚠️ Invalid workspace ID – no tasks loaded.");
             return;
         }
 
@@ -118,19 +114,17 @@ public class GroupWorkspaceController implements Initializable {
         completedTasks.clear();
 
         List<TaskModel> relevantTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceIDG);
-        System.out.println("✅ Tasks fetched: " + relevantTasks.size());
         
         // Check for urgent tasks
         List<TaskModel> urgentTasks = new ArrayList<>();
-        
+
         for (TaskModel task : relevantTasks) {
             String status = task.getStatus();
-            System.out.println(task.getPriority() + " - " + task.getDueDate());
             if ("Done".equalsIgnoreCase(status)) {
                 completedTasks.add(task);
             } else {
                 todoTasks.add(task);
-                
+
                 // Check if task is urgent (due today or tomorrow)
                 if (isTaskUrgent(task)) {
                     urgentTasks.add(task);
@@ -139,13 +133,14 @@ public class GroupWorkspaceController implements Initializable {
         }
 
         tableView.setItems(todoTasks);
-        
+
         // Show urgent tasks alert if there are any and it hasn't been shown for this workspace
         if (!urgentTasks.isEmpty() && !workspacesWithAlertShown.contains(currentWorkspaceIDG)) {
             showUrgentTasksAlert(urgentTasks);
             workspacesWithAlertShown.add(currentWorkspaceIDG); // Mark this workspace as alerted
         }
     }
+
     
     // Reset for a specific workspace when needed
     public static void resetAlertForWorkspace(int workspaceId) {

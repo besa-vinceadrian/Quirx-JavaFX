@@ -75,12 +75,11 @@ public class PersonalWorkspaceController implements Initializable {
         this.currentWorkspaceName = currentWorkspaceName;
         loadTasks(); // Load tasks for the current workspace
     }
-    
+
     public void setUsername(String username) {
         this.username = username;
     }
-    
-    
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         todoTasks      = FXCollections.observableArrayList();
@@ -94,14 +93,11 @@ public class PersonalWorkspaceController implements Initializable {
     }
 
     private void loadTasks() {
-        System.out.println("Fetching tasks for user: " + username + " or workspaceID: " + currentWorkspaceID);
         if (username == null || username.isBlank()) {
-            System.out.println("⚠️ Username not set – no tasks loaded.");
             return;
         }
 
         if (currentWorkspaceID <= 0) {
-            System.out.println("⚠️ Invalid workspace ID – no tasks loaded.");
             return;
         }
 
@@ -109,12 +105,9 @@ public class PersonalWorkspaceController implements Initializable {
         completedTasks.clear();
 
         List<TaskModel> relevantTasks = TaskDAO.getTasksByWorkspace(username, currentWorkspaceID);
-        System.out.println("✅ Tasks fetched: " + relevantTasks.size());
-        
 
         for (TaskModel task : relevantTasks) {
             String status = task.getStatus();
-            System.out.println(task.getPriority() + " - " + task.getDueDate());
             if ("Done".equalsIgnoreCase(status)) {
                 completedTasks.add(task);
             } else {
@@ -123,7 +116,7 @@ public class PersonalWorkspaceController implements Initializable {
         }
 
         tableView.setItems(todoTasks);
-        
+
         // Show urgent tasks alert after loading tasks
         Platform.runLater(() -> checkAndShowDueDateAlert());
     }
