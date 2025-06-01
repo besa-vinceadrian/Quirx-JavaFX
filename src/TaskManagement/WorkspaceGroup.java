@@ -59,7 +59,6 @@ public class WorkspaceGroup {
             
             // Send message
             Transport.send(message);
-            System.out.println("✅ Email sent successfully to " + recipientEmail);
             return true;
             
         } catch (MessagingException e) {
